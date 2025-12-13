@@ -93,7 +93,7 @@ $form_data = $form_data ?? $user;
                                    name="email"
                                    value="<?php echo htmlspecialchars($form_data['email'] ?? ''); ?>">
                             <?php if (isset($errors['email'])): ?>
-                                <div class="invalid-feedback">
+                                <div class="invalid-feedback d-block">
                                     <?php foreach ($errors['email'] as $error): ?>
                                         <div><?php echo htmlspecialchars($error); ?></div>
                                     <?php endforeach; ?>
@@ -109,7 +109,7 @@ $form_data = $form_data ?? $user;
                                    name="username"
                                    value="<?php echo htmlspecialchars($form_data['username'] ?? ''); ?>">
                             <?php if (isset($errors['username'])): ?>
-                                <div class="invalid-feedback">
+                                <div class="invalid-feedback d-block">
                                     <?php foreach ($errors['username'] as $error): ?>
                                         <div><?php echo htmlspecialchars($error); ?></div>
                                     <?php endforeach; ?>
@@ -138,7 +138,7 @@ $form_data = $form_data ?? $user;
                                id="current_password"
                                name="current_password">
                         <?php if (isset($errors['current_password'])): ?>
-                            <div class="invalid-feedback">
+                            <div class="invalid-feedback d-block">
                                 <?php foreach ($errors['current_password'] as $error): ?>
                                     <div><?php echo htmlspecialchars($error); ?></div>
                                 <?php endforeach; ?>
@@ -154,7 +154,7 @@ $form_data = $form_data ?? $user;
                                    id="new_password"
                                    name="new_password">
                             <?php if (isset($errors['new_password'])): ?>
-                                <div class="invalid-feedback">
+                                <div class="invalid-feedback d-block">
                                     <?php foreach ($errors['new_password'] as $error): ?>
                                         <div><?php echo htmlspecialchars($error); ?></div>
                                     <?php endforeach; ?>
@@ -170,7 +170,7 @@ $form_data = $form_data ?? $user;
                                    id="confirm_password"
                                    name="confirm_password">
                             <?php if (isset($errors['confirm_password'])): ?>
-                                <div class="invalid-feedback">
+                                <div class="invalid-feedback d-block">
                                     <?php foreach ($errors['confirm_password'] as $error): ?>
                                         <div><?php echo htmlspecialchars($error); ?></div>
                                     <?php endforeach; ?>
@@ -188,84 +188,3 @@ $form_data = $form_data ?? $user;
         </div>
     </div>
 </div>
-
-<style>
-    .profile-sidebar {
-        background: white;
-        border-radius: 10px;
-        padding: 30px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    .avatar-circle {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        margin: 0 auto;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .avatar-text {
-        color: white;
-        font-size: 36px;
-        font-weight: bold;
-    }
-
-    .profile-name {
-        font-size: 24px;
-        font-weight: 600;
-        margin-bottom: 5px;
-    }
-
-    .profile-email {
-        font-size: 14px;
-    }
-
-    .stat-item {
-        display: flex;
-        align-items: center;
-        padding: 15px 0;
-        border-bottom: 1px solid #eee;
-    }
-
-    .stat-item:last-child {
-        border-bottom: none;
-    }
-
-    .stat-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 8px;
-        background: #f8f9fa;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 15px;
-    }
-
-    .stat-icon i {
-        color: #667eea;
-        font-size: 18px;
-    }
-
-    .stat-value {
-        font-size: 20px;
-        font-weight: 600;
-        color: #333;
-    }
-
-    .stat-label {
-        font-size: 14px;
-        color: #666;
-    }
-
-    .profile-content {
-        background: white;
-        border-radius: 10px;
-        padding: 30px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-</style>

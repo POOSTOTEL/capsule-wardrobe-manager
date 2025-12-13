@@ -1,8 +1,8 @@
 <?php
 // config/routes.php
 
-// Загрузка Router без использования require в начале файла
 use App\Core\Router;
+use App\Middleware\AuthMiddleware;
 
 $router = new Router();
 
@@ -18,19 +18,29 @@ $router->get('/logout', 'AuthController@logout', 'logout');
 $router->get('/profile', 'AuthController@showProfile', 'profile');
 $router->post('/profile', 'AuthController@updateProfile');
 
+// Защищенные маршруты (требующие аутентификации)
+// Добавим позже, когда будут контроллеры
+// $router->get('/items', 'ItemController@index', 'items.index');
+// $router->get('/items/create', 'ItemController@create', 'items.create');
+// $router->post('/items', 'ItemController@store');
+// $router->get('/items/{id}', 'ItemController@show', 'items.show');
+
+// $router->get('/outfits', 'OutfitController@index', 'outfits.index');
+// $router->get('/outfits/create', 'OutfitController@create', 'outfits.create');
+
+// $router->get('/capsules', 'CapsuleController@index', 'capsules.index');
+// $router->get('/capsules/create', 'CapsuleController@create', 'capsules.create');
+
+// $router->get('/analytics', 'AnalyticsController@index', 'analytics.index');
+
 // Диагностика
 $router->get('/diagnostic', function() {
-    // Используем константу напрямую
-    $publicPath = dirname(__DIR__) . '/public';
-    require $publicPath . '/setup.php';
-});
+    require dirname(__DIR__) . '/public/setup.php';
+}, 'diagnostic');
 
 // Обработка ошибок
 $router->notFound(function() {
     http_response_code(404);
-
-    // Используем относительные пути
-    $viewsPath = dirname(__DIR__) . '/public/views';
 
     $data = [
         'title' => '404 - Страница не найдена',
@@ -41,9 +51,8 @@ $router->notFound(function() {
         </div>'
     ];
 
-    // Временный рендеринг для отладки
     extract($data);
-    require $viewsPath . '/layouts/main.php';
+    require dirname(__DIR__) . '/public/views/layouts/main.php';
 });
 
 $router->error(function($exception) {
@@ -62,13 +71,13 @@ $router->error(function($exception) {
 
     if ($appConfig['debug'] ?? false) {
         $data['content'] .= '<div class="mt-4"><pre>' . htmlspecialchars($exception->getMessage()) . '</pre></div>';
+        $data['content'] .= '<div class="mt-2"><pre>' . htmlspecialchars($exception->getTraceAsString()) . '</pre></div>';
     }
 
     $data['content'] .= '<a href="/" class="btn btn-primary mt-3">На главную</a></div>';
 
-    $viewsPath = dirname(__DIR__) . '/public/views';
     extract($data);
-    require $viewsPath . '/layouts/main.php';
+    require dirname(__DIR__) . '/public/views/layouts/main.php';
 });
 
 return $router;

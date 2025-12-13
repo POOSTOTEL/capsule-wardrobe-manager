@@ -3,100 +3,99 @@
 $errors = $errors ?? [];
 $email = $email ?? '';
 ?>
-<div class="auth-container">
-    <div class="auth-card">
-        <div class="auth-header">
-            <h1 class="auth-title">Вход в систему</h1>
-            <p class="auth-subtitle">Добро пожаловать обратно!</p>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h1 class="h3 mb-0">Вход в систему</h1>
+                    <p class="text-muted mb-0">Добро пожаловать обратно!</p>
+                </div>
+
+                <div class="card-body">
+                    <?php if (isset($errors['general'])): ?>
+                        <div class="alert alert-danger">
+                            <?php foreach ($errors['general'] as $error): ?>
+                                <p class="mb-0"><?php echo htmlspecialchars($error); ?></p>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <form method="POST" action="/login" class="needs-validation" novalidate>
+                        <input type="hidden" name="redirect" value="<?php echo htmlspecialchars($_GET['redirect'] ?? '/'); ?>">
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email"
+                                   class="form-control <?php echo isset($errors['email']) ? 'is-invalid' : ''; ?>"
+                                   id="email"
+                                   name="email"
+                                   value="<?php echo htmlspecialchars($email); ?>"
+                                   required>
+                            <?php if (isset($errors['email'])): ?>
+                                <div class="invalid-feedback d-block">
+                                    <?php foreach ($errors['email'] as $error): ?>
+                                        <div><?php echo htmlspecialchars($error); ?></div>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="password" class="form-label">Пароль</label>
+                            <input type="password"
+                                   class="form-control <?php echo isset($errors['password']) ? 'is-invalid' : ''; ?>"
+                                   id="password"
+                                   name="password"
+                                   required>
+                            <?php if (isset($errors['password'])): ?>
+                                <div class="invalid-feedback d-block">
+                                    <?php foreach ($errors['password'] as $error): ?>
+                                        <div><?php echo htmlspecialchars($error); ?></div>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="d-grid gap-2 mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg">Войти</button>
+                        </div>
+
+                        <div class="text-center">
+                            <p class="mb-0">Нет аккаунта? <a href="/register" class="text-decoration-none">Зарегистрироваться</a></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-
-        <?php if (isset($errors['general'])): ?>
-            <div class="alert alert-danger">
-                <?php foreach ($errors['general'] as $error): ?>
-                    <p><?php echo htmlspecialchars($error); ?></p>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-
-        <form method="POST" action="/login" class="auth-form">
-            <input type="hidden" name="redirect" value="<?php echo htmlspecialchars($_GET['redirect'] ?? '/'); ?>">
-
-            <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email"
-                       class="form-control <?php echo isset($errors['email']) ? 'is-invalid' : ''; ?>"
-                       id="email"
-                       name="email"
-                       value="<?php echo htmlspecialchars($email); ?>"
-                       required>
-                <?php if (isset($errors['email'])): ?>
-                    <div class="invalid-feedback">
-                        <?php foreach ($errors['email'] as $error): ?>
-                            <div><?php echo htmlspecialchars($error); ?></div>
-                        <?php endforeach; ?>
-                    </div>
-                <?php endif; ?>
-            </div>
-
-            <div class="mb-3">
-                <label for="password" class="form-label">Пароль</label>
-                <input type="password"
-                       class="form-control <?php echo isset($errors['password']) ? 'is-invalid' : ''; ?>"
-                       id="password"
-                       name="password"
-                       required>
-                <?php if (isset($errors['password'])): ?>
-                    <div class="invalid-feedback">
-                        <?php foreach ($errors['password'] as $error): ?>
-                            <div><?php echo htmlspecialchars($error); ?></div>
-                        <?php endforeach; ?>
-                    </div>
-                <?php endif; ?>
-            </div>
-
-            <div class="d-grid gap-2 mb-3">
-                <button type="submit" class="btn btn-primary btn-lg">Войти</button>
-            </div>
-
-            <div class="text-center">
-                <p class="mb-0">Нет аккаунта? <a href="/register">Зарегистрироваться</a></p>
-            </div>
-        </form>
     </div>
 </div>
 
 <style>
-    .auth-container {
-        min-height: 80vh;
+    .container.py-5 {
+        min-height: calc(100vh - 200px);
         display: flex;
         align-items: center;
-        justify-content: center;
-        padding: 20px;
     }
 
-    .auth-card {
-        width: 100%;
-        max-width: 400px;
-        background: white;
-        border-radius: 10px;
+    .card {
+        border: none;
         box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        padding: 40px;
     }
 
-    .auth-header {
-        text-align: center;
-        margin-bottom: 30px;
+    .card-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        border-bottom: none;
+        padding: 2rem 1rem;
     }
 
-    .auth-title {
-        font-size: 28px;
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 10px;
+    .card-body {
+        padding: 2rem;
     }
 
-    .auth-subtitle {
-        color: #666;
-        font-size: 16px;
+    .btn-lg {
+        padding: 12px 24px;
+        font-size: 1.1rem;
     }
 </style>

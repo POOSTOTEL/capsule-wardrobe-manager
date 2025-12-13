@@ -1,7 +1,6 @@
 <?php
 // public/views/home/index.php
 ?>
-
 <div class="hero-section">
     <h1 class="hero-title">Добро пожаловать в Капсульный Гардероб!</h1>
     <p class="hero-subtitle">Система управления вашим гардеробом, создания стильных образов и капсул одежды</p>
@@ -21,7 +20,9 @@
         <div class="stat-icon">
             <i class="fas fa-tshirt"></i>
         </div>
-        <div class="stat-value">0</div>
+        <div class="stat-value">
+            <?php echo isset($_SESSION['user_id']) ? ($stats['total_items'] ?? 0) : '0'; ?>
+        </div>
         <div class="stat-label">Всего вещей</div>
     </div>
 
@@ -29,7 +30,9 @@
         <div class="stat-icon">
             <i class="fas fa-user-tie"></i>
         </div>
-        <div class="stat-value">0</div>
+        <div class="stat-value">
+            <?php echo isset($_SESSION['user_id']) ? ($stats['total_outfits'] ?? 0) : '0'; ?>
+        </div>
         <div class="stat-label">Созданных образов</div>
     </div>
 
@@ -37,7 +40,9 @@
         <div class="stat-icon">
             <i class="fas fa-suitcase"></i>
         </div>
-        <div class="stat-value">0</div>
+        <div class="stat-value">
+            <?php echo isset($_SESSION['user_id']) ? ($stats['total_capsules'] ?? 0) : '0'; ?>
+        </div>
         <div class="stat-label">Капсул</div>
     </div>
 
@@ -88,14 +93,26 @@
     <h2 class="mb-4">Недавняя активность</h2>
 
     <div class="activity-list">
-        <div class="activity-item">
-            <div class="activity-icon">
-                <i class="fas fa-info-circle"></i>
+        <?php if (isset($_SESSION['user_id'])): ?>
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-text">Вы успешно вошли в систему</div>
+                    <div class="activity-time">Только что</div>
+                </div>
             </div>
-            <div class="activity-content">
-                <div class="activity-text">Добро пожаловать в систему! Начните с добавления ваших вещей.</div>
-                <div class="activity-time">Только что</div>
+        <?php else: ?>
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-text">Добро пожаловать в систему! Зарегистрируйтесь или войдите, чтобы начать.</div>
+                    <div class="activity-time">Только что</div>
+                </div>
             </div>
-        </div>
+        <?php endif; ?>
     </div>
 </div>

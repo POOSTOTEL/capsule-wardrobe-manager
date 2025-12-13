@@ -9,6 +9,7 @@ class HomeController extends Controller
     {
         $data = [
             'title' => 'Капсульный Гардероб - Главная',
+            'styles' => ['/assets/css/dashboard.css'],
             'content' => $this->renderView('home/index')
         ];
 

@@ -16,7 +16,8 @@ abstract class Controller
         // Данные для макета
         $layoutData = array_merge($data, [
             'content' => $content,
-            'title' => $data['title'] ?? 'Капсульный Гардероб'
+            'title' => $data['title'] ?? 'Капсульный Гардероб',
+            'styles' => $data['styles'] ?? ['/assets/css/app.css']
         ]);
 
         // Рендеринг макета
