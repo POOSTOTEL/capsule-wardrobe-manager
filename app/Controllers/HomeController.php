@@ -16,7 +16,7 @@ class HomeController extends Controller
     }
 
     // Вспомогательный метод для рендеринга представления
-    private function renderView(string $view, array $data = []): string
+    protected function renderView(string $view, array $data = []): string
     {
         extract($data, EXTR_SKIP);
 
@@ -32,7 +32,7 @@ class HomeController extends Controller
     }
 
     // Вспомогательный метод для рендеринга макета
-    private function renderLayout(string $layout, array $data = []): void
+    protected function renderLayout(string $layout, array $data = []): void
     {
         extract($data, EXTR_SKIP);
 

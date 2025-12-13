@@ -5,64 +5,42 @@ namespace App\Core;
 
 class Config
 {
-    private static array $config = [];
+    private static $configs = [];
 
-    // Загрузка конфигурации
-    public static function load(string $name): array
+    public static function load(string $name)
     {
-        $configFile = __DIR__ . '/../../config/' . $name . '.php';
-
-        if (!file_exists($configFile)) {
-            throw new \RuntimeException("Config file not found: {$configFile}");
+        if (!isset(self::$configs[$name])) {
+            $file = CONFIG_PATH . '/' . $name . '.php';
+            if (file_exists($file)) {
+                self::$configs[$name] = require $file;
+            } else {
+                self::$configs[$name] = [];
+            }
         }
 
-        $config = require $configFile;
-        self::$config[$name] = $config;
-
-        return $config;
+        return self::$configs[$name];
     }
 
-    // Получение значения конфигурации
     public static function get(string $key, $default = null)
     {
-        $keys = explode('.', $key);
-        $configName = array_shift($keys);
+        $parts = explode('.', $key);
 
-        if (!isset(self::$config[$configName])) {
-            self::load($configName);
+        if (count($parts) === 1) {
+            $config = self::load($parts[0]);
+            return $config;
         }
 
-        $value = self::$config[$configName] ?? null;
+        $configName = array_shift($parts);
+        $config = self::load($configName);
 
-        foreach ($keys as $subKey) {
-            if (!is_array($value) || !array_key_exists($subKey, $value)) {
+        $current = $config;
+        foreach ($parts as $part) {
+            if (!is_array($current) || !isset($current[$part])) {
                 return $default;
             }
-            $value = $value[$subKey];
+            $current = $current[$part];
         }
 
-        return $value ?? $default;
-    }
-
-    // Установка значения
-    public static function set(string $key, $value): void
-    {
-        $keys = explode('.', $key);
-        $configName = array_shift($keys);
-
-        if (!isset(self::$config[$configName])) {
-            self::load($configName);
-        }
-
-        $config = &self::$config[$configName];
-
-        foreach ($keys as $subKey) {
-            if (!isset($config[$subKey]) || !is_array($config[$subKey])) {
-                $config[$subKey] = [];
-            }
-            $config = &$config[$subKey];
-        }
-
-        $config = $value;
+        return $current;
     }
 }

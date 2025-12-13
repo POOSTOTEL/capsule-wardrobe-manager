@@ -7,33 +7,50 @@ use App\Core\Config;
 
 abstract class Controller
 {
-    // Рендеринг представления
-    protected function view(string $view, array $data = []): void
+    // Рендеринг представления с макетом
+    protected function render(string $view, array $data = [], string $layout = 'main'): void
     {
-        // Преобразуем ключи массива в переменные
+        // Содержимое представления
+        $content = $this->renderView($view, $data);
+
+        // Данные для макета
+        $layoutData = array_merge($data, [
+            'content' => $content,
+            'title' => $data['title'] ?? 'Капсульный Гардероб'
+        ]);
+
+        // Рендеринг макета
+        $this->renderLayout($layout, $layoutData);
+    }
+
+    // Рендеринг представления без макета
+    protected function renderView(string $view, array $data = []): string
+    {
         extract($data, EXTR_SKIP);
 
-        // Путь к файлу представления
-        $viewPath = Config::get('paths.views', __DIR__ . '/../../public/views/') . $view . '.php';
+        $viewPath = VIEWS_PATH . '/' . $view . '.php';
 
         if (!file_exists($viewPath)) {
             throw new \RuntimeException("View file not found: {$viewPath}");
         }
 
-        // Включаем файл представления
+        ob_start();
         require $viewPath;
+        return ob_get_clean();
     }
 
-    // Рендеринг с макетом
-    protected function render(string $view, array $data = [], string $layout = 'main'): void
+    // Рендеринг макета
+    protected function renderLayout(string $layout, array $data = []): void
     {
-        // Содержимое представления
-        ob_start();
-        $this->view($view, $data);
-        $content = ob_get_clean();
+        extract($data, EXTR_SKIP);
 
-        // Рендеринг макета
-        $this->view('layouts/' . $layout, array_merge($data, ['content' => $content]));
+        $layoutPath = VIEWS_PATH . '/layouts/' . $layout . '.php';
+
+        if (!file_exists($layoutPath)) {
+            throw new \RuntimeException("Layout file not found: {$layoutPath}");
+        }
+
+        require $layoutPath;
     }
 
     // Перенаправление
@@ -95,6 +112,12 @@ abstract class Controller
     protected function file(string $key): ?array
     {
         return $_FILES[$key] ?? null;
+    }
+
+    // Установка флеш-сообщения
+    protected function setFlash(string $type, string $message): void
+    {
+        $_SESSION['flash'][$type][] = $message;
     }
 
     // Валидация

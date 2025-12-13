@@ -8,127 +8,102 @@ use PDOException;
 
 class Database
 {
-    private static ?PDO $connection = null;
+    private static $instance = null;
+    private $connection;
 
-    // Получение подключения
-    public static function getConnection(): PDO
+    private function __construct()
     {
-        if (self::$connection === null) {
-            self::connect();
-        }
-
-        return self::$connection;
-    }
-
-    // Установка подключения
-    private static function connect(): void
-    {
-        $config = Config::get('database', []);
-
-        $dsn = sprintf(
-            '%s:host=%s;port=%s;dbname=%s;charset=%s',
-            $config['driver'] ?? 'pgsql',
-            $config['host'] ?? 'postgres',
-            $config['port'] ?? 5432,
-            $config['database'] ?? 'capsule_wardrobe',
-            $config['charset'] ?? 'utf8'
-        );
-
-        $options = array_merge([
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES => false,
-        ], $config['options'] ?? []);
-
         try {
-            self::$connection = new PDO(
-                $dsn,
-                $config['username'] ?? 'capsule_user',
-                $config['password'] ?? 'capsule_password',
-                $options
+            // Загружаем конфигурацию базы данных
+            $config = require CONFIG_PATH . '/database.php';
+
+            // Создаем DSN
+            $dsn = sprintf(
+                'pgsql:host=%s;port=%s;dbname=%s;',
+                $config['host'],
+                $config['port'],
+                $config['database']
             );
 
-            // Для PostgreSQL устанавливаем схему
-            if ($config['driver'] === 'pgsql') {
-                self::$connection->exec('SET search_path TO public');
-            }
+            // Создаем соединение
+            $this->connection = new PDO(
+                $dsn,
+                $config['username'],
+                $config['password'],
+                $config['options'] ?? []
+            );
+
+            // Устанавливаем атрибуты
+            $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->connection->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            $this->connection->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+
+            // Устанавливаем кодировку
+            $this->connection->exec("SET NAMES 'UTF8'");
 
         } catch (PDOException $e) {
             throw new \RuntimeException('Database connection failed: ' . $e->getMessage());
         }
     }
 
-    // Выполнение запроса
-    public static function query(string $sql, array $params = []): \PDOStatement
+    // Метод для получения экземпляра (Singleton)
+    public static function getInstance(): self
     {
-        $stmt = self::getConnection()->prepare($sql);
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+
+        return self::$instance;
+    }
+
+    // Получить соединение с базой данных
+    public function getConnection(): PDO
+    {
+        return $this->connection;
+    }
+
+    // Подготовить запрос
+    public function prepare(string $sql): \PDOStatement
+    {
+        return $this->connection->prepare($sql);
+    }
+
+    // Выполнить запрос
+    public function query(string $sql, array $params = [])
+    {
+        $stmt = $this->prepare($sql);
         $stmt->execute($params);
         return $stmt;
     }
 
-    // Получение одной записи
-    public static function fetchOne(string $sql, array $params = []): ?array
+    // Начать транзакцию
+    public function beginTransaction(): bool
     {
-        return self::query($sql, $params)->fetch() ?: null;
+        return $this->connection->beginTransaction();
     }
 
-    // Получение всех записей
-    public static function fetchAll(string $sql, array $params = []): array
+    // Зафиксировать транзакцию
+    public function commit(): bool
     {
-        return self::query($sql, $params)->fetchAll();
+        return $this->connection->commit();
     }
 
-    // Вставка записи и возврат ID
-    public static function insert(string $table, array $data): ?int
+    // Откатить транзакцию
+    public function rollback(): bool
     {
-        $columns = implode(', ', array_keys($data));
-        $placeholders = ':' . implode(', :', array_keys($data));
-
-        $sql = "INSERT INTO {$table} ({$columns}) VALUES ({$placeholders})";
-
-        self::query($sql, $data);
-
-        return (int) self::getConnection()->lastInsertId();
+        return $this->connection->rollBack();
     }
 
-    // Обновление записи
-    public static function update(string $table, array $data, string $where, array $whereParams = []): int
+    // Получить последний вставленный ID
+    public function lastInsertId(?string $name = null): string
     {
-        $setParts = [];
-        foreach (array_keys($data) as $key) {
-            $setParts[] = "{$key} = :{$key}";
-        }
-
-        $setClause = implode(', ', $setParts);
-        $sql = "UPDATE {$table} SET {$setClause} WHERE {$where}";
-
-        $stmt = self::query($sql, array_merge($data, $whereParams));
-        return $stmt->rowCount();
+        return $this->connection->lastInsertId($name);
     }
 
-    // Удаление записи
-    public static function delete(string $table, string $where, array $params = []): int
+    // Закрыть соединение (в основном для тестирования)
+    public function close(): void
     {
-        $sql = "DELETE FROM {$table} WHERE {$where}";
-        $stmt = self::query($sql, $params);
-        return $stmt->rowCount();
-    }
-
-    // Начало транзакции
-    public static function beginTransaction(): bool
-    {
-        return self::getConnection()->beginTransaction();
-    }
-
-    // Фиксация транзакции
-    public static function commit(): bool
-    {
-        return self::getConnection()->commit();
-    }
-
-    // Откат транзакции
-    public static function rollBack(): bool
-    {
-        return self::getConnection()->rollBack();
+        $this->connection = null;
+        self::$instance = null;
     }
 }
