@@ -1,0 +1,545 @@
+/* responsive.css - Адаптивные стили для всех разделов */
+
+/* Большие десктопы (более 1200px) */
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1140px;
+    }
+
+    .items-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+
+    .outfits-grid {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Десктопы (992px - 1199px) */
+@media (max-width: 1199px) {
+    .container {
+        max-width: 960px;
+    }
+
+    .outfit-builder {
+        grid-template-columns: 250px 1fr;
+    }
+
+    .dummy {
+        width: 250px;
+        height: 420px;
+    }
+}
+
+/* Планшеты (768px - 991px) */
+@media (max-width: 991px) {
+    .container {
+        max-width: 720px;
+    }
+
+    /* Навигация */
+    .navbar-collapse {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        padding: var(--spacing-md);
+        border-radius: var(--border-radius);
+        margin-top: var(--spacing-sm);
+    }
+
+    /* Конструктор образов */
+    .outfit-builder {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-lg);
+    }
+
+    .outfit-sidebar {
+        order: 2;
+    }
+
+    .outfit-workspace {
+        order: 1;
+        min-height: 500px;
+    }
+
+    .dummy {
+        width: 200px;
+        height: 350px;
+    }
+
+    /* Сетки */
+    .items-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+
+    .outfits-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dashboard-widgets {
+        grid-template-columns: 1fr;
+    }
+
+    /* Формы */
+    .form-row {
+        flex-direction: column;
+    }
+
+    .form-group {
+        width: 100%;
+    }
+}
+
+/* Мобильные телефоны (576px - 767px) */
+@media (max-width: 767px) {
+    .container {
+        padding: 0 var(--spacing-sm);
+    }
+
+    /* Заголовки */
+    h1 {
+        font-size: 2rem;
+    }
+
+    h2 {
+        font-size: 1.75rem;
+    }
+
+    h3 {
+        font-size: 1.5rem;
+    }
+
+    /* Карточки */
+    .card {
+        margin-bottom: var(--spacing-md);
+    }
+
+    /* Сетки */
+    .items-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+
+    .outfits-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+
+    .insights-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Конструктор */
+    .outfit-builder {
+        gap: var(--spacing-md);
+    }
+
+    .dummy {
+        width: 150px;
+        height: 250px;
+    }
+
+    .horizontal-builder {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .layer {
+        min-width: auto;
+    }
+
+    .layer-items {
+        min-height: 80px;
+        flex-direction: row;
+        overflow-x: auto;
+    }
+
+    .draggable-item {
+        min-width: 120px;
+    }
+
+    /* Таблицы */
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .list-header, .list-item {
+        grid-template-columns: 40px 1fr 80px;
+    }
+
+    .list-header > :nth-child(3),
+    .list-header > :nth-child(4),
+    .list-header > :nth-child(5),
+    .list-item > :nth-child(3),
+    .list-item > :nth-child(4),
+    .list-item > :nth-child(5) {
+        display: none;
+    }
+
+    /* Фильтры */
+    .filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-actions {
+        flex-direction: column;
+    }
+
+    /* Формы */
+    .item-form {
+        padding: 0;
+    }
+
+    .form-section {
+        padding: var(--spacing-md);
+    }
+
+    /* Навигация */
+    .navbar-nav {
+        text-align: center;
+    }
+
+    .nav-item {
+        margin: var(--spacing-xs) 0;
+    }
+
+    /* Детальная страница */
+    .detail-header {
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+
+    .detail-actions {
+        width: 100%;
+        display: flex;
+        gap: var(--spacing-sm);
+    }
+
+    /* Герой секция */
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+
+    /* Бейджи и теги */
+    .item-tags, .detail-tags {
+        justify-content: center;
+    }
+
+    /* Модальные окна */
+    .modal-dialog {
+        margin: var(--spacing-sm);
+    }
+}
+
+/* Маленькие телефоны (до 575px) */
+@media (max-width: 575px) {
+    /* Отступы */
+    .p-3, .p-4, .p-5 {
+        padding: var(--spacing-md);
+    }
+
+    .mt-4, .mt-5, .mb-4, .mb-5 {
+        margin: var(--spacing-md) 0;
+    }
+
+    /* Кнопки */
+    .btn {
+        display: block;
+        width: 100%;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .btn-group {
+        flex-direction: column;
+    }
+
+    /* Заголовки */
+    h1 {
+        font-size: 1.75rem;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+    }
+
+    /* Карточки */
+    .card-body {
+        padding: var(--spacing-md);
+    }
+
+    /* Информационные блоки */
+    .info-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+
+    /* Состав образа */
+    .composition-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Палитра цветов */
+    .color-picker {
+        justify-content: center;
+    }
+
+    /* Селектор сезонов */
+    .season-selector {
+        flex-direction: column;
+    }
+
+    /* Навигация хлебных крошек */
+    .breadcrumb {
+        flex-wrap: wrap;
+    }
+
+    /* Пагинация */
+    .pagination {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    /* Всплывающие подсказки */
+    .tooltip {
+        font-size: 0.875rem;
+    }
+
+    /* Алерты */
+    .alert {
+        font-size: 0.9rem;
+    }
+}
+
+/* Ориентация телефона (портретная vs альбомная) */
+@media (max-height: 500px) and (orientation: landscape) {
+    /* Уменьшаем высоту навигации */
+    .navbar {
+        padding: var(--spacing-sm) 0;
+    }
+
+    body {
+        padding-top: 48px;
+    }
+
+    /* Уменьшаем герой секцию */
+    .hero-section {
+        padding: var(--spacing-lg) 0;
+    }
+
+    .hero-title {
+        font-size: 1.5rem;
+    }
+
+    /* Адаптируем конструктор */
+    .outfit-builder {
+        min-height: 400px;
+    }
+
+    .outfit-workspace {
+        min-height: 400px;
+    }
+
+    .dummy {
+        width: 120px;
+        height: 200px;
+    }
+
+    /* Компактные формы */
+    .form-control {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+
+    .form-label {
+        font-size: 0.9rem;
+    }
+}
+
+/* Высокие экраны */
+@media (min-height: 800px) {
+    /* Увеличиваем отступы для лучшего восприятия */
+    .container {
+        padding-top: var(--spacing-xl);
+        padding-bottom: var(--spacing-xl);
+    }
+
+    /* Увеличиваем минимальную высоту конструктора */
+    .outfit-builder {
+        min-height: 700px;
+    }
+
+    .outfit-workspace {
+        min-height: 700px;
+    }
+
+    /* Увеличиваем манекен */
+    .dummy {
+        width: 350px;
+        height: 580px;
+    }
+}
+
+/* Темная тема (если поддерживается) */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-primary: #1a1a1a;
+        --bg-secondary: #2d2d2d;
+        --text-primary: #ffffff;
+        --text-secondary: #b0b0b0;
+        --text-light: #808080;
+        --border-color: #404040;
+    }
+
+    .card {
+        background-color: #2d2d2d;
+        border-color: #404040;
+    }
+
+    .form-control {
+        background-color: #2d2d2d;
+        border-color: #404040;
+        color: #ffffff;
+    }
+
+    .table th {
+        background-color: #2d2d2d;
+    }
+
+    .table-striped tbody tr:nth-child(odd) {
+        background-color: #252525;
+    }
+}
+
+/* Печать */
+@media print {
+    /* Скрываем ненужные элементы */
+    .navbar,
+    .footer,
+    .btn,
+    .no-print {
+        display: none !important;
+    }
+
+    /* Убираем фон и тени */
+    body {
+        background: white !important;
+        color: black !important;
+    }
+
+    .card {
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+    }
+
+    /* Оптимизируем цвета для печати */
+    a {
+        color: #000 !important;
+        text-decoration: underline !important;
+    }
+
+    /* Убираем лишние отступы */
+    .container {
+        max-width: 100% !important;
+        padding: 0 !important;
+    }
+}
+
+/* Анимации для мобильных устройств */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Специфичные стили для iOS Safari */
+@supports (-webkit-touch-callout: none) {
+    .form-control,
+    .btn {
+        -webkit-appearance: none;
+    }
+
+    /* Улучшаем скролл */
+    .items-palette {
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* Стили для Firefox */
+@-moz-document url-prefix() {
+    .form-control {
+        padding: 11px 16px; /* Компенсация для Firefox */
+    }
+}
+
+/* Высококонтрастный режим */
+@media (prefers-contrast: high) {
+    :root {
+        --border-color: #000000;
+        --text-primary: #000000;
+        --text-secondary: #000000;
+    }
+
+    .card {
+        border: 2px solid #000000;
+    }
+
+    .btn {
+        border: 2px solid #000000;
+    }
+}
+
+/* Очень маленькие экраны (до 360px) */
+@media (max-width: 360px) {
+    /* Еще более компактные отступы */
+    .container {
+        padding: 0 8px;
+    }
+
+    /* Уменьшаем размеры шрифтов */
+    body {
+        font-size: 14px;
+    }
+
+    h1 { font-size: 1.5rem; }
+    h2 { font-size: 1.3rem; }
+    h3 { font-size: 1.1rem; }
+
+    /* Компактные карточки */
+    .item-card .item-info {
+        padding: 12px;
+    }
+
+    /* Компактные иконки */
+    .icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* Уменьшаем палитру вещей */
+    .palette-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .palette-item {
+        width: 60px;
+        height: 60px;
+    }
+}

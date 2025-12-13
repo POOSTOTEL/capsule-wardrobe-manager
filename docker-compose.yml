@@ -1,0 +1,73 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: capsule_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-capsule_wardrobe}
+      POSTGRES_USER: ${DB_USER:-capsule_user}
+      POSTGRES_PASSWORD: ${DB_PASS:-capsule_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - capsule_network
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER:-capsule_user} -d ${DB_NAME:-capsule_wardrobe}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PHP-FPM Application
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: capsule_app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+      - uploads_volume:/var/www/public/uploads
+      - ./docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini
+    networks:
+      - capsule_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-capsule_wardrobe}
+      DB_USER: ${DB_USER:-capsule_user}
+      DB_PASS: ${DB_PASS:-capsule_password}
+
+  # Nginx Web Server
+  nginx:
+    image: nginx:alpine
+    container_name: capsule_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - uploads_volume:/var/www/public/uploads
+      - ./logs/nginx:/var/log/nginx
+    networks:
+      - capsule_network
+    depends_on:
+      - app
+
+volumes:
+  postgres_data:
+    driver: local
+  uploads_volume:
+    driver: local
+
+networks:
+  capsule_network:
+    driver: bridge

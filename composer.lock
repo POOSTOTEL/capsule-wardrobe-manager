@@ -1,0 +1,24 @@
+{
+  "_readme": [
+    "Этот файл блокировки автоматически создается Composer",
+    "Этот файл отслеживает точные версии, которые установлены",
+    "Этот файл должен быть закоммичен в систему контроля версий"
+  ],
+  "content-hash": "d751713988987e9331980363e24189ce",
+  "packages": [],
+  "packages-dev": [],
+  "aliases": [],
+  "minimum-stability": "stable",
+  "stability-flags": [],
+  "prefer-stable": false,
+  "prefer-lowest": false,
+  "platform": {
+    "php": ">=8.2",
+    "ext-pdo": "*",
+    "ext-pgsql": "*",
+    "ext-gd": "*",
+    "ext-zip": "*"
+  },
+  "platform-dev": [],
+  "plugin-api-version": "2.6.0"
+}

@@ -1,0 +1,531 @@
+/* outfits.css - Стили для конструктора образов */
+
+/* Конструктор образов */
+.outfit-builder {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: var(--spacing-xl);
+    min-height: 600px;
+}
+
+/* Боковая панель */
+.outfit-sidebar {
+    background: var(--bg-primary);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.sidebar-header {
+    margin-bottom: var(--spacing-lg);
+}
+
+.sidebar-section {
+    margin-bottom: var(--spacing-lg);
+}
+
+.section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-secondary);
+}
+
+.category-filters {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-md);
+}
+
+.category-filter {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.category-filter:hover {
+    background: rgba(74, 111, 165, 0.1);
+}
+
+.category-filter.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+.filter-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.filter-count {
+    margin-left: auto;
+    background: var(--bg-secondary);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+}
+
+.category-filter.active .filter-count {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+/* Палитра вещей */
+.items-palette {
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.palette-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: var(--spacing-sm);
+}
+
+.palette-item {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: grab;
+    position: relative;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.palette-item:hover {
+    border-color: var(--primary-color);
+    transform: scale(1.05);
+}
+
+.palette-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Область сборки */
+.outfit-workspace {
+    background: var(--bg-primary);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+}
+
+.workspace-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.workspace-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.workspace-actions {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+/* Манекен */
+.dummy-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.dummy {
+    width: 300px;
+    height: 500px;
+    background: linear-gradient(135deg, var(--bg-secondary), var(--border-color));
+    border-radius: 150px 150px 50px 50px;
+    position: relative;
+}
+
+.dummy-slot {
+    position: absolute;
+    border: 2px dashed var(--border-color);
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.dummy-slot.empty {
+    color: var(--text-light);
+    font-size: 0.875rem;
+}
+
+.dummy-slot.filled {
+    border-style: solid;
+    border-color: var(--primary-color);
+    background: rgba(74, 111, 165, 0.1);
+}
+
+.dummy-slot.hover {
+    border-color: var(--accent-color);
+    background: rgba(255, 126, 95, 0.1);
+}
+
+.dummy-slot.top {
+    top: 20%;
+    left: 25%;
+    width: 50%;
+    height: 30%;
+}
+
+.dummy-slot.bottom {
+    top: 55%;
+    left: 25%;
+    width: 50%;
+    height: 30%;
+}
+
+.dummy-slot.shoes {
+    top: 90%;
+    left: 40%;
+    width: 20%;
+    height: 20%;
+}
+
+.slot-item {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    position: relative;
+}
+
+.slot-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.remove-item {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--danger-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.slot-item:hover .remove-item {
+    opacity: 1;
+}
+
+/* Горизонтальный конструктор */
+.horizontal-builder {
+    display: flex;
+    gap: var(--spacing-lg);
+    overflow-x: auto;
+    padding: var(--spacing-md);
+    min-height: 200px;
+    align-items: center;
+}
+
+.layer {
+    min-width: 150px;
+    text-align: center;
+}
+
+.layer-title {
+    font-weight: 600;
+    margin-bottom: var(--spacing-md);
+    color: var(--text-secondary);
+}
+
+.layer-items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    min-height: 120px;
+    padding: var(--spacing-md);
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    border: 2px dashed var(--border-color);
+}
+
+.layer-items.drag-over {
+    border-color: var(--accent-color);
+    background: rgba(255, 126, 95, 0.1);
+}
+
+.draggable-item {
+    padding: var(--spacing-sm);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    transition: all 0.3s ease;
+}
+
+.draggable-item:hover {
+    background: rgba(74, 111, 165, 0.1);
+    border-color: var(--primary-color);
+}
+
+.draggable-item.dragging {
+    opacity: 0.5;
+}
+
+.item-thumb {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.item-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.item-name {
+    flex: 1;
+    font-size: 0.9rem;
+    text-align: left;
+}
+
+/* Сетка образов */
+.outfits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.outfit-card {
+    background: var(--bg-primary);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+}
+
+.outfit-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-4px);
+}
+
+.outfit-preview {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 2px;
+    aspect-ratio: 1;
+}
+
+.preview-item {
+    overflow: hidden;
+    position: relative;
+}
+
+.preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.preview-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    color: white;
+    font-weight: 600;
+}
+
+.preview-item:hover .preview-overlay {
+    opacity: 1;
+}
+
+.outfit-info {
+    padding: var(--spacing-md);
+}
+
+.outfit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-sm);
+}
+
+.outfit-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.outfit-actions {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.outfit-meta {
+    display: flex;
+    gap: var(--spacing-md);
+    color: var(--text-light);
+    font-size: 0.875rem;
+    margin-bottom: var(--spacing-md);
+}
+
+.outfit-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+}
+
+.outfit-tag {
+    background: rgba(74, 111, 165, 0.1);
+    color: var(--primary-color);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+}
+
+/* Детали образа */
+.outfit-detail {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.outfit-composition {
+    background: var(--bg-primary);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.composition-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-lg);
+}
+
+.composition-item {
+    text-align: center;
+}
+
+.item-preview {
+    width: 120px;
+    height: 120px;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    margin: 0 auto var(--spacing-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.item-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.item-category {
+    font-size: 0.875rem;
+    color: var(--text-light);
+    margin-bottom: var(--spacing-xs);
+}
+
+.item-name {
+    font-weight: 600;
+}
+
+/* Адаптация конструктора */
+.outfit-notes {
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-lg);
+    margin-top: var(--spacing-lg);
+}
+
+.notes-title {
+    font-weight: 600;
+    margin-bottom: var(--spacing-md);
+}
+
+.notes-content {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* Рейтинг образа */
+.outfit-rating {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--border-color);
+}
+
+.rating-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.rating-stars {
+    display: flex;
+    gap: 2px;
+}
+
+.star {
+    color: var(--border-color);
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.star.active {
+    color: #ffc107;
+}
+
+.rating-label {
+    font-size: 0.875rem;
+    color: var(--text-light);
+}
