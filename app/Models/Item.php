@@ -585,4 +585,19 @@ class Item extends BaseModel
 
         return $compressed;
     }
+
+    // Получить общее количество вещей пользователя
+    public function getTotalCount(int $userId): int
+    {
+        $sql = "SELECT COUNT(*) as total FROM {$this->table} WHERE user_id = :user_id";
+        
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['user_id' => $userId]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (int) ($result['total'] ?? 0);
+        } catch (PDOException $e) {
+            throw new \RuntimeException("Database error: " . $e->getMessage());
+        }
+    }
 }

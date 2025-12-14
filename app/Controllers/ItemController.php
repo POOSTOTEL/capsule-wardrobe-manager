@@ -242,36 +242,17 @@ class ItemController extends Controller
             ]);
 
             if ($this->isAjax()) {
-                $item = $this->itemModel->getWithDetails($itemId, $this->userId);
-                
-                if (!$item) {
-                    Logger::error('Вещь не найдена после создания', ['item_id' => $itemId]);
-                    $this->error('Вещь не найдена после создания', 500);
-                    return;
-                }
-                
-                // Удаляем бинарные данные изображения из ответа (они слишком большие для JSON)
-                // Изображение доступно через отдельный endpoint /api/items/{id}/image
-                $imageDataSize = isset($item['image_data']) ? strlen($item['image_data']) : 0;
-                if ($item && isset($item['image_data'])) {
-                    unset($item['image_data']);
-                    // Добавляем URL для получения изображения
-                    $item['image_url'] = "/api/items/{$itemId}/image";
-                }
-                
-                Logger::debug('Отправка JSON ответа', [
-                    'item_id' => $itemId,
-                    'image_data_size' => $imageDataSize,
-                    'has_image_data' => isset($item['image_data']),
-                    'item_keys' => array_keys($item)
-                ]);
-                
-                $this->success($item, 'Вещь успешно добавлена', 201);
+                // Упрощенный ответ - только ID и сообщение
+                // Это предотвращает проблемы с сериализацией больших объектов
+                $this->success([
+                    'id' => $itemId,
+                    'redirect_url' => '/items'
+                ], 'Вещь успешно добавлена', 201);
                 return;
             }
 
             $this->setFlash('success', 'Вещь успешно добавлена');
-            $this->redirect("/items/{$itemId}");
+            $this->redirect('/items');
         } catch (\Exception $e) {
             // Детальное логирование ошибки
             Logger::error('Ошибка при создании вещи', [
@@ -283,24 +264,15 @@ class ItemController extends Controller
                 'data' => $data
             ]);
 
-            $message = 'Ошибка при создании вещи: ' . $e->getMessage();
-            
-            // В режиме отладки показываем больше информации
-            $config = require dirname(__DIR__, 2) . '/config/app.php';
-            $debugInfo = [];
-            
-            if ($config['debug'] ?? false) {
-                $debugInfo = [
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine(),
-                    'trace' => array_slice(explode("\n", $e->getTraceAsString()), 0, 10) // Первые 10 строк трейса
-                ];
-            }
+            // Упрощенное сообщение об ошибке для пользователя
+            $message = 'Ошибка при создании вещи. Попробуйте еще раз.';
             
             if ($this->isAjax()) {
-                $this->error($message, 500, $debugInfo);
+                // Всегда возвращаем JSON для AJAX запросов
+                $this->error($message, 500);
                 return;
             }
+            
             $this->setFlash('error', $message);
             $this->redirect('/items/create');
         }

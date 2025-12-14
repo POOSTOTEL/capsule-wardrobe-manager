@@ -55,13 +55,53 @@ $router->get('/api/items', 'ItemController@index');
 $router->get('/api/items/{id}', 'ItemController@show');
 $router->get('/api/items/{id}/image', 'ItemController@getImage', 'items.image');
 
-// $router->get('/outfits', 'OutfitController@index', 'outfits.index');
-// $router->get('/outfits/create', 'OutfitController@create', 'outfits.create');
+// Маршруты для образов (Outfits)
+$router->get('/outfits', 'OutfitController@index', 'outfits.index');
+$router->get('/outfits/create', 'OutfitController@create', 'outfits.create');
+$router->get('/outfits/builder', 'OutfitController@builder', 'outfits.builder');
+$router->post('/outfits', 'OutfitController@store', 'outfits.store');
+$router->get('/outfits/{id}', 'OutfitController@show', 'outfits.show');
+$router->get('/outfits/{id}/edit', 'OutfitController@edit', 'outfits.edit');
+$router->post('/outfits/{id}', 'OutfitController@update', 'outfits.update');
+$router->put('/outfits/{id}', 'OutfitController@update');
+$router->patch('/outfits/{id}', 'OutfitController@update');
+$router->post('/outfits/{id}/delete', 'OutfitController@destroy', 'outfits.destroy');
+$router->delete('/outfits/{id}', 'OutfitController@destroy');
+$router->delete('/api/outfits/{id}', 'OutfitController@destroy');
+$router->post('/outfits/{id}/favorite', 'OutfitController@toggleFavorite', 'outfits.toggleFavorite');
+$router->post('/outfits/{id}/items', 'OutfitController@addItem', 'outfits.addItem');
+$router->post('/outfits/{id}/items/remove', 'OutfitController@removeItem', 'outfits.removeItem');
+$router->delete('/outfits/{id}/items/{itemId}', 'OutfitController@removeItem');
+$router->get('/api/outfits', 'OutfitController@index');
+$router->get('/api/outfits/{id}', 'OutfitController@show');
 
-// $router->get('/capsules', 'CapsuleController@index', 'capsules.index');
-// $router->get('/capsules/create', 'CapsuleController@create', 'capsules.create');
+// Маршруты для капсул (Capsules)
+$router->get('/capsules', 'CapsuleController@index', 'capsules.index');
+$router->get('/capsules/create', 'CapsuleController@create', 'capsules.create');
+$router->post('/capsules', 'CapsuleController@store', 'capsules.store');
+$router->get('/capsules/{id}', 'CapsuleController@show', 'capsules.show');
+$router->get('/capsules/{id}/edit', 'CapsuleController@edit', 'capsules.edit');
+$router->post('/capsules/{id}', 'CapsuleController@update', 'capsules.update');
+$router->put('/capsules/{id}', 'CapsuleController@update');
+$router->patch('/capsules/{id}', 'CapsuleController@update');
+$router->post('/capsules/{id}/delete', 'CapsuleController@destroy', 'capsules.destroy');
+$router->delete('/capsules/{id}', 'CapsuleController@destroy');
+$router->delete('/api/capsules/{id}', 'CapsuleController@destroy');
+$router->get('/capsules/{id}/combinations', 'CapsuleController@combinations', 'capsules.combinations');
+$router->get('/api/capsules', 'CapsuleController@index');
+$router->get('/api/capsules/{id}', 'CapsuleController@show');
 
-// $router->get('/analytics', 'AnalyticsController@index', 'analytics.index');
+// Маршруты для аналитики (Analytics)
+$router->get('/analytics', 'AnalyticsController@index', 'analytics.index');
+$router->get('/analytics/categories', 'AnalyticsController@categories', 'analytics.categories');
+$router->get('/analytics/colors', 'AnalyticsController@colors', 'analytics.colors');
+$router->get('/analytics/usage', 'AnalyticsController@usage', 'analytics.usage');
+$router->get('/analytics/compatibility', 'AnalyticsController@compatibility', 'analytics.compatibility');
+$router->get('/api/analytics', 'AnalyticsController@index');
+$router->get('/api/analytics/categories', 'AnalyticsController@categories');
+$router->get('/api/analytics/colors', 'AnalyticsController@colors');
+$router->get('/api/analytics/usage', 'AnalyticsController@usage');
+$router->get('/api/analytics/compatibility', 'AnalyticsController@compatibility');
 
 // Диагностика
 $router->get('/diagnostic', function() {

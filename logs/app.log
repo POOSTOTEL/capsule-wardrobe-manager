@@ -92,3 +92,21 @@
 [2025-12-14 16:50:33] [INFO] Вещь создана успешно {"item_id":7}
 [2025-12-14 16:50:33] [INFO] createWithImage: вещь создана в БД {"item_id":7}
 [2025-12-14 16:50:33] [INFO] Вещь успешно создана {"user_id":1,"item_id":7}
+[2025-12-14 16:54:11] [INFO] Начало создания вещи {"user_id":1,"data":{"name":"вапроспмир","category_id":6,"color_id":1,"season_id":4,"notes":"ввпро","tag_ids":[],"tag_ids_count":0},"image_size":8818,"image_type":"image\/jpeg"}
+[2025-12-14 16:54:11] [DEBUG] createWithImage: начало {"user_id":1,"image_path":"\/tmp\/phpADKnhe","data_keys":["name","category_id","color_id","season_id","notes","tag_ids"]}
+[2025-12-14 16:54:11] [DEBUG] createWithImage: чтение файла {"path":"\/tmp\/phpADKnhe","size":8818}
+[2025-12-14 16:54:11] [DEBUG] createWithImage: MIME тип определен {"mime_type":"image\/jpeg"}
+[2025-12-14 16:54:11] [DEBUG] createWithImage: данные изображения подготовлены {"image_size":8818,"mime_type":"image\/jpeg"}
+[2025-12-14 16:54:11] [DEBUG] createWithImage: вызов createWithBinaryData {"data_keys":["name","category_id","color_id","season_id","notes","tag_ids","image_data","image_mime_type","user_id","usage_count"],"has_image_data":true}
+[2025-12-14 16:54:11] [DEBUG] Выполнение INSERT для items {"columns":["name","category_id","color_id","season_id","notes","user_id","usage_count","image_data","image_mime_type"],"filtered_data_keys":["name","category_id","color_id","season_id","notes","user_id","usage_count"],"has_image":true,"image_size":8818}
+[2025-12-14 16:54:11] [DEBUG] Привязка параметра: name {"value":"вапроспмир"}
+[2025-12-14 16:54:11] [DEBUG] Привязка параметра: category_id {"value":6}
+[2025-12-14 16:54:11] [DEBUG] Привязка параметра: color_id {"value":1}
+[2025-12-14 16:54:11] [DEBUG] Привязка параметра: season_id {"value":4}
+[2025-12-14 16:54:11] [DEBUG] Привязка параметра: notes {"value":"ввпро"}
+[2025-12-14 16:54:11] [DEBUG] Привязка параметра: user_id {"value":1}
+[2025-12-14 16:54:11] [DEBUG] Привязка параметра: usage_count {"value":0}
+[2025-12-14 16:54:11] [DEBUG] Привязка бинарных данных {"hex_length":17638,"mime_type":"image\/jpeg"}
+[2025-12-14 16:54:11] [INFO] Вещь создана успешно {"item_id":8}
+[2025-12-14 16:54:11] [INFO] createWithImage: вещь создана в БД {"item_id":8}
+[2025-12-14 16:54:11] [INFO] Вещь успешно создана {"user_id":1,"item_id":8}

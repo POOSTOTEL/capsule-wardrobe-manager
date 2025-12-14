@@ -10,7 +10,7 @@
             <i class="fas fa-plus-circle me-2"></i>Начать добавление вещей
         </a>
         <a href="/outfits" class="btn btn-outline-primary btn-lg ms-2">
-            <i class="fas fa-user-tie me-2"></i>Создать образ
+            <i class="fas fa-user-tie me-2"></i>Мои образы
         </a>
     </div>
 </div>
@@ -64,12 +64,20 @@
         <div class="action-description">Добавьте новую вещь в ваш гардероб</div>
     </a>
 
-    <a href="/outfits/create" class="action-card">
+    <a href="/outfits" class="action-card">
         <div class="action-icon">
             <i class="fas fa-user-tie"></i>
         </div>
+        <div class="action-title">Мои образы</div>
+        <div class="action-description">Просмотрите и управляйте вашими образами</div>
+    </a>
+
+    <a href="/outfits/create" class="action-card">
+        <div class="action-icon">
+            <i class="fas fa-magic"></i>
+        </div>
         <div class="action-title">Создать образ</div>
-        <div class="action-description">Соберите стильный образ из ваших вещей</div>
+        <div class="action-description">Соберите стильный образ с помощью конструктора</div>
     </a>
 
     <a href="/capsules/create" class="action-card">

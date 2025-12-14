@@ -283,7 +283,9 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Response data:', data);
             
             if (data.success) {
-                window.location.href = `/items/${data.data.id}`;
+                // Редирект на список всех вещей
+                const redirectUrl = data.data?.redirect_url || '/items';
+                window.location.href = redirectUrl;
             } else {
                 // Показываем ошибки
                 if (data.errors) {
@@ -293,10 +295,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 } else {
                     console.error('Error response:', data);
-                    // Показываем детальную информацию об ошибке в консоли
-                    if (data.errors && Array.isArray(data.errors)) {
-                        console.error('Error details:', data.errors);
-                    }
                     alert(data.message || 'Ошибка при создании вещи');
                 }
             }
