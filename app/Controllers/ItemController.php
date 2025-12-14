@@ -42,9 +42,9 @@ class ItemController extends Controller
     {
         // Получаем фильтры из запроса
         $filters = [
-            'category_id' => $this->input('category_id'),
-            'color_id' => $this->input('color_id'),
-            'season_id' => $this->input('season_id'),
+            'category_id' => $this->input('category_id') ? (int) $this->input('category_id') : null,
+            'color_id' => $this->input('color_id') ? (int) $this->input('color_id') : null,
+            'season_id' => $this->input('season_id') ? (int) $this->input('season_id') : null,
             'search' => $this->input('search'),
             'tag_ids' => $this->input('tag_ids') ? explode(',', $this->input('tag_ids')) : [],
             'order_by' => $this->input('order_by', 'created_at'),
@@ -55,7 +55,7 @@ class ItemController extends Controller
 
         // Удаляем пустые фильтры
         $filters = array_filter($filters, function($value) {
-            return $value !== '' && $value !== null && $value !== [];
+            return $value !== '' && $value !== null && $value !== [] && $value !== 0;
         });
 
         if ($this->isAjax()) {

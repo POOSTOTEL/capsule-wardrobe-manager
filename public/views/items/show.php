@@ -7,18 +7,17 @@
  */
 ?>
 
-<div class="item-detail">
-    <div class="detail-header mb-4">
-        <h1><?= htmlspecialchars($item['name']) ?></h1>
-        <div class="detail-actions">
-            <a href="/items/<?= $item['id'] ?>/edit" class="btn btn-outline-primary">
-                <i class="fas fa-edit me-2"></i>Редактировать
-            </a>
-            <a href="/items" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-2"></i>Назад к списку
-            </a>
-        </div>
+<div class="detail-header mb-4">
+    <h1><?= htmlspecialchars($item['name']) ?></h1>
+    <div class="detail-actions">
+        <a href="/items/<?= $item['id'] ?>/edit" class="btn btn-outline-primary">
+            <i class="fas fa-edit me-2"></i>Редактировать
+        </a>
+        <a href="/items" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Назад к списку
+        </a>
     </div>
+</div>
 
     <div class="detail-image">
         <img src="/api/items/<?= $item['id'] ?>/image" 
@@ -112,6 +111,3 @@
             </div>
         <?php endif; ?>
     </div>
-</div>
-
-<link rel="stylesheet" href="/assets/css/items.css">

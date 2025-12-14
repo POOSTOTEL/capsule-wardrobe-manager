@@ -10,15 +10,14 @@
  */
 ?>
 
-<div class="item-form">
-    <div class="page-header mb-4">
-        <h1>Добавить вещь</h1>
-        <a href="/items" class="btn btn-outline-primary">
-            <i class="fas fa-arrow-left me-2"></i>Назад к списку
-        </a>
-    </div>
+<div class="page-header mb-4">
+    <h1>Добавить вещь</h1>
+    <a href="/items" class="btn btn-outline-primary">
+        <i class="fas fa-arrow-left me-2"></i>Назад к списку
+    </a>
+</div>
 
-    <form id="item-form" method="POST" action="/items" enctype="multipart/form-data">
+<form id="item-form" method="POST" action="/items" enctype="multipart/form-data">
         <!-- Основная информация -->
         <div class="form-section">
             <h2 class="section-title">Основная информация</h2>
@@ -142,10 +141,8 @@
                 <i class="fas fa-save me-2"></i>Сохранить вещь
             </button>
         </div>
-    </form>
-</div>
+</form>
 
-<link rel="stylesheet" href="/assets/css/items.css">
 <script src="/assets/js/items.js"></script>
 
 <script>

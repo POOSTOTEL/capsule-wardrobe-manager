@@ -12,15 +12,14 @@
  */
 ?>
 
-<div class="outfit-form">
-    <div class="page-header mb-4">
-        <h1>Редактировать образ</h1>
-        <a href="/outfits/<?= $outfit['id'] ?>" class="btn btn-outline-primary">
-            <i class="fas fa-arrow-left me-2"></i>Назад к образу
-        </a>
-    </div>
+<div class="page-header mb-4">
+    <h1>Редактировать образ</h1>
+    <a href="/outfits/<?= $outfit['id'] ?>" class="btn btn-outline-primary">
+        <i class="fas fa-arrow-left me-2"></i>Назад к образу
+    </a>
+</div>
 
-    <form id="outfit-form" method="POST" action="/outfits/<?= $outfit['id'] ?>">
+<form id="outfit-form" method="POST" action="/outfits/<?= $outfit['id'] ?>">
         <input type="hidden" name="_method" value="PUT">
 
         <!-- Основная информация -->
@@ -153,10 +152,7 @@
                 <i class="fas fa-save me-2"></i>Сохранить изменения
             </button>
         </div>
-    </form>
-</div>
-
-<link rel="stylesheet" href="/assets/css/outfits.css">
+</form>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

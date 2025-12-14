@@ -7,8 +7,7 @@
  */
 ?>
 
-<div class="outfit-detail">
-    <div class="detail-header mb-4">
+<div class="detail-header mb-4">
         <div class="header-content">
             <h1>
                 <?= htmlspecialchars($outfit['name']) ?>
@@ -121,9 +120,6 @@
             </div>
         <?php endif; ?>
     </div>
-</div>
-
-<link rel="stylesheet" href="/assets/css/outfits.css">
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

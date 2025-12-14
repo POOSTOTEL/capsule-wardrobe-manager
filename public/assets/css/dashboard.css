@@ -183,7 +183,7 @@
 
 .map-visualization {
     height: 300px;
-    background: linear-gradient(135deg, rgba(74, 111, 165, 0.1), rgba(22, 96, 136, 0.1));
+    background: linear-gradient(135deg, rgba(74, 111, 165, 0.1), rgba(46, 90, 135, 0.1));
     border-radius: var(--border-radius);
     margin: var(--spacing-lg) 0;
     display: flex;

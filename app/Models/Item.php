@@ -71,7 +71,14 @@ class Item extends BaseModel
         // Сортировка
         $orderBy = $filters['order_by'] ?? 'created_at';
         $orderDir = strtoupper($filters['order_dir'] ?? 'DESC');
-        $sql .= " ORDER BY i.{$orderBy} {$orderDir}";
+        
+        // Безопасная сортировка
+        $allowedOrderBy = ['created_at', 'updated_at', 'name', 'usage_count', 'category_id'];
+        if (in_array($orderBy, $allowedOrderBy)) {
+            $sql .= " ORDER BY i.{$orderBy} {$orderDir}";
+        } else {
+            $sql .= " ORDER BY i.created_at {$orderDir}";
+        }
 
         // Пагинация
         if (!empty($filters['limit'])) {

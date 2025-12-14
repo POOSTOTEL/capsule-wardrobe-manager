@@ -124,8 +124,6 @@
     </div>
 </div>
 
-<link rel="stylesheet" href="/assets/css/analytics.css">
-
 <style>
 .compatibility-list {
     display: flex;

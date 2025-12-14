@@ -10,13 +10,12 @@
  */
 ?>
 
-<div class="items-page">
-    <div class="page-header mb-4">
-        <h1>Мой гардероб</h1>
-        <a href="/items/create" class="btn btn-primary">
-            <i class="fas fa-plus me-2"></i>Добавить вещь
-        </a>
-    </div>
+<div class="page-header mb-4">
+    <h1>Мой гардероб</h1>
+    <a href="/items/create" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i>Добавить вещь
+    </a>
+</div>
 
     <!-- Фильтры -->
     <?php include __DIR__ . '/_filters.php'; ?>
@@ -31,9 +30,7 @@
     <?php else: ?>
         <?php include __DIR__ . '/_grid.php'; ?>
     <?php endif; ?>
-</div>
 
-<link rel="stylesheet" href="/assets/css/items.css">
 <script src="/assets/js/items.js"></script>
 
 <script>

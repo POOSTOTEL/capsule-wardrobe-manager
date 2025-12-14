@@ -32,26 +32,32 @@
                 </div>
             </div>
 
-            <div class="items-list" id="items-list">
+            <div class="items-list" id="items-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; max-height: 500px; overflow-y: auto;">
                 <?php foreach ($items as $item): ?>
                     <div class="builder-item-card" 
                          data-item-id="<?= $item['id'] ?>"
                          data-item-name="<?= htmlspecialchars(strtolower($item['name'])) ?>"
                          data-category="<?= htmlspecialchars(strtolower($item['category_name'] ?? '')) ?>"
                          data-category-id="<?= $item['category_id'] ?? '' ?>"
-                         draggable="true">
-                        <div class="builder-item-image">
+                         style="position: relative; border: 2px solid #ddd; border-radius: 8px; padding: 8px; cursor: pointer; transition: all 0.3s;">
+                        <input type="checkbox" 
+                               class="item-checkbox" 
+                               data-item-id="<?= $item['id'] ?>"
+                               data-category-id="<?= $item['category_id'] ?? '' ?>"
+                               style="position: absolute; top: 8px; right: 8px; z-index: 10; width: 20px; height: 20px;">
+                        <div class="builder-item-image" style="width: 100%; aspect-ratio: 1; overflow: hidden; border-radius: 4px; margin-bottom: 8px;">
                             <img src="/api/items/<?= $item['id'] ?>/image" 
                                  alt="<?= htmlspecialchars($item['name']) ?>"
                                  loading="lazy"
-                                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'%3E%3Crect fill=\'%23ddd\' width=\'200\' height=\'200\'/%3E%3Ctext fill=\'%23999\' font-family=\'sans-serif\' font-size=\'14\' x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dominant-baseline=\'middle\'%3EНет фото%3C/text%3E%3C/svg%3E';">
+                                 style="width: 100%; height: 100%; object-fit: cover;"
+                                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'150\' height=\'150\'%3E%3Crect fill=\'%23ddd\' width=\'150\' height=\'150\'/%3E%3Ctext fill=\'%23999\' font-family=\'sans-serif\' font-size=\'12\' x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dominant-baseline=\'middle\'%3EНет фото%3C/text%3E%3C/svg%3E';">
                         </div>
-                        <div class="builder-item-info">
-                            <div class="builder-item-name" title="<?= htmlspecialchars($item['name']) ?>">
+                        <div class="builder-item-info" style="text-align: center;">
+                            <div class="builder-item-name" title="<?= htmlspecialchars($item['name']) ?>" style="font-size: 0.9rem; font-weight: 500; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                 <?= htmlspecialchars($item['name']) ?>
                             </div>
                             <?php if (!empty($item['category_name'])): ?>
-                                <div class="builder-item-category">
+                                <div class="builder-item-category" style="font-size: 0.75rem; color: #666;">
                                     <i class="fas fa-tag me-1"></i><?= htmlspecialchars($item['category_name']) ?>
                                 </div>
                             <?php endif; ?>
@@ -150,10 +156,16 @@
                 </h3>
                 
                 <p class="text-muted mb-3">
-                    Перетащите вещи из списка слева в соответствующие зоны ниже
+                    Выберите вещи из списка слева, установив галочки. Выбранные вещи появятся ниже.
                 </p>
 
-                <div class="assembly-zones">
+                <div id="selected-items-display" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; min-height: 100px; padding: 16px; background: #f8f9fa; border-radius: 8px;">
+                    <div style="grid-column: 1 / -1; text-align: center; color: #999; padding: 20px;">
+                        Выберите вещи из списка слева
+                    </div>
+                </div>
+
+                <div class="assembly-zones" style="display: none;">
                     <div class="assembly-zone" 
                          data-zone="top" 
                          data-category="Верх"
@@ -223,8 +235,6 @@
     </div>
 </div>
 
-<link rel="stylesheet" href="/assets/css/outfits.css">
-
 <style>
 /* Дополнительные стили для конструктора */
 .outfit-builder {
@@ -279,6 +289,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    const selectedItems = new Set();
+    const selectedItemsDisplay = document.getElementById('selected-items-display');
+
     // Поиск вещей
     if (itemSearch) {
         itemSearch.addEventListener('input', function() {
@@ -296,7 +309,101 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Drag and Drop функционал
+    // Обработка выбора вещей через чекбоксы
+    function updateSelectedItems() {
+        const checkboxes = document.querySelectorAll('.item-checkbox:checked');
+        selectedItems.clear();
+        checkboxes.forEach(checkbox => {
+            selectedItems.add(parseInt(checkbox.dataset.itemId));
+        });
+        
+        updateSelectedItemsDisplay();
+        updateItemsCount();
+    }
+
+    function updateSelectedItemsDisplay() {
+        if (!selectedItemsDisplay) return;
+        
+        selectedItemsDisplay.innerHTML = '';
+        
+        if (selectedItems.size === 0) {
+            selectedItemsDisplay.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: #999; padding: 20px;">Выберите вещи из списка слева</div>';
+            return;
+        }
+
+        selectedItems.forEach(itemId => {
+            const itemCard = document.querySelector(`.builder-item-card[data-item-id="${itemId}"]`);
+            if (itemCard) {
+                const clone = itemCard.cloneNode(true);
+                // Удаляем чекбокс из клона, так как он не нужен в области отображения
+                const checkbox = clone.querySelector('.item-checkbox');
+                if (checkbox) {
+                    checkbox.remove();
+                }
+                clone.style.border = '2px solid var(--primary-color)';
+                clone.style.position = 'relative';
+                clone.style.cursor = 'default';
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                removeBtn.style.cssText = 'position: absolute; top: 4px; right: 4px; background: #dc3545; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; z-index: 20; display: flex; align-items: center; justify-content: center;';
+                removeBtn.onclick = function(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    const checkbox = document.querySelector(`.item-checkbox[data-item-id="${itemId}"]`);
+                    if (checkbox) {
+                        checkbox.checked = false;
+                        updateSelectedItems();
+                    }
+                };
+                clone.appendChild(removeBtn);
+                selectedItemsDisplay.appendChild(clone);
+            }
+        });
+    }
+
+    // Обработчики для чекбоксов
+    document.querySelectorAll('.item-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function(e) {
+            e.stopPropagation();
+            updateSelectedItems();
+        });
+        
+        // Предотвращаем клик на карточку при клике на чекбокс
+        checkbox.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    });
+    
+    // Также добавляем обработчики для динамически добавленных чекбоксов
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            mutation.addedNodes.forEach(function(node) {
+                if (node.nodeType === 1) { // Element node
+                    const checkboxes = node.querySelectorAll ? node.querySelectorAll('.item-checkbox') : [];
+                    checkboxes.forEach(checkbox => {
+                        if (!checkbox.hasAttribute('data-listener-added')) {
+                            checkbox.setAttribute('data-listener-added', 'true');
+                            checkbox.addEventListener('change', function(e) {
+                                e.stopPropagation();
+                                updateSelectedItems();
+                            });
+                            checkbox.addEventListener('click', function(e) {
+                                e.stopPropagation();
+                            });
+                        }
+                    });
+                }
+            });
+        });
+    });
+    
+    const itemsList = document.getElementById('items-list');
+    if (itemsList) {
+        observer.observe(itemsList, { childList: true, subtree: true });
+    }
+
+    // Старый код drag and drop (удаляем или оставляем для совместимости)
     function initDragAndDrop() {
         document.querySelectorAll('.builder-item-card').forEach(item => {
             // Удаляем старые обработчики, если они есть
@@ -451,8 +558,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Обновление счетчика вещей
     function updateItemsCount() {
-        let count = 0;
-        document.querySelectorAll('.zone-content .zone-item').forEach(() => count++);
+        // Считаем выбранные вещи из чекбоксов
+        const count = selectedItems.size;
         if (itemsCountBadge) {
             itemsCountBadge.textContent = count + ' ' + (count === 1 ? 'вещь' : count < 5 ? 'вещи' : 'вещей');
         }
@@ -482,14 +589,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            // Собираем вещи из всех зон
-            const itemIds = [];
-            document.querySelectorAll('.zone-content .zone-item').forEach(item => {
-                const itemId = item.dataset.itemId;
-                if (itemId && !itemIds.includes(itemId)) {
-                    itemIds.push(itemId);
-                }
-            });
+            // Собираем вещи из выбранных чекбоксов
+            const itemIds = Array.from(selectedItems);
 
             if (itemIds.length === 0) {
                 alert('Добавьте хотя бы одну вещь в образ');
@@ -503,7 +604,11 @@ document.addEventListener('DOMContentLoaded', function() {
             formData.append('season_id', document.getElementById('outfit-season').value);
             formData.append('formality_level', document.getElementById('outfit-formality').value);
             formData.append('is_favorite', document.getElementById('outfit-favorite').checked ? '1' : '0');
-            formData.append('item_ids', itemIds.join(','));
+            
+            // Добавляем каждый item_id отдельно - PHP автоматически создаст массив из item_ids[]
+            itemIds.forEach(itemId => {
+                formData.append('item_ids[]', itemId.toString());
+            });
 
             // Добавляем теги
             const tagInput = document.querySelector('input[name="tags"]');

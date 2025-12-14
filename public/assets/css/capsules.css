@@ -1,32 +1,6 @@
 /* capsules.css - Стили для управления капсулами */
 
-/* Общие стили для страниц капсул */
-.capsules-page,
-.capsule-form,
-.capsule-detail {
-    max-width: 1400px;
-    margin: 0 auto;
-}
-
-.page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing-lg);
-    flex-wrap: wrap;
-    gap: var(--spacing-md);
-}
-
-.page-header h1 {
-    margin: 0;
-    font-size: 2rem;
-    font-weight: 600;
-}
-
-.header-actions {
-    display: flex;
-    gap: var(--spacing-sm);
-}
+/* Общие стили для страниц капсул - стили применяются напрямую к элементам */
 
 .capsule-meta-header {
     display: flex;
@@ -36,36 +10,11 @@
     flex-wrap: wrap;
 }
 
-/* Фильтры */
-.filters-panel {
-    background: var(--bg-primary);
-    border-radius: var(--border-radius-lg);
-    padding: var(--spacing-lg);
-    margin-bottom: var(--spacing-lg);
-    box-shadow: var(--shadow-sm);
-}
-
-.filters-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing-md);
-}
-
-.filters-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--spacing-md);
-}
-
+/* Фильтры - стили в app.css */
 .filter-group {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-xs);
-}
-
-.filters-actions {
-    margin-top: var(--spacing-md);
 }
 
 /* Сетка капсул */
@@ -198,54 +147,11 @@
     justify-content: flex-end;
 }
 
-/* Форма капсулы */
-.form-section {
-    background: var(--bg-primary);
-    border-radius: var(--border-radius-lg);
-    padding: var(--spacing-lg);
-    margin-bottom: var(--spacing-lg);
-    box-shadow: var(--shadow-sm);
-}
-
-.section-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: var(--spacing-md);
-    color: var(--text-primary);
-}
+/* Форма капсулы - стили в app.css */
 
 /* Селектор вещей */
-.items-selector {
-    margin-top: var(--spacing-md);
-}
-
 .selector-header {
     margin-bottom: var(--spacing-md);
-}
-
-.items-grid-selector {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: var(--spacing-md);
-    max-height: 500px;
-    overflow-y: auto;
-    padding: var(--spacing-sm);
-}
-
-.item-selector-card {
-    background: var(--bg-secondary);
-    border-radius: var(--border-radius);
-    overflow: hidden;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: 2px solid transparent;
-    position: relative;
-}
-
-.item-selector-card:hover {
-    border-color: var(--primary-color);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
 }
 
 .item-selector-card .item-checkbox:checked + .item-label {
@@ -302,33 +208,8 @@
 }
 
 /* Селектор образов */
-.outfits-selector {
-    margin-top: var(--spacing-md);
-}
-
 .outfits-grid-selector {
-    display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: var(--spacing-md);
-    max-height: 500px;
-    overflow-y: auto;
-    padding: var(--spacing-sm);
-}
-
-.outfit-selector-card {
-    background: var(--bg-secondary);
-    border-radius: var(--border-radius);
-    overflow: hidden;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: 2px solid transparent;
-    position: relative;
-}
-
-.outfit-selector-card:hover {
-    border-color: var(--primary-color);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
 }
 
 .outfit-selector-card .outfit-checkbox:checked + .outfit-label {
@@ -420,7 +301,7 @@
 }
 
 /* Детальная страница капсулы */
-.capsule-detail .page-header {
+.page-header {
     margin-bottom: var(--spacing-xl);
 }
 
@@ -428,54 +309,6 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: var(--spacing-md);
-}
-
-.item-card-detail {
-    background: var(--bg-secondary);
-    border-radius: var(--border-radius-lg);
-    overflow: hidden;
-    transition: all 0.3s ease;
-}
-
-.item-card-detail:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
-}
-
-.item-link {
-    text-decoration: none;
-    color: inherit;
-    display: block;
-}
-
-.item-image-detail {
-    aspect-ratio: 1;
-    overflow: hidden;
-    background: var(--bg-secondary);
-}
-
-.item-image-detail img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.item-info-detail {
-    padding: var(--spacing-md);
-}
-
-.item-name-detail {
-    font-size: 1rem;
-    font-weight: 600;
-    margin: 0 0 var(--spacing-sm) 0;
-    color: var(--text-primary);
-}
-
-.item-meta-detail {
-    display: flex;
-    gap: var(--spacing-sm);
-    flex-wrap: wrap;
-    font-size: 0.875rem;
 }
 
 .item-category-badge {
@@ -498,22 +331,7 @@
     gap: var(--spacing-md);
 }
 
-.outfit-card-detail {
-    background: var(--bg-secondary);
-    border-radius: var(--border-radius-lg);
-    overflow: hidden;
-    transition: all 0.3s ease;
-}
-
-.outfit-card-detail:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
-}
-
 .outfit-link-detail {
-    text-decoration: none;
-    color: inherit;
-    display: block;
     padding: var(--spacing-md);
 }
 
@@ -637,81 +455,4 @@
     }
 }
 
-/* Утилиты */
-.text-danger {
-    color: var(--danger-color);
-}
-
-.text-muted {
-    color: var(--text-light);
-}
-
-.me-1 { margin-right: 4px; }
-.me-2 { margin-right: 8px; }
-.ms-1 { margin-left: 4px; }
-.ms-2 { margin-left: 8px; }
-
-.mb-0 { margin-bottom: 0; }
-.mb-2 { margin-bottom: var(--spacing-sm); }
-.mb-3 { margin-bottom: var(--spacing-md); }
-.mb-4 { margin-bottom: var(--spacing-lg); }
-
-.mt-3 { margin-top: var(--spacing-md); }
-.mt-4 { margin-top: var(--spacing-lg); }
-
-.p-4 { padding: var(--spacing-lg); }
-
-.row {
-    display: flex;
-    flex-wrap: wrap;
-    margin: 0 calc(-1 * var(--spacing-sm));
-}
-
-.col-md-3,
-.col-md-4,
-.col-md-6,
-.col-md-8 {
-    padding: 0 var(--spacing-sm);
-}
-
-.col-md-3 {
-    flex: 0 0 25%;
-}
-
-.col-md-4 {
-    flex: 0 0 33.333333%;
-}
-
-.col-md-6 {
-    flex: 0 0 50%;
-}
-
-.col-md-8 {
-    flex: 0 0 66.666667%;
-}
-
-@media (max-width: 768px) {
-    .col-md-3,
-    .col-md-4,
-    .col-md-6,
-    .col-md-8 {
-        flex: 0 0 100%;
-    }
-}
-
-.form-actions {
-    display: flex;
-    gap: var(--spacing-sm);
-    justify-content: flex-end;
-    margin-top: var(--spacing-lg);
-}
-
-@media (max-width: 768px) {
-    .form-actions {
-        flex-direction: column;
-    }
-
-    .form-actions .btn {
-        width: 100%;
-    }
-}
+/* Утилиты - стили в app.css */

@@ -88,6 +88,7 @@ $router->post('/capsules/{id}/delete', 'CapsuleController@destroy', 'capsules.de
 $router->delete('/capsules/{id}', 'CapsuleController@destroy');
 $router->delete('/api/capsules/{id}', 'CapsuleController@destroy');
 $router->get('/capsules/{id}/combinations', 'CapsuleController@combinations', 'capsules.combinations');
+$router->post('/capsules/{id}/generate-outfits', 'CapsuleController@generateOutfits', 'capsules.generateOutfits');
 $router->get('/api/capsules', 'CapsuleController@index');
 $router->get('/api/capsules/{id}', 'CapsuleController@show');
 

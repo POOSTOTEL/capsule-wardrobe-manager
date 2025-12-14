@@ -50,7 +50,9 @@
         <div class="stat-icon">
             <i class="fas fa-chart-line"></i>
         </div>
-        <div class="stat-value">0%</div>
+        <div class="stat-value">
+            <?php echo isset($_SESSION['user_id']) ? number_format($stats['wardrobe_usage_percentage'] ?? 0, 1) . '%' : '0%'; ?>
+        </div>
         <div class="stat-label">Использования гардероба</div>
     </div>
 </div>

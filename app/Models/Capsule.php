@@ -399,6 +399,182 @@ class Capsule extends BaseModel
         return $combinations;
     }
 
+    // Генерация и сохранение образов из вещей капсулы
+    public function generateOutfits(int $capsuleId, int $userId, int $count): array
+    {
+        // Проверяем права доступа
+        $capsule = $this->find($capsuleId);
+        if (!$capsule || $capsule['user_id'] != $userId) {
+            throw new \RuntimeException('Капсула не найдена или нет прав доступа');
+        }
+
+        // Получаем вещи капсулы
+        $items = $this->getItems($capsuleId);
+        
+        if (empty($items)) {
+            throw new \RuntimeException('В капсуле нет вещей для генерации образов');
+        }
+
+        // Валидация количества
+        if ($count < 1 || $count > 50) {
+            throw new \RuntimeException('Количество образов должно быть от 1 до 50');
+        }
+
+        // Группируем вещи по категориям
+        $itemsByCategory = [];
+        foreach ($items as $item) {
+            $categoryId = $item['category_id'];
+            if (!isset($itemsByCategory[$categoryId])) {
+                $itemsByCategory[$categoryId] = [];
+            }
+            $itemsByCategory[$categoryId][] = $item;
+        }
+
+        // Определяем категории для генерации
+        $tops = $itemsByCategory[1] ?? []; // Верх
+        $bottoms = $itemsByCategory[2] ?? []; // Низ
+        $dresses = $itemsByCategory[3] ?? []; // Платье/Костюм
+        $shoes = $itemsByCategory[4] ?? []; // Обувь
+        $outerwear = $itemsByCategory[5] ?? []; // Верхняя одежда
+        $accessories = $itemsByCategory[6] ?? []; // Аксессуар
+
+        $outfitModel = new Outfit();
+        $generatedOutfits = [];
+        $generated = 0;
+        $attempts = 0;
+        $maxAttempts = $count * 100; // Защита от бесконечного цикла
+
+        // Генерируем образы
+        while ($generated < $count && $attempts < $maxAttempts) {
+            $attempts++;
+            $outfitItems = [];
+            $itemIds = [];
+
+            // Если есть платья, можем использовать их как цельный образ
+            if (!empty($dresses) && rand(0, 100) < 30) {
+                $dress = $dresses[array_rand($dresses)];
+                $outfitItems[] = $dress;
+                $itemIds[] = $dress['id'];
+            } else {
+                // Генерируем комбинацию: верх + низ
+                if (!empty($tops) && !empty($bottoms)) {
+                    $top = $tops[array_rand($tops)];
+                    $bottom = $bottoms[array_rand($bottoms)];
+                    $outfitItems[] = $top;
+                    $outfitItems[] = $bottom;
+                    $itemIds[] = $top['id'];
+                    $itemIds[] = $bottom['id'];
+                } elseif (!empty($tops)) {
+                    // Только верх
+                    $top = $tops[array_rand($tops)];
+                    $outfitItems[] = $top;
+                    $itemIds[] = $top['id'];
+                } elseif (!empty($bottoms)) {
+                    // Только низ
+                    $bottom = $bottoms[array_rand($bottoms)];
+                    $outfitItems[] = $bottom;
+                    $itemIds[] = $bottom['id'];
+                } else {
+                    // Если нет верха и низа, пропускаем
+                    continue;
+                }
+            }
+
+            // Добавляем верхнюю одежду, если есть
+            if (!empty($outerwear) && rand(0, 100) < 40) {
+                $outer = $outerwear[array_rand($outerwear)];
+                if (!in_array($outer['id'], $itemIds)) {
+                    $outfitItems[] = $outer;
+                    $itemIds[] = $outer['id'];
+                }
+            }
+
+            // Добавляем обувь, если есть
+            if (!empty($shoes) && rand(0, 100) < 70) {
+                $shoe = $shoes[array_rand($shoes)];
+                if (!in_array($shoe['id'], $itemIds)) {
+                    $outfitItems[] = $shoe;
+                    $itemIds[] = $shoe['id'];
+                }
+            }
+
+            // Добавляем аксессуар, если есть
+            if (!empty($accessories) && rand(0, 100) < 50) {
+                $accessory = $accessories[array_rand($accessories)];
+                if (!in_array($accessory['id'], $itemIds)) {
+                    $outfitItems[] = $accessory;
+                    $itemIds[] = $accessory['id'];
+                }
+            }
+
+            // Проверяем, что у нас есть хотя бы одна вещь
+            if (empty($itemIds)) {
+                continue;
+            }
+
+            // Создаем название образа
+            $outfitName = 'Образ из капсулы "' . $capsule['name'] . '" #' . ($generated + 1);
+            
+            // Определяем сезон образа (берем из капсулы или из первой вещи)
+            $seasonId = $capsule['season_id'];
+            if (!$seasonId && !empty($outfitItems)) {
+                $seasonId = $outfitItems[0]['season_id'] ?? null;
+            }
+
+            // Создаем образ
+            try {
+                $outfitData = [
+                    'name' => $outfitName,
+                    'description' => 'Автоматически сгенерированный образ из капсулы',
+                    'season_id' => $seasonId,
+                    'item_ids' => $itemIds
+                ];
+
+                $outfitId = $outfitModel->createOutfit($userId, $outfitData);
+
+                // Связываем образ с капсулой
+                $this->linkOutfitToCapsule($capsuleId, $outfitId);
+
+                $generatedOutfits[] = $outfitId;
+                $generated++;
+
+                Logger::info('Образ сгенерирован из капсулы', [
+                    'capsule_id' => $capsuleId,
+                    'outfit_id' => $outfitId,
+                    'items_count' => count($itemIds)
+                ]);
+            } catch (\Exception $e) {
+                Logger::error('Ошибка при создании образа из капсулы', [
+                    'capsule_id' => $capsuleId,
+                    'error' => $e->getMessage()
+                ]);
+                // Продолжаем генерацию, даже если один образ не создался
+            }
+        }
+
+        return $generatedOutfits;
+    }
+
+    // Связать образ с капсулой
+    private function linkOutfitToCapsule(int $capsuleId, int $outfitId): void
+    {
+        // Проверяем, не связан ли уже образ с капсулой
+        $sql = "SELECT * FROM capsule_outfits 
+                WHERE capsule_id = :capsule_id AND outfit_id = :outfit_id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['capsule_id' => $capsuleId, 'outfit_id' => $outfitId]);
+        
+        if ($stmt->fetch()) {
+            return; // Уже связан
+        }
+
+        // Создаем связь
+        $sql = "INSERT INTO capsule_outfits (capsule_id, outfit_id) 
+                VALUES (:capsule_id, :outfit_id)";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['capsule_id' => $capsuleId, 'outfit_id' => $outfitId]);
+    }
+
     // Получить статистику капсул пользователя
     public function getStatistics(int $userId): array
     {

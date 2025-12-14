@@ -7,10 +7,31 @@ class HomeController extends Controller
 {
     public function index(): void
     {
+        // Получаем статистику для авторизованных пользователей
+        $stats = [];
+        if (isset($_SESSION['user_id'])) {
+            $itemModel = new \App\Models\Item();
+            $outfitModel = new \App\Models\Outfit();
+            $capsuleModel = new \App\Models\Capsule();
+            $analyticsModel = new \App\Models\Analytics();
+            
+            // Получаем статистику использования гардероба
+            $usageStats = $analyticsModel->getUsageStatistics($_SESSION['user_id']);
+            $wardrobeUsagePercentage = $usageStats['used_percentage'] ?? 0;
+            
+            $stats = [
+                'total_items' => $itemModel->getTotalCount($_SESSION['user_id']),
+                'total_outfits' => $outfitModel->getTotalCount($_SESSION['user_id']),
+                'total_capsules' => $capsuleModel->getTotalCount($_SESSION['user_id']),
+                'wardrobe_usage_percentage' => $wardrobeUsagePercentage
+            ];
+        }
+        
         $data = [
             'title' => 'Капсульный Гардероб - Главная',
             'styles' => ['/assets/css/dashboard.css'],
-            'content' => $this->renderView('home/index')
+            'stats' => $stats,
+            'content' => $this->renderView('home/index', ['stats' => $stats])
         ];
 
         $this->renderLayout('main', $data);

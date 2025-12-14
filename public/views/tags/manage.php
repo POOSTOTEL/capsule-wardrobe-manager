@@ -132,7 +132,6 @@
 </div>
 
 <!-- Подключаем скрипты -->
-<link rel="stylesheet" href="/assets/css/tags.css">
 <script src="/assets/js/tags.js"></script>
 
 <script>

@@ -60,6 +60,19 @@ abstract class BaseModel
             throw new \RuntimeException("No fillable fields provided for insert");
         }
 
+        // Обрабатываем boolean значения - конвертируем в правильный формат для PostgreSQL
+        foreach ($filteredData as $key => $value) {
+            if (is_bool($value)) {
+                $filteredData[$key] = $value;
+            } elseif ($value === '' && in_array($key, ['is_favorite', 'is_active'])) {
+                // Если пустая строка для boolean поля, устанавливаем false
+                $filteredData[$key] = false;
+            } elseif (is_string($value) && in_array(strtolower($value), ['true', 'false', '1', '0', ''])) {
+                // Конвертируем строковые представления boolean
+                $filteredData[$key] = in_array(strtolower($value), ['true', '1']);
+            }
+        }
+
         $columns = implode(', ', array_keys($filteredData));
         $placeholders = ':' . implode(', :', array_keys($filteredData));
 

@@ -10,7 +10,7 @@
  */
 ?>
 
-<div class="filters-panel card p-4 mb-4">
+<div class="filters-panel mb-4">
     <div class="filters-header mb-3">
         <h3 class="mb-0">
             <i class="fas fa-filter me-2"></i>Фильтры

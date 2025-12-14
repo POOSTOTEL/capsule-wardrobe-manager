@@ -353,7 +353,8 @@ class TagController extends Controller
 
         $data = [
             'title' => 'Управление тегами - Капсульный Гардероб',
-            'tags' => $tags
+            'tags' => $tags,
+            'styles' => ['/assets/css/tags.css']
         ];
 
         $this->render('tags/manage', $data);

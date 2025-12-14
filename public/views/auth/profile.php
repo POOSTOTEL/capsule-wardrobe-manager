@@ -10,23 +10,8 @@ $form_data = $form_data ?? $user;
         <div class="col-lg-4 mb-4">
             <div class="profile-sidebar">
                 <div class="profile-header text-center mb-4">
-                    <div class="profile-avatar">
-                        <div class="avatar-circle">
-                            <span class="avatar-text">
-                                <?php
-                                $initials = '';
-                                if (!empty($user['full_name'])) {
-                                    $nameParts = explode(' ', $user['full_name']);
-                                    foreach ($nameParts as $part) {
-                                        $initials .= strtoupper(substr($part, 0, 1));
-                                    }
-                                } else {
-                                    $initials = strtoupper(substr($user['username'], 0, 2));
-                                }
-                                echo $initials;
-                                ?>
-                            </span>
-                        </div>
+                    <div class="profile-avatar mb-3">
+                        <i class="fas fa-user-circle" style="font-size: 4rem; color: var(--primary-color);"></i>
                     </div>
                     <h3 class="profile-name mt-3"><?php echo htmlspecialchars($user['full_name'] ?? $user['username']); ?></h3>
                     <p class="profile-email text-muted"><?php echo htmlspecialchars($user['email']); ?></p>
@@ -34,31 +19,31 @@ $form_data = $form_data ?? $user;
 
                 <div class="profile-stats">
                     <h5 class="mb-3">Статистика</h5>
-                    <div class="stat-item">
+                    <div class="stat-item" style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
                         <div class="stat-icon">
                             <i class="fas fa-tshirt"></i>
                         </div>
-                        <div class="stat-info">
-                            <div class="stat-value"><?php echo $stats['total_items'] ?? 0; ?></div>
-                            <div class="stat-label">Вещей</div>
+                        <div class="stat-info" style="display: flex; align-items: center; gap: 8px;">
+                            <div class="stat-value" style="margin: 0;"><?php echo $stats['total_items'] ?? 0; ?></div>
+                            <div class="stat-label" style="margin: 0;">Вещей</div>
                         </div>
                     </div>
-                    <div class="stat-item">
+                    <div class="stat-item" style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
                         <div class="stat-icon">
                             <i class="fas fa-user-tie"></i>
                         </div>
-                        <div class="stat-info">
-                            <div class="stat-value"><?php echo $stats['total_outfits'] ?? 0; ?></div>
-                            <div class="stat-label">Образов</div>
+                        <div class="stat-info" style="display: flex; align-items: center; gap: 8px;">
+                            <div class="stat-value" style="margin: 0;"><?php echo $stats['total_outfits'] ?? 0; ?></div>
+                            <div class="stat-label" style="margin: 0;">Образов</div>
                         </div>
                     </div>
-                    <div class="stat-item">
+                    <div class="stat-item" style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
                         <div class="stat-icon">
                             <i class="fas fa-suitcase"></i>
                         </div>
-                        <div class="stat-info">
-                            <div class="stat-value"><?php echo $stats['total_capsules'] ?? 0; ?></div>
-                            <div class="stat-label">Капсул</div>
+                        <div class="stat-info" style="display: flex; align-items: center; gap: 8px;">
+                            <div class="stat-value" style="margin: 0;"><?php echo $stats['total_capsules'] ?? 0; ?></div>
+                            <div class="stat-label" style="margin: 0;">Капсул</div>
                         </div>
                     </div>
                 </div>

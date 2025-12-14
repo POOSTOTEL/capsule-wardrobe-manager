@@ -22,7 +22,7 @@
             <h3 class="mb-3">
                 <i class="fas fa-chart-pie me-2"></i>Диаграмма распределения
             </h3>
-            <div class="chart-container" style="max-height: 400px;">
+            <div class="chart-container" style="max-height: 400px; position: relative; height: 400px;">
                 <canvas id="colorChart"></canvas>
             </div>
         </div>
@@ -67,8 +67,6 @@
         </div>
     </div>
 </div>
-
-<link rel="stylesheet" href="/assets/css/analytics.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 
 <script>
@@ -89,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
                             position: 'right'

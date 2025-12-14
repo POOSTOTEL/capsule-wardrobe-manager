@@ -10,18 +10,17 @@
  */
 ?>
 
-<div class="outfits-page">
-    <div class="page-header mb-4">
-        <h1>Мои образы</h1>
-        <div class="header-actions">
-            <a href="/outfits/create" class="btn btn-primary">
-                <i class="fas fa-plus me-2"></i>Создать образ
-            </a>
-        </div>
+<div class="page-header mb-4">
+    <h1>Мои образы</h1>
+    <div class="header-actions">
+        <a href="/outfits/create" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Создать образ
+        </a>
     </div>
+</div>
 
-    <!-- Фильтры -->
-    <div class="filters-panel card p-4 mb-4">
+<!-- Фильтры -->
+<div class="filters-panel mb-4">
         <div class="filters-header mb-3">
             <h3 class="mb-0">
                 <i class="fas fa-filter me-2"></i>Фильтры
@@ -213,9 +212,6 @@
             <?php endforeach; ?>
         </div>
     <?php endif; ?>
-</div>
-
-<link rel="stylesheet" href="/assets/css/outfits.css">
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

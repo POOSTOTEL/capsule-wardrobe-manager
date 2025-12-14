@@ -189,11 +189,15 @@
 }
 
 .color-indicator {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    border: 2px solid white;
-    box-shadow: 0 0 0 1px var(--border-color);
+    display: inline-block !important;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    vertical-align: middle;
+    margin-right: 8px;
+    flex-shrink: 0;
 }
 
 .item-tags {
@@ -258,11 +262,7 @@
     gap: var(--spacing-xs);
 }
 
-/* Форма добавления/редактирования вещи */
-.item-form {
-    max-width: 800px;
-    margin: 0 auto;
-}
+/* Форма добавления/редактирования вещи - стили применяются напрямую к форме */
 
 .form-section {
     background: var(--bg-primary);
@@ -404,11 +404,7 @@
     border-color: var(--primary-color);
 }
 
-/* Детальная страница вещи */
-.item-detail {
-    max-width: 800px;
-    margin: 0 auto;
-}
+/* Детальная страница вещи - стили применяются напрямую к элементам */
 
 .detail-header {
     display: flex;
@@ -458,6 +454,9 @@
 
 .info-value {
     font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .detail-tags {

@@ -12,15 +12,14 @@
  */
 ?>
 
-<div class="item-form">
-    <div class="page-header mb-4">
-        <h1>Редактировать вещь</h1>
-        <a href="/items/<?= $item['id'] ?>" class="btn btn-outline-primary">
-            <i class="fas fa-arrow-left me-2"></i>Назад
-        </a>
-    </div>
+<div class="page-header mb-4">
+    <h1>Редактировать вещь</h1>
+    <a href="/items/<?= $item['id'] ?>" class="btn btn-outline-primary">
+        <i class="fas fa-arrow-left me-2"></i>Назад
+    </a>
+</div>
 
-    <form id="item-form" method="POST" action="/items/<?= $item['id'] ?>" enctype="multipart/form-data">
+<form id="item-form" method="POST" action="/items/<?= $item['id'] ?>" enctype="multipart/form-data">
         <input type="hidden" name="_method" value="PUT">
 
         <!-- Основная информация -->
@@ -153,10 +152,7 @@
                 <i class="fas fa-save me-2"></i>Сохранить изменения
             </button>
         </div>
-    </form>
-</div>
-
-<link rel="stylesheet" href="/assets/css/items.css">
+</form>
 <script src="/assets/js/items.js"></script>
 
 <script>

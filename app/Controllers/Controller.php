@@ -14,10 +14,17 @@ abstract class Controller
         $content = $this->renderView($view, $data);
 
         // Данные для макета
+        $defaultStyles = ['/assets/css/app.css', '/assets/css/responsive.css'];
+        $additionalStyles = $data['styles'] ?? [];
+        
+        // Объединяем стили, избегая дубликатов
+        $allStyles = array_merge($defaultStyles, $additionalStyles);
+        $allStyles = array_unique($allStyles);
+        
         $layoutData = array_merge($data, [
             'content' => $content,
             'title' => $data['title'] ?? 'Капсульный Гардероб',
-            'styles' => $data['styles'] ?? ['/assets/css/app.css']
+            'styles' => $allStyles
         ]);
 
         // Рендеринг макета

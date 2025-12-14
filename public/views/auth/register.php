@@ -4,8 +4,7 @@ $errors = $errors ?? [];
 $form_data = $form_data ?? [];
 ?>
 <div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
+        <div class="col-md-8 col-lg-7">
             <div class="card">
                 <div class="card-header text-center">
                     <h1 class="h3 mb-0">Регистрация</h1>
@@ -109,7 +108,6 @@ $form_data = $form_data ?? [];
                 </div>
             </div>
         </div>
-    </div>
 </div>
 
 <style>
@@ -117,11 +115,15 @@ $form_data = $form_data ?? [];
         min-height: calc(100vh - 200px);
         display: flex;
         align-items: center;
+        justify-content: center;
     }
 
     .card {
         border: none;
         box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
     }
 
     .card-header {

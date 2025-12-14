@@ -86,7 +86,7 @@
                         Подробнее <i class="fas fa-arrow-right ms-1"></i>
                     </a>
                 </div>
-                <div class="chart-container">
+                <div class="chart-container" style="height: 400px; position: relative;">
                     <canvas id="categoryChart"></canvas>
                 </div>
             </div>
@@ -103,7 +103,7 @@
                         Подробнее <i class="fas fa-arrow-right ms-1"></i>
                     </a>
                 </div>
-                <div class="chart-container">
+                <div class="chart-container" style="height: 400px; position: relative;">
                     <canvas id="colorChart"></canvas>
                 </div>
             </div>
@@ -223,8 +223,6 @@
         </div>
     </div>
 </div>
-
-<link rel="stylesheet" href="/assets/css/analytics.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 <script src="/assets/js/charts.js"></script>
 
@@ -278,7 +276,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
                             position: 'bottom'

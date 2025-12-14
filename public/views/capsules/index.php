@@ -9,18 +9,17 @@
  */
 ?>
 
-<div class="capsules-page">
-    <div class="page-header mb-4">
-        <h1>Мои капсулы</h1>
-        <div class="header-actions">
-            <a href="/capsules/create" class="btn btn-primary">
-                <i class="fas fa-plus me-2"></i>Создать капсулу
-            </a>
-        </div>
+<div class="page-header mb-4">
+    <h1>Мои капсулы</h1>
+    <div class="header-actions">
+        <a href="/capsules/create" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Создать капсулу
+        </a>
     </div>
+</div>
 
-    <!-- Фильтры -->
-    <div class="filters-panel card p-4 mb-4">
+<!-- Фильтры -->
+<div class="filters-panel mb-4">
         <div class="filters-header mb-3">
             <h3 class="mb-0">
                 <i class="fas fa-filter me-2"></i>Фильтры
@@ -109,46 +108,25 @@
                         </div>
 
                         <div class="capsule-content">
-                            <?php if (!empty($capsule['items']) || !empty($capsule['outfits'])): ?>
-                                <div class="capsule-stats">
-                                    <?php if (!empty($capsule['items'])): ?>
-                                        <div class="stat-item">
-                                            <i class="fas fa-tshirt me-1"></i>
-                                            <span><?= count($capsule['items']) ?> вещей</span>
-                                        </div>
-                                    <?php endif; ?>
-                                    <?php if (!empty($capsule['outfits'])): ?>
-                                        <div class="stat-item">
-                                            <i class="fas fa-tshirt me-1"></i>
-                                            <span><?= count($capsule['outfits']) ?> образов</span>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-
-                                <div class="capsule-preview">
-                                    <?php 
-                                    $previewItems = array_slice($capsule['items'], 0, 6);
-                                    foreach ($previewItems as $item): 
-                                    ?>
-                                        <div class="preview-item">
-                                            <img src="/api/items/<?= $item['id'] ?>/image" 
-                                                 alt="<?= htmlspecialchars($item['name']) ?>"
-                                                 loading="lazy"
-                                                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect fill=\'%23ddd\' width=\'100\' height=\'100\'/%3E%3Ctext fill=\'%23999\' font-family=\'sans-serif\' font-size=\'10\' x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dominant-baseline=\'middle\'%3EНет фото%3C/text%3E%3C/svg%3E';">
-                                        </div>
-                                    <?php endforeach; ?>
-                                    <?php if (count($capsule['items']) > 6): ?>
-                                        <div class="preview-more">
-                                            +<?= count($capsule['items']) - 6 ?>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                            <?php else: ?>
-                                <div class="no-content">
-                                    <i class="fas fa-inbox fa-2x mb-2"></i>
-                                    <p>Капсула пуста</p>
-                                </div>
-                            <?php endif; ?>
+                            <div class="capsule-stats">
+                                <?php if (!empty($capsule['items'])): ?>
+                                    <div class="stat-item">
+                                        <i class="fas fa-tshirt me-1"></i>
+                                        <span><?= count($capsule['items']) ?> вещей</span>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="stat-item">
+                                        <i class="fas fa-tshirt me-1"></i>
+                                        <span>0 вещей</span>
+                                    </div>
+                                <?php endif; ?>
+                                <?php if (!empty($capsule['outfits'])): ?>
+                                    <div class="stat-item">
+                                        <i class="fas fa-user-tie me-1"></i>
+                                        <span><?= count($capsule['outfits']) ?> образов</span>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
                         </div>
 
                         <?php if (!empty($capsule['description'])): ?>
@@ -179,9 +157,6 @@
             <?php endforeach; ?>
         </div>
     <?php endif; ?>
-</div>
-
-<link rel="stylesheet" href="/assets/css/capsules.css">
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

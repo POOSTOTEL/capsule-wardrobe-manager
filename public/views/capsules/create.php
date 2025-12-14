@@ -9,15 +9,14 @@
  */
 ?>
 
-<div class="capsule-form">
-    <div class="page-header mb-4">
-        <h1>Создать капсулу</h1>
-        <a href="/capsules" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-2"></i>Назад к списку
-        </a>
-    </div>
+<div class="page-header mb-4">
+    <h1>Создать капсулу</h1>
+    <a href="/capsules" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Назад к списку
+    </a>
+</div>
 
-    <form id="capsule-form" method="POST" action="/capsules" class="card p-4">
+<form id="capsule-form" method="POST" action="/capsules">
         <div class="row">
             <div class="col-md-8">
                 <!-- Основная информация -->
@@ -204,10 +203,7 @@
                 Отмена
             </a>
         </div>
-    </form>
-</div>
-
-<link rel="stylesheet" href="/assets/css/capsules.css">
+</form>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

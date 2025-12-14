@@ -12,15 +12,14 @@
  */
 ?>
 
-<div class="capsule-form">
-    <div class="page-header mb-4">
-        <h1>Редактировать капсулу</h1>
-        <a href="/capsules/<?= $capsule['id'] ?>" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-2"></i>Назад
-        </a>
-    </div>
+<div class="page-header mb-4">
+    <h1>Редактировать капсулу</h1>
+    <a href="/capsules/<?= $capsule['id'] ?>" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Назад
+    </a>
+</div>
 
-    <form id="capsule-form" method="POST" action="/capsules/<?= $capsule['id'] ?>" class="card p-4">
+<form id="capsule-form" method="POST" action="/capsules/<?= $capsule['id'] ?>">
         <input type="hidden" name="_method" value="PUT">
 
         <div class="row">
@@ -196,10 +195,7 @@
                 Отмена
             </a>
         </div>
-    </form>
-</div>
-
-<link rel="stylesheet" href="/assets/css/capsules.css">
+</form>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

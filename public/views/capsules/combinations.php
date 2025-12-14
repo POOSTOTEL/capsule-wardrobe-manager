@@ -77,8 +77,6 @@
     <?php endif; ?>
 </div>
 
-<link rel="stylesheet" href="/assets/css/capsules.css">
-
 <style>
 .capsule-combinations {
     max-width: 1400px;

@@ -1,37 +1,41 @@
 FROM php:8.2-fpm-alpine
 
-# Устанавливаем системные зависимости
-RUN apk add --no-cache \
-    postgresql-dev \
-    libpng-dev \
-    libjpeg-turbo-dev \
-    freetype-dev \
-    libzip-dev \
-    zip \
-    unzip \
-    curl \
-    git \
-    nodejs \
-    npm \
-    supervisor \
-    tzdata
+# Настройка часового пояса (раньше для лучшего кэширования)
+ENV TZ=Europe/Moscow
 
-# Устанавливаем расширения PHP
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+# Устанавливаем системные зависимости и расширения PHP в одном слое
+# Это уменьшает количество слоев и улучшает кэширование
+RUN apk add --no-cache --virtual .build-deps \
+        $PHPIZE_DEPS \
+        postgresql-dev \
+    && apk add --no-cache \
+        postgresql-libs \
+        libpng-dev \
+        libjpeg-turbo-dev \
+        freetype-dev \
+        libzip-dev \
+        zip \
+        unzip \
+        curl \
+        git \
+        nodejs \
+        npm \
+        supervisor \
+        tzdata \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
-    pdo \
-    pdo_pgsql \
-    pgsql \
-    gd \
-    zip \
-    bcmath
+        pdo \
+        pdo_pgsql \
+        pgsql \
+        gd \
+        zip \
+        bcmath \
+    && apk del .build-deps \
+    && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
+    && echo $TZ > /etc/timezone
 
 # Устанавливаем Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# Настройка часового пояса
-ENV TZ=Europe/Moscow
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Создаем пользователя для приложения
 RUN addgroup -g 1000 www && \
@@ -40,13 +44,14 @@ RUN addgroup -g 1000 www && \
 # Настраиваем рабочую директорию
 WORKDIR /var/www
 
-# Копируем composer.json (composer.lock может отсутствовать)
-COPY composer.json ./
+# Копируем только composer файлы для кэширования зависимостей
+COPY composer.json composer.lock* ./
 
-# Устанавливаем зависимости (без dev-зависимостей для production)
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress
+# Устанавливаем зависимости с кэшированием (без dev-зависимостей для production)
+# Используем --prefer-dist для быстрой установки из архивов
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress --prefer-dist --no-scripts
 
-# Копируем исходный код
+# Копируем исходный код (это делается после установки зависимостей для лучшего кэширования)
 COPY . .
 
 # Настраиваем права доступа

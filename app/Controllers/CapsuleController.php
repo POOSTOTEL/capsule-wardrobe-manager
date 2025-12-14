@@ -367,6 +367,89 @@ class CapsuleController extends Controller
         $this->render('capsules/combinations', $data);
     }
 
+    // Генерация образов из вещей капсулы
+    public function generateOutfits(int $id): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->error('Метод не разрешен', 405);
+            return;
+        }
+
+        $capsule = $this->capsuleModel->getWithDetails($id, $this->userId);
+
+        if (!$capsule) {
+            $this->error('Капсула не найдена', 404);
+            return;
+        }
+
+        // Проверяем, что в капсуле есть вещи
+        if (empty($capsule['items'])) {
+            $this->error('В капсуле нет вещей для генерации образов', 400);
+            return;
+        }
+
+        // Получаем количество образов для генерации
+        $count = (int) $this->input('count', 5);
+        
+        // Валидация количества
+        if ($count < 1 || $count > 50) {
+            $this->error('Количество образов должно быть от 1 до 50', 400);
+            return;
+        }
+
+        try {
+            Logger::info('Начало генерации образов из капсулы', [
+                'user_id' => $this->userId,
+                'capsule_id' => $id,
+                'count' => $count
+            ]);
+
+            // Генерируем образы
+            $generatedOutfitIds = $this->capsuleModel->generateOutfits($id, $this->userId, $count);
+
+            Logger::info('Образы успешно сгенерированы', [
+                'user_id' => $this->userId,
+                'capsule_id' => $id,
+                'generated_count' => count($generatedOutfitIds),
+                'requested_count' => $count
+            ]);
+
+            // Обновляем данные капсулы
+            $capsule = $this->capsuleModel->getWithDetails($id, $this->userId);
+
+            if ($this->isAjax()) {
+                $this->success([
+                    'generated_count' => count($generatedOutfitIds),
+                    'requested_count' => $count,
+                    'capsule' => $capsule
+                ], 'Образы успешно сгенерированы');
+                return;
+            }
+
+            $this->setFlash('success', 'Успешно сгенерировано ' . count($generatedOutfitIds) . ' образов');
+            $this->redirect("/capsules/{$id}");
+        } catch (\Exception $e) {
+            Logger::error('Ошибка при генерации образов из капсулы', [
+                'user_id' => $this->userId,
+                'capsule_id' => $id,
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            $message = 'Ошибка при генерации образов: ' . $e->getMessage();
+            
+            if ($this->isAjax()) {
+                $this->error($message, 500);
+                return;
+            }
+            
+            $this->setFlash('error', $message);
+            $this->redirect("/capsules/{$id}");
+        }
+    }
+
     // Валидация данных капсулы
     private function validateCapsuleData(array $data, int $capsuleId = null): array
     {
