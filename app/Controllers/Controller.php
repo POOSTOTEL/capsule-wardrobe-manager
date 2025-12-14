@@ -64,10 +64,51 @@ abstract class Controller
     // JSON ответ
     protected function json(array $data, int $statusCode = 200): void
     {
-        header('Content-Type: application/json');
+        header('Content-Type: application/json; charset=utf-8');
         http_response_code($statusCode);
-        echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        
+        // Рекурсивно удаляем бинарные данные перед сериализацией
+        $data = $this->removeBinaryData($data);
+        
+        $json = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        
+        if ($json === false) {
+            // Если не удалось закодировать JSON, отправляем ошибку
+            $error = json_last_error_msg();
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Ошибка сериализации JSON: ' . $error,
+                'json_error' => json_last_error()
+            ], JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+        
+        echo $json;
         exit();
+    }
+    
+    // Рекурсивно удаляет бинарные данные из массива
+    private function removeBinaryData($data)
+    {
+        if (is_array($data)) {
+            foreach ($data as $key => $value) {
+                if ($key === 'image_data') {
+                    unset($data[$key]);
+                } elseif (is_array($value) || is_object($value)) {
+                    $data[$key] = $this->removeBinaryData($value);
+                }
+            }
+        } elseif (is_object($data)) {
+            foreach ($data as $key => $value) {
+                if ($key === 'image_data') {
+                    unset($data->$key);
+                } elseif (is_array($value) || is_object($value)) {
+                    $data->$key = $this->removeBinaryData($value);
+                }
+            }
+        }
+        return $data;
     }
 
     // Успешный JSON ответ
@@ -100,7 +141,32 @@ abstract class Controller
     // Получение данных запроса
     protected function input(string $key = null, $default = null)
     {
+        // Получаем данные из GET и POST
         $data = array_merge($_GET, $_POST);
+
+        // Обработка _method для эмуляции PUT/PATCH/DELETE через POST
+        if (isset($data['_method'])) {
+            $_SERVER['REQUEST_METHOD'] = strtoupper($data['_method']);
+            unset($data['_method']);
+        }
+
+        // Для PUT/PATCH/DELETE запросов читаем JSON из тела запроса
+        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+        if (in_array($method, ['PUT', 'PATCH', 'DELETE'])) {
+            $rawInput = file_get_contents('php://input');
+            if (!empty($rawInput)) {
+                $jsonData = json_decode($rawInput, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($jsonData)) {
+                    $data = array_merge($data, $jsonData);
+                } else {
+                    // Если не JSON, пытаемся распарсить как form-data
+                    parse_str($rawInput, $parsedData);
+                    if (is_array($parsedData)) {
+                        $data = array_merge($data, $parsedData);
+                    }
+                }
+            }
+        }
 
         if ($key === null) {
             return $data;

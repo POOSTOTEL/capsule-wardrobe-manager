@@ -81,7 +81,8 @@ class TagController extends Controller
     // Создать новый тег
     public function store(): void
     {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+        if ($method !== 'POST') {
             $this->json([
                 'success' => false,
                 'message' => 'Метод не разрешен'
@@ -90,7 +91,7 @@ class TagController extends Controller
         }
 
         $name = trim($this->input('name', ''));
-        $color = $this->input('color', '');
+        $color = trim($this->input('color', ''));
 
         // Валидация
         if (empty($name)) {
@@ -109,32 +110,48 @@ class TagController extends Controller
             return;
         }
 
-        $tagId = $this->tagModel->createUserTag($this->userId, [
-            'name' => $name,
-            'color' => $color
-        ]);
+        try {
+            $tagId = $this->tagModel->createUserTag($this->userId, [
+                'name' => $name,
+                'color' => $color
+            ]);
 
-        if ($tagId === null) {
+            if ($tagId === null || $tagId === 0) {
+                $this->json([
+                    'success' => false,
+                    'message' => 'Тег с таким названием уже существует'
+                ], 409);
+                return;
+            }
+
+            $newTag = $this->tagModel->find($tagId);
+
+            if (!$newTag) {
+                $this->json([
+                    'success' => false,
+                    'message' => 'Тег создан, но не найден'
+                ], 500);
+                return;
+            }
+
+            $this->json([
+                'success' => true,
+                'message' => 'Тег успешно создан',
+                'data' => $newTag
+            ], 201);
+        } catch (\Exception $e) {
             $this->json([
                 'success' => false,
-                'message' => 'Тег с таким названием уже существует'
-            ], 409);
-            return;
+                'message' => 'Ошибка при создании тега: ' . $e->getMessage()
+            ], 500);
         }
-
-        $newTag = $this->tagModel->find($tagId);
-
-        $this->json([
-            'success' => true,
-            'message' => 'Тег успешно создан',
-            'data' => $newTag
-        ], 201);
     }
 
     // Обновить тег
     public function update(int $id): void
     {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $_SERVER['REQUEST_METHOD'] !== 'PUT') {
+        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+        if ($method !== 'POST' && $method !== 'PUT' && $method !== 'PATCH') {
             $this->json([
                 'success' => false,
                 'message' => 'Метод не разрешен'
@@ -153,7 +170,7 @@ class TagController extends Controller
         }
 
         // Проверяем права доступа
-        if ($tag['is_system'] || $tag['user_id'] != $this->userId) {
+        if ($tag['is_system'] || ($tag['user_id'] != $this->userId && !$tag['is_system'])) {
             $this->json([
                 'success' => false,
                 'message' => 'Нет прав для редактирования этого тега'
@@ -161,8 +178,9 @@ class TagController extends Controller
             return;
         }
 
+        // Получаем данные из запроса (поддерживает JSON и form-data)
         $name = trim($this->input('name', ''));
-        $color = $this->input('color', '');
+        $color = trim($this->input('color', ''));
 
         if (empty($name)) {
             $this->json([
@@ -172,20 +190,39 @@ class TagController extends Controller
             return;
         }
 
-        $success = $this->tagModel->updateTag($id, [
-            'name' => $name,
-            'color' => $color
-        ]);
+        if (strlen($name) > 50) {
+            $this->json([
+                'success' => false,
+                'message' => 'Название тега не должно превышать 50 символов'
+            ], 400);
+            return;
+        }
+
+        // Подготавливаем данные для обновления
+        $updateData = ['name' => $name];
+        if (!empty($color)) {
+            $updateData['color'] = $color;
+        }
+
+        $success = $this->tagModel->updateTag($id, $updateData);
 
         if (!$success) {
             $this->json([
                 'success' => false,
-                'message' => 'Ошибка при обновлении тега'
-            ], 500);
+                'message' => 'Ошибка при обновлении тега. Возможно, тег с таким названием уже существует'
+            ], 400);
             return;
         }
 
         $updatedTag = $this->tagModel->find($id);
+
+        if (!$updatedTag) {
+            $this->json([
+                'success' => false,
+                'message' => 'Тег не найден после обновления'
+            ], 500);
+            return;
+        }
 
         $this->json([
             'success' => true,

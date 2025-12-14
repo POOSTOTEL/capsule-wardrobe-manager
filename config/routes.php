@@ -39,11 +39,21 @@ $router->delete('/api/tags/item/{itemId}/{tagId}', 'TagController@detachFromItem
 $router->get('/tags', 'TagController@manage', 'tags.manage');
 
 // Защищенные маршруты (требующие аутентификации)
-// Добавим позже, когда будут контроллеры
-// $router->get('/items', 'ItemController@index', 'items.index');
-// $router->get('/items/create', 'ItemController@create', 'items.create');
-// $router->post('/items', 'ItemController@store');
-// $router->get('/items/{id}', 'ItemController@show', 'items.show');
+// Маршруты для вещей (Items)
+$router->get('/items', 'ItemController@index', 'items.index');
+$router->get('/items/create', 'ItemController@create', 'items.create');
+$router->post('/items', 'ItemController@store', 'items.store');
+$router->get('/items/{id}', 'ItemController@show', 'items.show');
+$router->get('/items/{id}/edit', 'ItemController@edit', 'items.edit');
+$router->post('/items/{id}', 'ItemController@update', 'items.update');
+$router->put('/items/{id}', 'ItemController@update');
+$router->patch('/items/{id}', 'ItemController@update');
+$router->post('/items/{id}/delete', 'ItemController@destroy', 'items.destroy');
+$router->delete('/items/{id}', 'ItemController@destroy');
+$router->delete('/api/items/{id}', 'ItemController@destroy');
+$router->get('/api/items', 'ItemController@index');
+$router->get('/api/items/{id}', 'ItemController@show');
+$router->get('/api/items/{id}/image', 'ItemController@getImage', 'items.image');
 
 // $router->get('/outfits', 'OutfitController@index', 'outfits.index');
 // $router->get('/outfits/create', 'OutfitController@create', 'outfits.create');

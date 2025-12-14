@@ -30,20 +30,45 @@ class Tag extends BaseModel
     public function createUserTag(int $userId, array $data): ?int
     {
         // Проверяем, существует ли уже такой тег у пользователя
-        $existing = $this->firstWhere('name', $data['name']);
-        if ($existing && $existing['user_id'] == $userId) {
-            return null; // Тег уже существует
+        // Учитываем уникальность по (user_id, name) согласно схеме БД
+        $sql = "SELECT * FROM {$this->table} 
+                WHERE user_id = :user_id AND LOWER(name) = LOWER(:name)
+                LIMIT 1";
+        
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([
+                'user_id' => $userId,
+                'name' => trim($data['name'])
+            ]);
+            $existing = $stmt->fetch(\PDO::FETCH_ASSOC);
+            
+            if ($existing) {
+                return null; // Тег уже существует у этого пользователя
+            }
+        } catch (\PDOException $e) {
+            throw new \RuntimeException("Database error: " . $e->getMessage());
         }
 
         $data['user_id'] = $userId;
         $data['is_system'] = false;
+        $data['name'] = trim($data['name']);
 
         // Если цвет не указан, генерируем случайный
         if (empty($data['color'])) {
             $data['color'] = $this->generateRandomColor();
         }
 
-        return $this->create($data);
+        try {
+            return $this->create($data);
+        } catch (\PDOException $e) {
+            // Если ошибка уникальности - тег уже существует
+            if (strpos($e->getMessage(), 'unique') !== false || 
+                strpos($e->getMessage(), 'duplicate') !== false) {
+                return null;
+            }
+            throw $e;
+        }
     }
 
     // Получить системные теги
@@ -115,7 +140,66 @@ class Tag extends BaseModel
     // Обновить тег
     public function updateTag(int $tagId, array $data): bool
     {
-        return $this->update($tagId, $data);
+        // Проверяем, не конфликтует ли новое имя с существующим тегом того же пользователя
+        if (isset($data['name'])) {
+            $tag = $this->find($tagId);
+            if (!$tag) {
+                return false;
+            }
+            
+            $userId = $tag['user_id'];
+            $newName = trim($data['name']);
+            
+            // Проверяем, не существует ли уже тег с таким именем у этого пользователя
+            // Для системных тегов user_id может быть NULL
+            if ($userId === null) {
+                $sql = "SELECT * FROM {$this->table} 
+                        WHERE user_id IS NULL 
+                        AND LOWER(name) = LOWER(:name)
+                        AND id != :id
+                        LIMIT 1";
+                $params = [
+                    'name' => $newName,
+                    'id' => $tagId
+                ];
+            } else {
+                $sql = "SELECT * FROM {$this->table} 
+                        WHERE user_id = :user_id 
+                        AND LOWER(name) = LOWER(:name)
+                        AND id != :id
+                        LIMIT 1";
+                $params = [
+                    'user_id' => $userId,
+                    'name' => $newName,
+                    'id' => $tagId
+                ];
+            }
+            
+            try {
+                $stmt = $this->db->prepare($sql);
+                $stmt->execute($params);
+                $existing = $stmt->fetch(\PDO::FETCH_ASSOC);
+                
+                if ($existing) {
+                    return false; // Тег с таким именем уже существует
+                }
+            } catch (\PDOException $e) {
+                throw new \RuntimeException("Database error: " . $e->getMessage());
+            }
+            
+            $data['name'] = $newName;
+        }
+        
+        try {
+            return $this->update($tagId, $data);
+        } catch (\PDOException $e) {
+            // Если ошибка уникальности - тег уже существует
+            if (strpos($e->getMessage(), 'unique') !== false || 
+                strpos($e->getMessage(), 'duplicate') !== false) {
+                return false;
+            }
+            throw $e;
+        }
     }
 
     // Удалить тег (только пользовательский)

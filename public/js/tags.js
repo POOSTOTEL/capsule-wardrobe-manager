@@ -98,16 +98,22 @@ let TagManager = (function() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
-                body: JSON.stringify({ name, color })
+                body: JSON.stringify({ 
+                    name: name.trim(), 
+                    color: color || '' 
+                })
             });
 
             const data = await response.json();
 
             if (data.success) {
                 // Добавляем новый тег в хранилище
-                tags.push(data.data);
-                showSuccess('Тег успешно создан');
+                if (data.data) {
+                    tags.push(data.data);
+                }
+                showSuccess(data.message || 'Тег успешно создан');
                 return data.data;
             } else {
                 throw new Error(data.message || 'Ошибка создания тега');
@@ -126,19 +132,23 @@ let TagManager = (function() {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
-                body: JSON.stringify({ name, color })
+                body: JSON.stringify({ 
+                    name: name.trim(), 
+                    color: color || '' 
+                })
             });
 
             const data = await response.json();
 
             if (data.success) {
                 // Обновляем тег в хранилище
-                const index = tags.findIndex(tag => tag.id === id);
-                if (index !== -1) {
+                const index = tags.findIndex(tag => tag.id == id);
+                if (index !== -1 && data.data) {
                     tags[index] = data.data;
                 }
-                showSuccess('Тег успешно обновлен');
+                showSuccess(data.message || 'Тег успешно обновлен');
                 return data.data;
             } else {
                 throw new Error(data.message || 'Ошибка обновления тега');
@@ -158,15 +168,18 @@ let TagManager = (function() {
 
         try {
             const response = await fetch(`${config.endpoints.destroy}/${id}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
             });
 
             const data = await response.json();
 
             if (data.success) {
                 // Удаляем тег из хранилища
-                tags = tags.filter(tag => tag.id !== id);
-                showSuccess('Тег успешно удален');
+                tags = tags.filter(tag => tag.id != id);
+                showSuccess(data.message || 'Тег успешно удален');
                 return true;
             } else {
                 throw new Error(data.message || 'Ошибка удаления тега');
@@ -225,14 +238,47 @@ let TagManager = (function() {
 
     // Вспомогательные функции для уведомлений
     function showSuccess(message) {
-        // Можно использовать существующую систему уведомлений или создать простую
         console.log('Success:', message);
-        alert(message); // Временное решение
+        // Пытаемся использовать Bootstrap toast, если доступен
+        if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
+            const toastElement = document.createElement('div');
+            toastElement.className = 'toast align-items-center text-white bg-success border-0';
+            toastElement.setAttribute('role', 'alert');
+            toastElement.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            document.body.appendChild(toastElement);
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+            toastElement.addEventListener('hidden.bs.toast', () => toastElement.remove());
+        } else {
+            alert(message);
+        }
     }
 
     function showError(message) {
         console.error('Error:', message);
-        alert('Ошибка: ' + message); // Временное решение
+        // Пытаемся использовать Bootstrap toast, если доступен
+        if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
+            const toastElement = document.createElement('div');
+            toastElement.className = 'toast align-items-center text-white bg-danger border-0';
+            toastElement.setAttribute('role', 'alert');
+            toastElement.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            document.body.appendChild(toastElement);
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+            toastElement.addEventListener('hidden.bs.toast', () => toastElement.remove());
+        } else {
+            alert('Ошибка: ' + message);
+        }
     }
 
     // Публичное API

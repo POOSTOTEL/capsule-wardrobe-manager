@@ -56,15 +56,30 @@ abstract class BaseModel
         // Фильтруем данные по fillable
         $filteredData = array_intersect_key($data, array_flip($this->fillable));
 
+        if (empty($filteredData)) {
+            throw new \RuntimeException("No fillable fields provided for insert");
+        }
+
         $columns = implode(', ', array_keys($filteredData));
         $placeholders = ':' . implode(', :', array_keys($filteredData));
 
-        $sql = "INSERT INTO {$this->table} ({$columns}) VALUES ({$placeholders})";
+        $sql = "INSERT INTO {$this->table} ({$columns}) VALUES ({$placeholders}) RETURNING {$this->primaryKey}";
 
         try {
             $stmt = $this->db->prepare($sql);
             $stmt->execute($filteredData);
-            return $this->db->lastInsertId();
+            
+            // Для PostgreSQL используем RETURNING, для других БД - lastInsertId
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($result && isset($result[$this->primaryKey])) {
+                return (int) $result[$this->primaryKey];
+            }
+            
+            // Fallback на lastInsertId для других БД
+            // В PostgreSQL нужно указать имя последовательности
+            $sequenceName = $this->table . '_' . $this->primaryKey . '_seq';
+            $lastId = $this->db->lastInsertId($sequenceName);
+            return $lastId ? (int) $lastId : 0;
         } catch (PDOException $e) {
             throw new \RuntimeException("Database error: " . $e->getMessage());
         }
@@ -76,6 +91,10 @@ abstract class BaseModel
         // Фильтруем данные по fillable
         $filteredData = array_intersect_key($data, array_flip($this->fillable));
 
+        if (empty($filteredData)) {
+            throw new \RuntimeException("No fillable fields provided for update");
+        }
+
         $setClause = implode(', ', array_map(
             fn($key) => "{$key} = :{$key}",
             array_keys($filteredData)
@@ -86,7 +105,10 @@ abstract class BaseModel
 
         try {
             $stmt = $this->db->prepare($sql);
-            return $stmt->execute($filteredData);
+            $result = $stmt->execute($filteredData);
+            
+            // Проверяем, были ли затронуты строки
+            return $result && $stmt->rowCount() > 0;
         } catch (PDOException $e) {
             throw new \RuntimeException("Database error: " . $e->getMessage());
         }
