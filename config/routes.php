@@ -17,6 +17,26 @@ $router->post('/register', 'AuthController@register');
 $router->get('/logout', 'AuthController@logout', 'logout');
 $router->get('/profile', 'AuthController@showProfile', 'profile');
 $router->post('/profile', 'AuthController@updateProfile');
+// Маршруты для таксономии (справочников)
+$router->get('/api/taxonomies', 'TaxonomyController@index', 'taxonomies.index');
+$router->get('/api/taxonomies/forms', 'TaxonomyController@forForms', 'taxonomies.forForms');
+$router->get('/api/taxonomies/categories', 'TaxonomyController@categories', 'taxonomies.categories');
+$router->get('/api/taxonomies/colors', 'TaxonomyController@colors', 'taxonomies.colors');
+$router->get('/api/taxonomies/seasons', 'TaxonomyController@seasons', 'taxonomies.seasons');
+// Маршруты для управления тегами
+$router->get('/api/tags', 'TagController@index', 'tags.index');
+$router->get('/api/tags/grouped', 'TagController@grouped', 'tags.grouped');
+$router->get('/api/tags/search', 'TagController@search', 'tags.search');
+$router->get('/api/tags/popular', 'TagController@popular', 'tags.popular');
+$router->post('/api/tags', 'TagController@store', 'tags.store');
+$router->put('/api/tags/{id}', 'TagController@update', 'tags.update');
+$router->delete('/api/tags/{id}', 'TagController@destroy', 'tags.destroy');
+$router->get('/api/tags/item/{id}', 'TagController@forItem', 'tags.forItem');
+$router->post('/api/tags/item/{id}/attach', 'TagController@attachToItem', 'tags.attach');
+$router->delete('/api/tags/item/{itemId}/{tagId}', 'TagController@detachFromItem', 'tags.detach');
+
+// Страница управления тегами
+$router->get('/tags', 'TagController@manage', 'tags.manage');
 
 // Защищенные маршруты (требующие аутентификации)
 // Добавим позже, когда будут контроллеры

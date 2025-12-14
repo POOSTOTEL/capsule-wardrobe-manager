@@ -4,239 +4,167 @@
 namespace App\Models;
 
 use App\Core\Database;
+use PDO;
+use PDOException;
 
 abstract class BaseModel
 {
-    protected static string $table;
-    protected static string $primaryKey = 'id';
-    protected array $attributes = [];
-    protected array $original = [];
-    protected bool $exists = false;
+    protected $table;
+    protected $primaryKey = 'id';
+    protected $db;
+    protected $fillable = [];
 
-    public function __construct(array $attributes = [])
+    public function __construct()
     {
-        $this->fill($attributes);
+        $this->db = Database::getInstance();
     }
 
-    // Заполнение атрибутов
-    public function fill(array $attributes): self
+    // Получить все записи
+    public function all(array $columns = ['*']): array
     {
-        foreach ($attributes as $key => $value) {
-            if (property_exists($this, $key) || in_array($key, $this->getFillable())) {
-                $this->attributes[$key] = $value;
-            }
-        }
-
-        return $this;
-    }
-
-    // Получение заполняемых полей
-    protected function getFillable(): array
-    {
-        return isset($this->fillable) ? $this->fillable : [];
-    }
-
-    // Магический метод get
-    public function __get(string $key)
-    {
-        if (array_key_exists($key, $this->attributes)) {
-            return $this->attributes[$key];
-        }
-
-        if (method_exists($this, $key)) {
-            return $this->$key();
-        }
-
-        return null;
-    }
-
-    // Магический метод set
-    public function __set(string $key, $value): void
-    {
-        if (in_array($key, $this->getFillable()) || property_exists($this, $key)) {
-            $this->attributes[$key] = $value;
-        }
-    }
-
-    // Получение записи по ID
-    public static function find(int $id): ?self
-    {
-        $table = static::$table;
-        $primaryKey = static::$primaryKey;
-
-        $data = Database::fetchOne(
-            "SELECT * FROM {$table} WHERE {$primaryKey} = :id",
-            ['id' => $id]
-        );
-
-        if ($data) {
-            $model = new static($data);
-            $model->exists = true;
-            $model->original = $data;
-            return $model;
-        }
-
-        return null;
-    }
-
-    // Получение всех записей
-    public static function all(array $columns = ['*']): array
-    {
-        $table = static::$table;
         $columns = implode(', ', $columns);
+        $sql = "SELECT {$columns} FROM {$this->table} ORDER BY id";
 
-        $data = Database::fetchAll("SELECT {$columns} FROM {$table}");
-
-        $models = [];
-        foreach ($data as $item) {
-            $model = new static($item);
-            $model->exists = true;
-            $model->original = $item;
-            $models[] = $model;
-        }
-
-        return $models;
-    }
-
-    // Поиск с условиями
-    public static function where(string $column, string $operator, $value = null): array
-    {
-        if (func_num_args() === 2) {
-            $value = $operator;
-            $operator = '=';
-        }
-
-        $table = static::$table;
-        $sql = "SELECT * FROM {$table} WHERE {$column} {$operator} :value";
-
-        $data = Database::fetchAll($sql, ['value' => $value]);
-
-        $models = [];
-        foreach ($data as $item) {
-            $model = new static($item);
-            $model->exists = true;
-            $model->original = $item;
-            $models[] = $model;
-        }
-
-        return $models;
-    }
-
-    // Получение первой записи
-    public static function first(): ?self
-    {
-        $table = static::$table;
-
-        $data = Database::fetchOne("SELECT * FROM {$table} LIMIT 1");
-
-        if ($data) {
-            $model = new static($data);
-            $model->exists = true;
-            $model->original = $data;
-            return $model;
-        }
-
-        return null;
-    }
-
-    // Создание новой записи
-    public function create(array $data): self
-    {
-        $table = static::$table;
-
-        $id = Database::insert($table, $data);
-
-        if ($id) {
-            $data[static::$primaryKey] = $id;
-            $this->fill($data);
-            $this->exists = true;
-            $this->original = $data;
-        }
-
-        return $this;
-    }
-
-    // Обновление записи
-    public function update(array $data): bool
-    {
-        if (!$this->exists) {
-            return false;
-        }
-
-        $table = static::$table;
-        $primaryKey = static::$primaryKey;
-
-        $affected = Database::update(
-            $table,
-            $data,
-            "{$primaryKey} = :id",
-            ['id' => $this->attributes[$primaryKey]]
-        );
-
-        if ($affected > 0) {
-            $this->fill($data);
-            return true;
-        }
-
-        return false;
-    }
-
-    // Сохранение (create или update)
-    public function save(): bool
-    {
-        if ($this->exists) {
-            $changes = array_diff_assoc($this->attributes, $this->original);
-            if (!empty($changes)) {
-                return $this->update($changes);
-            }
-            return true;
-        } else {
-            $id = Database::insert(static::$table, $this->attributes);
-            if ($id) {
-                $this->attributes[static::$primaryKey] = $id;
-                $this->exists = true;
-                $this->original = $this->attributes;
-                return true;
-            }
-            return false;
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new \RuntimeException("Database error: " . $e->getMessage());
         }
     }
 
-    // Удаление записи
-    public function delete(): bool
+    // Найти запись по ID
+    public function find(int $id, array $columns = ['*']): ?array
     {
-        if (!$this->exists) {
-            return false;
+        $columns = implode(', ', $columns);
+        $sql = "SELECT {$columns} FROM {$this->table} WHERE {$this->primaryKey} = :id LIMIT 1";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['id' => $id]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result ?: null;
+        } catch (PDOException $e) {
+            throw new \RuntimeException("Database error: " . $e->getMessage());
         }
-
-        $table = static::$table;
-        $primaryKey = static::$primaryKey;
-
-        $affected = Database::delete(
-            $table,
-            "{$primaryKey} = :id",
-            ['id' => $this->attributes[$primaryKey]]
-        );
-
-        if ($affected > 0) {
-            $this->exists = false;
-            return true;
-        }
-
-        return false;
     }
 
-    // Получение атрибутов как массива
-    public function toArray(): array
+    // Создать запись
+    public function create(array $data): int
     {
-        return $this->attributes;
+        // Фильтруем данные по fillable
+        $filteredData = array_intersect_key($data, array_flip($this->fillable));
+
+        $columns = implode(', ', array_keys($filteredData));
+        $placeholders = ':' . implode(', :', array_keys($filteredData));
+
+        $sql = "INSERT INTO {$this->table} ({$columns}) VALUES ({$placeholders})";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($filteredData);
+            return $this->db->lastInsertId();
+        } catch (PDOException $e) {
+            throw new \RuntimeException("Database error: " . $e->getMessage());
+        }
     }
 
-    // Счетчик записей
-    public static function count(): int
+    // Обновить запись
+    public function update(int $id, array $data): bool
     {
-        $table = static::$table;
-        $result = Database::fetchOne("SELECT COUNT(*) as count FROM {$table}");
-        return (int) ($result['count'] ?? 0);
+        // Фильтруем данные по fillable
+        $filteredData = array_intersect_key($data, array_flip($this->fillable));
+
+        $setClause = implode(', ', array_map(
+            fn($key) => "{$key} = :{$key}",
+            array_keys($filteredData)
+        ));
+
+        $sql = "UPDATE {$this->table} SET {$setClause} WHERE {$this->primaryKey} = :id";
+        $filteredData['id'] = $id;
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute($filteredData);
+        } catch (PDOException $e) {
+            throw new \RuntimeException("Database error: " . $e->getMessage());
+        }
+    }
+
+    // Удалить запись
+    public function delete(int $id): bool
+    {
+        $sql = "DELETE FROM {$this->table} WHERE {$this->primaryKey} = :id";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute(['id' => $id]);
+        } catch (PDOException $e) {
+            throw new \RuntimeException("Database error: " . $e->getMessage());
+        }
+    }
+
+    // Получить записи с условием WHERE
+    public function where(string $column, $value, string $operator = '='): array
+    {
+        $sql = "SELECT * FROM {$this->table} WHERE {$column} {$operator} :value";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['value' => $value]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new \RuntimeException("Database error: " . $e->getMessage());
+        }
+    }
+
+    // Получить первую запись с условием
+    public function firstWhere(string $column, $value, string $operator = '='): ?array
+    {
+        $results = $this->where($column, $value, $operator);
+        return $results[0] ?? null;
+    }
+
+    // Получить все записи с сортировкой
+    public function allOrdered(string $orderBy = 'id', string $direction = 'ASC'): array
+    {
+        $sql = "SELECT * FROM {$this->table} ORDER BY {$orderBy} {$direction}";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new \RuntimeException("Database error: " . $e->getMessage());
+        }
+    }
+
+    // Получить записи в виде массива для select (id => name)
+    public function getForSelect(string $valueField = 'name', string $keyField = 'id'): array
+    {
+        $items = $this->all();
+        $result = [];
+
+        foreach ($items as $item) {
+            $result[$item[$keyField]] = $item[$valueField];
+        }
+
+        return $result;
+    }
+
+    // Получить количество записей
+    public function count(): int
+    {
+        $sql = "SELECT COUNT(*) as count FROM {$this->table}";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (int) $result['count'];
+        } catch (PDOException $e) {
+            throw new \RuntimeException("Database error: " . $e->getMessage());
+        }
     }
 }
