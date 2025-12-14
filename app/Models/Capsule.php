@@ -1,5 +1,5 @@
 <?php
-// app/Models/Capsule.php
+
 
 namespace App\Models;
 
@@ -15,7 +15,7 @@ class Capsule extends BaseModel
         'user_id', 'name', 'description', 'season_id'
     ];
 
-    // Получить все капсулы пользователя с дополнительной информацией
+    
     public function getByUser(int $userId, array $filters = []): array
     {
         $sql = "SELECT c.*, 
@@ -30,7 +30,7 @@ class Capsule extends BaseModel
 
         $params = ['user_id' => $userId];
 
-        // Применяем фильтры
+        
         if (!empty($filters['season_id'])) {
             $sql .= " AND c.season_id = :season_id";
             $params['season_id'] = $filters['season_id'];
@@ -41,14 +41,14 @@ class Capsule extends BaseModel
             $params['search'] = '%' . $filters['search'] . '%';
         }
 
-        // Группировка для подсчета
+        
         $sql .= " GROUP BY c.id, s.name";
 
-        // Сортировка
+        
         $orderBy = $filters['order_by'] ?? 'created_at';
         $orderDir = strtoupper($filters['order_dir'] ?? 'DESC');
         
-        // Безопасная сортировка
+        
         $allowedOrderBy = ['created_at', 'updated_at', 'name'];
         if (in_array($orderBy, $allowedOrderBy)) {
             $sql .= " ORDER BY c.{$orderBy} {$orderDir}";
@@ -56,7 +56,7 @@ class Capsule extends BaseModel
             $sql .= " ORDER BY c.created_at {$orderDir}";
         }
 
-        // Пагинация
+        
         if (!empty($filters['limit'])) {
             $limit = (int) $filters['limit'];
             $offset = (int) ($filters['offset'] ?? 0);
@@ -68,7 +68,7 @@ class Capsule extends BaseModel
             $stmt->execute($params);
             $capsules = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            // Загружаем вещи и образы для каждой капсулы
+            
             foreach ($capsules as &$capsule) {
                 $capsule['items'] = $this->getItems($capsule['id']);
                 $capsule['outfits'] = $this->getOutfits($capsule['id']);
@@ -80,7 +80,7 @@ class Capsule extends BaseModel
         }
     }
 
-    // Получить капсулу с полной информацией
+    
     public function getWithDetails(int $id, int $userId = null): ?array
     {
         $sql = "SELECT c.*, 
@@ -105,7 +105,7 @@ class Capsule extends BaseModel
                 return null;
             }
 
-            // Загружаем вещи и образы
+            
             $capsule['items'] = $this->getItems($id);
             $capsule['outfits'] = $this->getOutfits($id);
 
@@ -115,7 +115,7 @@ class Capsule extends BaseModel
         }
     }
 
-    // Создать капсулу с вещами и образами
+    
     public function createCapsule(int $userId, array $data): int
     {
         Logger::debug('createCapsule: начало', [
@@ -123,7 +123,7 @@ class Capsule extends BaseModel
             'data_keys' => array_keys($data)
         ]);
 
-        // Подготавливаем данные для вставки
+        
         $capsuleData = [
             'user_id' => $userId,
             'name' => trim($data['name'] ?? ''),
@@ -131,18 +131,18 @@ class Capsule extends BaseModel
             'season_id' => !empty($data['season_id']) ? (int) $data['season_id'] : null
         ];
 
-        // Создаем капсулу
+        
         $capsuleId = $this->create($capsuleData);
 
         Logger::info('createCapsule: капсула создана в БД', ['capsule_id' => $capsuleId]);
 
-        // Привязываем вещи, если указаны
+        
         if (!empty($data['item_ids']) && is_array($data['item_ids'])) {
             Logger::debug('createCapsule: добавление вещей', ['item_ids' => $data['item_ids']]);
             $this->syncItems($capsuleId, $data['item_ids']);
         }
 
-        // Привязываем образы, если указаны
+        
         if (!empty($data['outfit_ids']) && is_array($data['outfit_ids'])) {
             Logger::debug('createCapsule: добавление образов', ['outfit_ids' => $data['outfit_ids']]);
             $this->syncOutfits($capsuleId, $data['outfit_ids']);
@@ -151,16 +151,16 @@ class Capsule extends BaseModel
         return $capsuleId;
     }
 
-    // Обновить капсулу
+    
     public function updateCapsule(int $id, int $userId, array $data): bool
     {
-        // Проверяем права доступа
+        
         $capsule = $this->find($id);
         if (!$capsule || $capsule['user_id'] != $userId) {
             return false;
         }
 
-        // Подготавливаем данные для обновления
+        
         $updateData = [];
 
         if (isset($data['name'])) {
@@ -175,18 +175,18 @@ class Capsule extends BaseModel
             $updateData['season_id'] = !empty($data['season_id']) ? (int) $data['season_id'] : null;
         }
 
-        // Обновляем капсулу
+        
         $success = false;
         if (!empty($updateData)) {
             $success = $this->update($id, $updateData);
         }
 
-        // Синхронизируем вещи, если указаны
+        
         if (isset($data['item_ids']) && is_array($data['item_ids'])) {
             $this->syncItems($id, $data['item_ids']);
         }
 
-        // Синхронизируем образы, если указаны
+        
         if (isset($data['outfit_ids']) && is_array($data['outfit_ids'])) {
             $this->syncOutfits($id, $data['outfit_ids']);
         }
@@ -194,7 +194,7 @@ class Capsule extends BaseModel
         return $success;
     }
 
-    // Удалить капсулу
+    
     public function deleteCapsule(int $id, int $userId): bool
     {
         $capsule = $this->find($id);
@@ -205,7 +205,7 @@ class Capsule extends BaseModel
         return $this->delete($id);
     }
 
-    // Получить вещи капсулы
+    
     public function getItems(int $capsuleId): array
     {
         $sql = "SELECT i.*, 
@@ -226,7 +226,7 @@ class Capsule extends BaseModel
             $stmt->execute(['capsule_id' => $capsuleId]);
             $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            // Удаляем бинарные данные изображения
+            
             foreach ($items as &$item) {
                 if (isset($item['image_data'])) {
                     unset($item['image_data']);
@@ -240,7 +240,7 @@ class Capsule extends BaseModel
         }
     }
 
-    // Получить образы капсулы
+    
     public function getOutfits(int $capsuleId): array
     {
         $sql = "SELECT o.*, 
@@ -256,7 +256,7 @@ class Capsule extends BaseModel
             $stmt->execute(['capsule_id' => $capsuleId]);
             $outfits = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            // Загружаем вещи для каждого образа
+            
             foreach ($outfits as &$outfit) {
                 $outfitModel = new Outfit();
                 $outfit['items'] = $outfitModel->getItems($outfit['id']);
@@ -268,15 +268,15 @@ class Capsule extends BaseModel
         }
     }
 
-    // Синхронизировать вещи капсулы
+    
     public function syncItems(int $capsuleId, array $itemIds): void
     {
-        // Удаляем все существующие связи
+        
         $sql = "DELETE FROM capsule_items WHERE capsule_id = :capsule_id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['capsule_id' => $capsuleId]);
 
-        // Добавляем новые связи
+        
         if (!empty($itemIds)) {
             $itemIds = array_filter(array_map('intval', $itemIds));
             if (!empty($itemIds)) {
@@ -297,15 +297,15 @@ class Capsule extends BaseModel
         }
     }
 
-    // Синхронизировать образы капсулы
+    
     public function syncOutfits(int $capsuleId, array $outfitIds): void
     {
-        // Удаляем все существующие связи
+        
         $sql = "DELETE FROM capsule_outfits WHERE capsule_id = :capsule_id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['capsule_id' => $capsuleId]);
 
-        // Добавляем новые связи
+        
         if (!empty($outfitIds)) {
             $outfitIds = array_filter(array_map('intval', $outfitIds));
             if (!empty($outfitIds)) {
@@ -326,10 +326,10 @@ class Capsule extends BaseModel
         }
     }
 
-    // Генерация комбинаций внутри капсулы
+    
     public function generateCombinations(int $capsuleId, int $userId): array
     {
-        // Проверяем права доступа
+        
         $capsule = $this->find($capsuleId);
         if (!$capsule || $capsule['user_id'] != $userId) {
             return [];
@@ -340,7 +340,7 @@ class Capsule extends BaseModel
 
         $combinations = [];
 
-        // Если есть готовые образы, добавляем их
+        
         foreach ($outfits as $outfit) {
             $combinations[] = [
                 'type' => 'outfit',
@@ -349,8 +349,8 @@ class Capsule extends BaseModel
             ];
         }
 
-        // Генерируем комбинации из отдельных вещей
-        // Группируем вещи по категориям
+        
+        
         $itemsByCategory = [];
         foreach ($items as $item) {
             $categoryId = $item['category_id'];
@@ -360,13 +360,13 @@ class Capsule extends BaseModel
             $itemsByCategory[$categoryId][] = $item;
         }
 
-        // Простая генерация комбинаций: верх + низ + обувь + аксессуар
-        $tops = $itemsByCategory[1] ?? []; // Верх
-        $bottoms = $itemsByCategory[2] ?? []; // Низ
-        $shoes = $itemsByCategory[4] ?? []; // Обувь
-        $accessories = $itemsByCategory[6] ?? []; // Аксессуар
+        
+        $tops = $itemsByCategory[1] ?? []; 
+        $bottoms = $itemsByCategory[2] ?? []; 
+        $shoes = $itemsByCategory[4] ?? []; 
+        $accessories = $itemsByCategory[6] ?? []; 
 
-        // Генерируем до 20 комбинаций
+        
         $maxCombinations = 20;
         $generated = 0;
 
@@ -381,12 +381,12 @@ class Capsule extends BaseModel
                     'items' => [$top, $bottom]
                 ];
 
-                // Добавляем обувь, если есть
+                
                 if (!empty($shoes)) {
                     $combination['items'][] = $shoes[array_rand($shoes)];
                 }
 
-                // Добавляем аксессуар, если есть
+                
                 if (!empty($accessories)) {
                     $combination['items'][] = $accessories[array_rand($accessories)];
                 }
@@ -399,28 +399,28 @@ class Capsule extends BaseModel
         return $combinations;
     }
 
-    // Генерация и сохранение образов из вещей капсулы
+    
     public function generateOutfits(int $capsuleId, int $userId, int $count): array
     {
-        // Проверяем права доступа
+        
         $capsule = $this->find($capsuleId);
         if (!$capsule || $capsule['user_id'] != $userId) {
             throw new \RuntimeException('Капсула не найдена или нет прав доступа');
         }
 
-        // Получаем вещи капсулы
+        
         $items = $this->getItems($capsuleId);
         
         if (empty($items)) {
             throw new \RuntimeException('В капсуле нет вещей для генерации образов');
         }
 
-        // Валидация количества
+        
         if ($count < 1 || $count > 50) {
             throw new \RuntimeException('Количество образов должно быть от 1 до 50');
         }
 
-        // Группируем вещи по категориям
+        
         $itemsByCategory = [];
         foreach ($items as $item) {
             $categoryId = $item['category_id'];
@@ -430,33 +430,33 @@ class Capsule extends BaseModel
             $itemsByCategory[$categoryId][] = $item;
         }
 
-        // Определяем категории для генерации
-        $tops = $itemsByCategory[1] ?? []; // Верх
-        $bottoms = $itemsByCategory[2] ?? []; // Низ
-        $dresses = $itemsByCategory[3] ?? []; // Платье/Костюм
-        $shoes = $itemsByCategory[4] ?? []; // Обувь
-        $outerwear = $itemsByCategory[5] ?? []; // Верхняя одежда
-        $accessories = $itemsByCategory[6] ?? []; // Аксессуар
+        
+        $tops = $itemsByCategory[1] ?? []; 
+        $bottoms = $itemsByCategory[2] ?? []; 
+        $dresses = $itemsByCategory[3] ?? []; 
+        $shoes = $itemsByCategory[4] ?? []; 
+        $outerwear = $itemsByCategory[5] ?? []; 
+        $accessories = $itemsByCategory[6] ?? []; 
 
         $outfitModel = new Outfit();
         $generatedOutfits = [];
         $generated = 0;
         $attempts = 0;
-        $maxAttempts = $count * 100; // Защита от бесконечного цикла
+        $maxAttempts = $count * 100; 
 
-        // Генерируем образы
+        
         while ($generated < $count && $attempts < $maxAttempts) {
             $attempts++;
             $outfitItems = [];
             $itemIds = [];
 
-            // Если есть платья, можем использовать их как цельный образ
+            
             if (!empty($dresses) && rand(0, 100) < 30) {
                 $dress = $dresses[array_rand($dresses)];
                 $outfitItems[] = $dress;
                 $itemIds[] = $dress['id'];
             } else {
-                // Генерируем комбинацию: верх + низ
+                
                 if (!empty($tops) && !empty($bottoms)) {
                     $top = $tops[array_rand($tops)];
                     $bottom = $bottoms[array_rand($bottoms)];
@@ -465,22 +465,22 @@ class Capsule extends BaseModel
                     $itemIds[] = $top['id'];
                     $itemIds[] = $bottom['id'];
                 } elseif (!empty($tops)) {
-                    // Только верх
+                    
                     $top = $tops[array_rand($tops)];
                     $outfitItems[] = $top;
                     $itemIds[] = $top['id'];
                 } elseif (!empty($bottoms)) {
-                    // Только низ
+                    
                     $bottom = $bottoms[array_rand($bottoms)];
                     $outfitItems[] = $bottom;
                     $itemIds[] = $bottom['id'];
                 } else {
-                    // Если нет верха и низа, пропускаем
+                    
                     continue;
                 }
             }
 
-            // Добавляем верхнюю одежду, если есть
+            
             if (!empty($outerwear) && rand(0, 100) < 40) {
                 $outer = $outerwear[array_rand($outerwear)];
                 if (!in_array($outer['id'], $itemIds)) {
@@ -489,7 +489,7 @@ class Capsule extends BaseModel
                 }
             }
 
-            // Добавляем обувь, если есть
+            
             if (!empty($shoes) && rand(0, 100) < 70) {
                 $shoe = $shoes[array_rand($shoes)];
                 if (!in_array($shoe['id'], $itemIds)) {
@@ -498,7 +498,7 @@ class Capsule extends BaseModel
                 }
             }
 
-            // Добавляем аксессуар, если есть
+            
             if (!empty($accessories) && rand(0, 100) < 50) {
                 $accessory = $accessories[array_rand($accessories)];
                 if (!in_array($accessory['id'], $itemIds)) {
@@ -507,21 +507,21 @@ class Capsule extends BaseModel
                 }
             }
 
-            // Проверяем, что у нас есть хотя бы одна вещь
+            
             if (empty($itemIds)) {
                 continue;
             }
 
-            // Создаем название образа
+            
             $outfitName = 'Образ из капсулы "' . $capsule['name'] . '" #' . ($generated + 1);
             
-            // Определяем сезон образа (берем из капсулы или из первой вещи)
+            
             $seasonId = $capsule['season_id'];
             if (!$seasonId && !empty($outfitItems)) {
                 $seasonId = $outfitItems[0]['season_id'] ?? null;
             }
 
-            // Создаем образ
+            
             try {
                 $outfitData = [
                     'name' => $outfitName,
@@ -532,7 +532,7 @@ class Capsule extends BaseModel
 
                 $outfitId = $outfitModel->createOutfit($userId, $outfitData);
 
-                // Связываем образ с капсулой
+                
                 $this->linkOutfitToCapsule($capsuleId, $outfitId);
 
                 $generatedOutfits[] = $outfitId;
@@ -548,34 +548,34 @@ class Capsule extends BaseModel
                     'capsule_id' => $capsuleId,
                     'error' => $e->getMessage()
                 ]);
-                // Продолжаем генерацию, даже если один образ не создался
+                
             }
         }
 
         return $generatedOutfits;
     }
 
-    // Связать образ с капсулой
+    
     public function linkOutfitToCapsule(int $capsuleId, int $outfitId): void
     {
-        // Проверяем, не связан ли уже образ с капсулой
+        
         $sql = "SELECT * FROM capsule_outfits 
                 WHERE capsule_id = :capsule_id AND outfit_id = :outfit_id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['capsule_id' => $capsuleId, 'outfit_id' => $outfitId]);
         
         if ($stmt->fetch()) {
-            return; // Уже связан
+            return; 
         }
 
-        // Создаем связь
+        
         $sql = "INSERT INTO capsule_outfits (capsule_id, outfit_id) 
                 VALUES (:capsule_id, :outfit_id)";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['capsule_id' => $capsuleId, 'outfit_id' => $outfitId]);
     }
 
-    // Получить статистику капсул пользователя
+    
     public function getStatistics(int $userId): array
     {
         $sql = "SELECT 
@@ -597,7 +597,7 @@ class Capsule extends BaseModel
         }
     }
 
-    // Получить общее количество капсул пользователя
+    
     public function getTotalCount(int $userId): int
     {
         $sql = "SELECT COUNT(*) as total FROM {$this->table} WHERE user_id = :user_id";

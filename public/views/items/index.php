@@ -1,13 +1,5 @@
 <?php
-/**
- * @var array $items
- * @var array $categories
- * @var array $colors
- * @var array $seasons
- * @var array $tags
- * @var array $filters
- * @var string $title
- */
+
 ?>
 
 <div class="page-header mb-4">
@@ -17,10 +9,10 @@
     </a>
 </div>
 
-    <!-- Фильтры -->
+    
     <?php include __DIR__ . '/_filters.php'; ?>
 
-    <!-- Список вещей -->
+    
     <?php if (empty($items)): ?>
         <div class="alert alert-info">
             <i class="fas fa-info-circle me-2"></i>
@@ -35,7 +27,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Инициализация фильтров
+    
     if (typeof ItemFilters !== 'undefined') {
         ItemFilters.init();
     }

@@ -1,5 +1,5 @@
 <?php
-// config/database.php
+
 
 return [
     'driver' => 'pgsql',

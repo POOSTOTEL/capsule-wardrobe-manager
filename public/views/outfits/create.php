@@ -1,12 +1,5 @@
 <?php
-/**
- * Конструктор образов (объединенный с созданием)
- * 
- * @var array $items
- * @var array $seasons
- * @var array $tags
- * @var string $title
- */
+
 ?>
 
 <div class="outfit-builder">
@@ -18,7 +11,7 @@
     </div>
 
     <div class="builder-container">
-        <!-- Левая панель: Список вещей -->
+        
         <div class="builder-sidebar">
             <div class="sidebar-header">
                 <h3>
@@ -67,9 +60,9 @@
             </div>
         </div>
 
-        <!-- Центральная панель: Конструктор образа -->
+        
         <div class="builder-main">
-            <!-- Форма с информацией об образе -->
+            
             <div class="builder-form-section">
                 <h3 class="mb-3">
                     <i class="fas fa-info-circle me-2"></i>Информация об образе
@@ -139,7 +132,7 @@
                 </div>
             </div>
 
-            <!-- Область сборки образа -->
+            
             <div class="outfit-assembly-section">
                 <h3 class="mb-3">
                     <i class="fas fa-magic me-2"></i>Соберите образ
@@ -227,7 +220,7 @@
 </div>
 
 <style>
-/* Дополнительные стили для конструктора */
+
 .outfit-builder {
     width: 100%;
     max-width: 100%;
@@ -271,7 +264,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let draggedElement = null;
     let draggedFromZone = null;
 
-    // Счетчик символов для описания
+    
     if (descriptionTextarea && descriptionCounter) {
         descriptionTextarea.addEventListener('input', function() {
             const remaining = 1000 - this.value.length;
@@ -283,7 +276,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const selectedItems = new Set();
     const selectedItemsDisplay = document.getElementById('selected-items-display');
 
-    // Поиск вещей
+    
     if (itemSearch) {
         itemSearch.addEventListener('input', function() {
             const query = this.value.toLowerCase();
@@ -300,7 +293,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Обработка выбора вещей через чекбоксы
+    
     function updateSelectedItems() {
         const checkboxes = document.querySelectorAll('.item-checkbox:checked');
         selectedItems.clear();
@@ -326,7 +319,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const itemCard = document.querySelector(`.builder-item-card[data-item-id="${itemId}"]`);
             if (itemCard) {
                 const clone = itemCard.cloneNode(true);
-                // Удаляем чекбокс из клона, так как он не нужен в области отображения
+                
                 const checkbox = clone.querySelector('.item-checkbox');
                 if (checkbox) {
                     checkbox.remove();
@@ -353,24 +346,24 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Обработчики для чекбоксов
+    
     document.querySelectorAll('.item-checkbox').forEach(checkbox => {
         checkbox.addEventListener('change', function(e) {
             e.stopPropagation();
             updateSelectedItems();
         });
         
-        // Предотвращаем клик на карточку при клике на чекбокс
+        
         checkbox.addEventListener('click', function(e) {
             e.stopPropagation();
         });
     });
     
-    // Также добавляем обработчики для динамически добавленных чекбоксов
+    
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             mutation.addedNodes.forEach(function(node) {
-                if (node.nodeType === 1) { // Element node
+                if (node.nodeType === 1) { 
                     const checkboxes = node.querySelectorAll ? node.querySelectorAll('.item-checkbox') : [];
                     checkboxes.forEach(checkbox => {
                         if (!checkbox.hasAttribute('data-listener-added')) {
@@ -394,10 +387,10 @@ document.addEventListener('DOMContentLoaded', function() {
         observer.observe(itemsList, { childList: true, subtree: true });
     }
 
-    // Старый код drag and drop (удаляем или оставляем для совместимости)
+    
     function initDragAndDrop() {
         document.querySelectorAll('.builder-item-card').forEach(item => {
-            // Удаляем старые обработчики, если они есть
+            
             const newItem = item.cloneNode(true);
             item.parentNode.replaceChild(newItem, item);
             
@@ -418,10 +411,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Инициализируем drag and drop
+    
     initDragAndDrop();
 
-    // Обработка зон
+    
     document.querySelectorAll('.assembly-zone').forEach(zone => {
         const zoneContent = zone.querySelector('.zone-content');
         const zoneEmpty = zone.querySelector('.zone-empty');
@@ -445,10 +438,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const itemId = e.dataTransfer.getData('text/plain');
             
             if (html && itemId) {
-                // Проверяем, не добавлена ли уже эта вещь в эту зону
+                
                 const existingItem = zoneContent.querySelector(`[data-item-id="${itemId}"]`);
                 if (existingItem) {
-                    return; // Вещь уже в зоне
+                    return; 
                 }
                 
                 const tempDiv = document.createElement('div');
@@ -456,14 +449,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 const droppedItem = tempDiv.querySelector('.builder-item-card');
                 
                 if (droppedItem) {
-                    // Создаем элемент для зоны
+                    
                     const zoneItem = droppedItem.cloneNode(true);
                     zoneItem.draggable = true;
                     zoneItem.classList.add('zone-item');
                     zoneItem.classList.remove('dragging');
                     zoneItem.style.opacity = '1';
                     
-                    // Добавляем кнопку удаления
+                    
                     const removeBtn = document.createElement('button');
                     removeBtn.className = 'zone-item-remove';
                     removeBtn.innerHTML = '<i class="fas fa-times"></i>';
@@ -478,7 +471,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     zoneItem.appendChild(removeBtn);
                     
-                    // Настраиваем drag для элемента в зоне
+                    
                     zoneItem.addEventListener('dragstart', function(e) {
                         this.classList.add('dragging');
                         this.style.opacity = '0.5';
@@ -494,7 +487,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     zoneContent.appendChild(zoneItem);
                     
-                    // Удаляем оригинал, если он был в другой зоне
+                    
                     if (draggedFromZone) {
                         const originalItem = draggedFromZone.querySelector(`[data-item-id="${itemId}"]`);
                         if (originalItem && originalItem.closest('.zone-content')) {
@@ -509,7 +502,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Разрешаем перетаскивание обратно в список (удаление из образа)
+    
     const itemsListForDrop = document.getElementById('items-list');
     if (itemsListForDrop) {
         itemsListForDrop.addEventListener('dragover', function(e) {
@@ -521,7 +514,7 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             const itemId = e.dataTransfer.getData('text/plain');
             if (itemId) {
-                // Удаляем вещь из всех зон
+                
                 document.querySelectorAll('.zone-content').forEach(zone => {
                     const item = zone.querySelector(`[data-item-id="${itemId}"]`);
                     if (item) {
@@ -534,7 +527,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Очистка образа
+    
     if (clearBtn) {
         clearBtn.addEventListener('click', function() {
             if (confirm('Вы уверены, что хотите очистить весь образ?')) {
@@ -547,16 +540,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Обновление счетчика вещей
+    
     function updateItemsCount() {
-        // Считаем выбранные вещи из чекбоксов
+        
         const count = selectedItems.size;
         if (itemsCountBadge) {
             itemsCountBadge.textContent = count + ' ' + (count === 1 ? 'вещь' : count < 5 ? 'вещи' : 'вещей');
         }
     }
 
-    // Обновление пустых зон
+    
     function updateZoneEmpty() {
         document.querySelectorAll('.assembly-zone').forEach(zone => {
             const zoneContent = zone.querySelector('.zone-content');
@@ -569,7 +562,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Сохранение образа
+    
     if (saveBtn) {
         saveBtn.addEventListener('click', function() {
             const name = document.getElementById('outfit-name').value.trim();
@@ -580,7 +573,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            // Собираем вещи из выбранных чекбоксов
+            
             const itemIds = Array.from(selectedItems);
 
             if (itemIds.length === 0) {
@@ -588,7 +581,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            // Подготавливаем данные
+            
             const formData = new FormData();
             formData.append('name', name);
             formData.append('description', document.getElementById('outfit-description').value);
@@ -596,24 +589,24 @@ document.addEventListener('DOMContentLoaded', function() {
             formData.append('formality_level', document.getElementById('outfit-formality').value);
             formData.append('is_favorite', document.getElementById('outfit-favorite').checked ? '1' : '0');
             
-            // Добавляем каждый item_id отдельно - PHP автоматически создаст массив из item_ids[]
+            
             itemIds.forEach(itemId => {
                 formData.append('item_ids[]', itemId.toString());
             });
 
-            // Добавляем теги
+            
             const tagInput = document.getElementById('tag-ids-input');
             if (tagInput && tagInput.value) {
                 const tagIds = tagInput.value.split(',').filter(id => id.trim() !== '');
                 if (tagIds.length > 0) {
-                    // Отправляем как массив
+                    
                     tagIds.forEach(tagId => {
                         formData.append('tag_ids[]', tagId.trim());
                     });
                 }
             }
 
-            // Отправляем запрос
+            
             saveBtn.disabled = true;
             saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Сохранение...';
 
@@ -667,16 +660,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Инициализация
+    
     updateItemsCount();
     updateZoneEmpty();
     
-    // Проверка инициализации (для отладки)
+    
     console.log('Outfit builder initialized');
     console.log('Items found:', document.querySelectorAll('.builder-item-card').length);
     console.log('Zones found:', document.querySelectorAll('.assembly-zone').length);
     
-    // Убеждаемся, что все карточки имеют правильный размер
+    
     setTimeout(() => {
         document.querySelectorAll('.builder-item-card').forEach(card => {
             if (card.offsetHeight !== 200) {

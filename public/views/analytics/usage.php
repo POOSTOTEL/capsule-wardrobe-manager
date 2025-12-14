@@ -1,11 +1,5 @@
 <?php
-/**
- * Индекс использования вещей
- * 
- * @var array $items
- * @var string $filter
- * @var string $title
- */
+
 ?>
 
 <div class="analytics-page">

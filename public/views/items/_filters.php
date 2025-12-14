@@ -1,13 +1,5 @@
 <?php
-/**
- * Компонент фильтров для списка вещей
- * 
- * @var array $categories
- * @var array $colors
- * @var array $seasons
- * @var array $tags
- * @var array $filters
- */
+
 ?>
 
 <div class="filters-panel mb-4">
@@ -22,7 +14,7 @@
 
     <form id="filters-form" method="GET" action="/items">
         <div class="filters-grid">
-            <!-- Поиск по названию -->
+            
             <div class="filter-group">
                 <label for="filter-search" class="form-label">Поиск</label>
                 <input type="text" 
@@ -33,7 +25,7 @@
                        value="<?= htmlspecialchars($filters['search'] ?? '') ?>">
             </div>
 
-            <!-- Категория -->
+            
             <div class="filter-group">
                 <label for="filter-category" class="form-label">Категория</label>
                 <select id="filter-category" name="category_id" class="form-control">
@@ -47,7 +39,7 @@
                 </select>
             </div>
 
-            <!-- Цвет -->
+            
             <div class="filter-group">
                 <label for="filter-color" class="form-label">Цвет</label>
                 <select id="filter-color" name="color_id" class="form-control">
@@ -61,7 +53,7 @@
                 </select>
             </div>
 
-            <!-- Сезон -->
+            
             <div class="filter-group">
                 <label for="filter-season" class="form-label">Сезон</label>
                 <select id="filter-season" name="season_id" class="form-control">
@@ -75,7 +67,7 @@
                 </select>
             </div>
 
-            <!-- Сортировка -->
+            
             <div class="filter-group">
                 <label for="filter-order" class="form-label">Сортировка</label>
                 <select id="filter-order" name="order_by" class="form-control">
@@ -102,7 +94,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Инициализация селектора тегов для фильтров
+    
     if (typeof TagManager !== 'undefined') {
         TagManager.init().then(() => {
             const container = document.getElementById('filter-tag-selector-container');
@@ -119,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
 
-                // Устанавливаем выбранные теги
+                
                 const initialTagIds = hiddenInput.value
                     .split(',')
                     .filter(id => id.trim() !== '')
@@ -132,7 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Сброс фильтров
+    
     const resetBtn = document.getElementById('reset-filters');
     if (resetBtn) {
         resetBtn.addEventListener('click', function() {

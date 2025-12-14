@@ -1,12 +1,5 @@
 <?php
-/**
- * Форма создания капсулы
- * 
- * @var array $items
- * @var array $outfits
- * @var array $seasons
- * @var string $title
- */
+
 ?>
 
 <div class="page-header mb-4">
@@ -19,7 +12,7 @@
 <form id="capsule-form" method="POST" action="/capsules">
         <div class="row">
             <div class="col-md-8">
-                <!-- Основная информация -->
+                
                 <div class="form-section mb-4">
                     <h3 class="section-title mb-3">
                         <i class="fas fa-info-circle me-2"></i>Основная информация
@@ -60,7 +53,7 @@
                     </div>
                 </div>
 
-                <!-- Вещи -->
+                
                 <div class="form-section mb-4">
                     <h3 class="section-title mb-3">
                         <i class="fas fa-tshirt me-2"></i>Вещи в капсуле
@@ -112,7 +105,7 @@
                     </div>
                 </div>
 
-                <!-- Образы -->
+                
                 <div class="form-section mb-4">
                     <h3 class="section-title mb-3">
                         <i class="fas fa-palette me-2"></i>Образы в капсуле
@@ -175,7 +168,7 @@
             </div>
 
             <div class="col-md-4">
-                <!-- Статистика -->
+                
                 <div class="form-section mb-4">
                     <h3 class="section-title mb-3">
                         <i class="fas fa-chart-bar me-2"></i>Статистика
@@ -194,7 +187,7 @@
             </div>
         </div>
 
-        <!-- Действия -->
+        
         <div class="form-actions mt-4">
             <button type="submit" class="btn btn-primary btn-lg">
                 <i class="fas fa-save me-2"></i>Создать капсулу
@@ -215,7 +208,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const itemSearch = document.getElementById('item-search');
     const outfitSearch = document.getElementById('outfit-search');
 
-    // Обновление счетчиков
+    
     function updateCounters() {
         const selectedItems = document.querySelectorAll('.item-checkbox:checked').length;
         const selectedOutfits = document.querySelectorAll('.outfit-checkbox:checked').length;
@@ -224,7 +217,7 @@ document.addEventListener('DOMContentLoaded', function() {
         selectedOutfitsCount.textContent = selectedOutfits;
     }
 
-    // Поиск вещей
+    
     if (itemSearch) {
         itemSearch.addEventListener('input', function() {
             const searchTerm = this.value.toLowerCase();
@@ -235,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Поиск образов
+    
     if (outfitSearch) {
         outfitSearch.addEventListener('input', function() {
             const searchTerm = this.value.toLowerCase();
@@ -246,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Обработка изменения чекбоксов
+    
     itemCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', updateCounters);
     });
@@ -255,16 +248,16 @@ document.addEventListener('DOMContentLoaded', function() {
         checkbox.addEventListener('change', updateCounters);
     });
 
-    // Инициализация счетчиков
+    
     updateCounters();
 
-    // Обработка отправки формы
+    
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
 
         const formData = new FormData(form);
         
-        // Проверка на наличие хотя бы одной вещи или образа
+        
         const selectedItems = document.querySelectorAll('.item-checkbox:checked').length;
         const selectedOutfits = document.querySelectorAll('.outfit-checkbox:checked').length;
 

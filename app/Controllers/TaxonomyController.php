@@ -1,5 +1,5 @@
 <?php
-// app/Controllers/TaxonomyController.php
+
 
 namespace App\Controllers;
 
@@ -14,7 +14,7 @@ class TaxonomyController extends Controller
         $this->taxonomyService = new TaxonomyService();
     }
 
-    // Получить все справочники (страница для просмотра)
+    
     public function index(): void
     {
         if ($this->isAjax()) {
@@ -30,7 +30,7 @@ class TaxonomyController extends Controller
         $this->render('taxonomies/index', $data);
     }
 
-    // Получить справочники для форм (API)
+    
     public function forForms(): void
     {
         $this->json([
@@ -39,7 +39,7 @@ class TaxonomyController extends Controller
         ]);
     }
 
-    // Получить категории (API)
+    
     public function categories(): void
     {
         $categoryModel = new \App\Models\Category();
@@ -51,7 +51,7 @@ class TaxonomyController extends Controller
         ]);
     }
 
-    // Получить цвета (API)
+    
     public function colors(): void
     {
         $colorModel = new \App\Models\Color();
@@ -63,7 +63,7 @@ class TaxonomyController extends Controller
         ]);
     }
 
-    // Получить сезоны (API)
+    
     public function seasons(): void
     {
         $seasonModel = new \App\Models\Season();

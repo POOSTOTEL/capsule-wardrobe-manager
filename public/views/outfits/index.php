@@ -1,13 +1,5 @@
 <?php
-/**
- * Список образов пользователя
- * 
- * @var array $outfits
- * @var array $seasons
- * @var array $tags
- * @var array $filters
- * @var string $title
- */
+
 ?>
 
 <div class="page-header mb-4">
@@ -19,7 +11,7 @@
     </div>
 </div>
 
-<!-- Фильтры -->
+
 <div class="filters-panel mb-4">
         <div class="filters-header mb-3">
             <h3 class="mb-0">
@@ -33,7 +25,7 @@
         <form id="filters-form" method="GET" action="/outfits">
             <input type="hidden" name="tag_ids" id="filter-tag-ids" value="<?= htmlspecialchars(implode(',', $filters['tag_ids'] ?? [])) ?>">
             <div class="filters-grid">
-                <!-- Поиск -->
+                
                 <div class="filter-group">
                     <label for="filter-search" class="form-label">Поиск</label>
                     <input type="text" 
@@ -44,7 +36,7 @@
                            value="<?= htmlspecialchars($filters['search'] ?? '') ?>">
                 </div>
 
-                <!-- Сезон -->
+                
                 <div class="filter-group">
                     <label for="filter-season" class="form-label">Сезон</label>
                     <select id="filter-season" name="season_id" class="form-control">
@@ -58,7 +50,7 @@
                     </select>
                 </div>
 
-                <!-- Уровень формальности -->
+                
                 <div class="filter-group">
                     <label for="filter-formality" class="form-label">Формальность</label>
                     <select id="filter-formality" name="formality_level" class="form-control">
@@ -71,7 +63,7 @@
                     </select>
                 </div>
 
-                <!-- Избранное -->
+                
                 <div class="filter-group">
                     <label for="filter-favorite" class="form-label">Избранное</label>
                     <select id="filter-favorite" name="is_favorite" class="form-control">
@@ -81,7 +73,7 @@
                     </select>
                 </div>
 
-                <!-- Сортировка -->
+                
                 <div class="filter-group">
                     <label for="filter-order" class="form-label">Сортировка</label>
                     <select id="filter-order" name="order_by" class="form-control">
@@ -106,7 +98,7 @@
         </form>
     </div>
 
-    <!-- Список образов -->
+    
     <?php if (empty($outfits)): ?>
         <div class="alert alert-info">
             <i class="fas fa-info-circle me-2"></i>
@@ -216,7 +208,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Обновление скрытого поля с тегами при изменении выбора
+    
     const filterTags = document.getElementById('filter-tags');
     const filterTagIds = document.getElementById('filter-tag-ids');
     if (filterTags && filterTagIds) {
@@ -226,7 +218,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Сброс фильтров
+    
     const resetBtn = document.getElementById('reset-filters');
     if (resetBtn) {
         resetBtn.addEventListener('click', function() {
@@ -234,7 +226,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Переключение избранного
+    
     document.querySelectorAll('.toggle-favorite-btn').forEach(btn => {
         btn.addEventListener('click', async function(e) {
             e.preventDefault();
@@ -278,7 +270,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Удаление образа
+    
     document.querySelectorAll('.delete-outfit-btn').forEach(btn => {
         btn.addEventListener('click', async function(e) {
             e.preventDefault();

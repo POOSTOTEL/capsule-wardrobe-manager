@@ -1,12 +1,5 @@
 <?php
-/**
- * Список капсул пользователя
- * 
- * @var array $capsules
- * @var array $seasons
- * @var array $filters
- * @var string $title
- */
+
 ?>
 
 <div class="page-header mb-4">
@@ -18,7 +11,7 @@
     </div>
 </div>
 
-<!-- Фильтры -->
+
 <div class="filters-panel mb-4">
         <div class="filters-header mb-3">
             <h3 class="mb-0">
@@ -31,7 +24,7 @@
 
         <form id="filters-form" method="GET" action="/capsules">
             <div class="filters-grid">
-                <!-- Поиск -->
+                
                 <div class="filter-group">
                     <label for="filter-search" class="form-label">Поиск</label>
                     <input type="text" 
@@ -42,7 +35,7 @@
                            value="<?= htmlspecialchars($filters['search'] ?? '') ?>">
                 </div>
 
-                <!-- Сезон -->
+                
                 <div class="filter-group">
                     <label for="filter-season" class="form-label">Сезон</label>
                     <select id="filter-season" name="season_id" class="form-control">
@@ -56,7 +49,7 @@
                     </select>
                 </div>
 
-                <!-- Сортировка -->
+                
                 <div class="filter-group">
                     <label for="filter-order" class="form-label">Сортировка</label>
                     <select id="filter-order" name="order_by" class="form-control">
@@ -81,7 +74,7 @@
         </form>
     </div>
 
-    <!-- Список капсул -->
+    
     <?php if (empty($capsules)): ?>
         <div class="alert alert-info">
             <i class="fas fa-info-circle me-2"></i>
@@ -160,7 +153,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Сброс фильтров
+    
     const resetBtn = document.getElementById('reset-filters');
     if (resetBtn) {
         resetBtn.addEventListener('click', function() {
@@ -168,7 +161,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Удаление капсулы
+    
     document.querySelectorAll('.delete-capsule-btn').forEach(btn => {
         btn.addEventListener('click', async function(e) {
             e.preventDefault();

@@ -1,10 +1,5 @@
 <?php
-/**
- * Детальная страница образа
- * 
- * @var array $outfit
- * @var string $title
- */
+
 ?>
 
 <div class="detail-header mb-4">
@@ -107,7 +102,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Переключение избранного
+    
     const toggleBtn = document.querySelector('.toggle-favorite-btn');
     if (toggleBtn) {
         toggleBtn.addEventListener('click', async function() {
@@ -134,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (text.textContent) {
                             text.textContent = 'В избранном';
                         }
-                        // Добавляем звездочку в заголовок
+                        
                         const header = document.querySelector('.detail-header h1');
                         if (header && !header.querySelector('.fa-star')) {
                             header.innerHTML += ' <i class="fas fa-star text-warning ms-2"></i>';
@@ -146,7 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (text.textContent) {
                             text.textContent = 'В избранное';
                         }
-                        // Убираем звездочку из заголовка
+                        
                         const starIcon = document.querySelector('.detail-header h1 .fa-star');
                         if (starIcon) starIcon.remove();
                     }

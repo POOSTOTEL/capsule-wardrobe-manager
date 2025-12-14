@@ -1,15 +1,15 @@
 <?php
-// config/routes.php
+
 
 use App\Core\Router;
 use App\Middleware\AuthMiddleware;
 
 $router = new Router();
 
-// Главная страница
+
 $router->get('/', 'HomeController@index', 'home');
 
-// Маршруты аутентификации
+
 $router->get('/login', 'AuthController@showLogin', 'login');
 $router->post('/login', 'AuthController@login');
 $router->get('/register', 'AuthController@showRegister', 'register');
@@ -17,13 +17,13 @@ $router->post('/register', 'AuthController@register');
 $router->get('/logout', 'AuthController@logout', 'logout');
 $router->get('/profile', 'AuthController@showProfile', 'profile');
 $router->post('/profile', 'AuthController@updateProfile');
-// Маршруты для таксономии (справочников)
+
 $router->get('/api/taxonomies', 'TaxonomyController@index', 'taxonomies.index');
 $router->get('/api/taxonomies/forms', 'TaxonomyController@forForms', 'taxonomies.forForms');
 $router->get('/api/taxonomies/categories', 'TaxonomyController@categories', 'taxonomies.categories');
 $router->get('/api/taxonomies/colors', 'TaxonomyController@colors', 'taxonomies.colors');
 $router->get('/api/taxonomies/seasons', 'TaxonomyController@seasons', 'taxonomies.seasons');
-// Маршруты для управления тегами
+
 $router->get('/api/tags', 'TagController@index', 'tags.index');
 $router->get('/api/tags/grouped', 'TagController@grouped', 'tags.grouped');
 $router->get('/api/tags/search', 'TagController@search', 'tags.search');
@@ -40,11 +40,11 @@ $router->delete('/api/tags/item/{itemId}/{tagId}', 'TagController@detachFromItem
 $router->post('/api/tags/outfit/{id}/attach', 'TagController@attachToOutfit', 'tags.attachOutfit');
 $router->delete('/api/tags/outfit/{outfitId}/{tagId}', 'TagController@detachFromOutfit', 'tags.detachOutfit');
 
-// Страница управления тегами
+
 $router->get('/tags', 'TagController@manage', 'tags.manage');
 
-// Защищенные маршруты (требующие аутентификации)
-// Маршруты для вещей (Items)
+
+
 $router->get('/items', 'ItemController@index', 'items.index');
 $router->get('/items/create', 'ItemController@create', 'items.create');
 $router->post('/items', 'ItemController@store', 'items.store');
@@ -60,7 +60,7 @@ $router->get('/api/items', 'ItemController@index');
 $router->get('/api/items/{id}', 'ItemController@show');
 $router->get('/api/items/{id}/image', 'ItemController@getImage', 'items.image');
 
-// Маршруты для образов (Outfits)
+
 $router->get('/outfits', 'OutfitController@index', 'outfits.index');
 $router->get('/outfits/create', 'OutfitController@create', 'outfits.create');
 $router->get('/outfits/builder', 'OutfitController@builder', 'outfits.builder');
@@ -83,7 +83,7 @@ $router->post('/api/capsules/{id}/save-outfit', 'OutfitController@saveGenerated'
 $router->get('/api/outfits', 'OutfitController@index');
 $router->get('/api/outfits/{id}', 'OutfitController@show');
 
-// Маршруты для капсул (Capsules)
+
 $router->get('/capsules', 'CapsuleController@index', 'capsules.index');
 $router->get('/capsules/create', 'CapsuleController@create', 'capsules.create');
 $router->post('/capsules', 'CapsuleController@store', 'capsules.store');
@@ -100,7 +100,7 @@ $router->post('/capsules/{id}/generate-outfits', 'CapsuleController@generateOutf
 $router->get('/api/capsules', 'CapsuleController@index');
 $router->get('/api/capsules/{id}', 'CapsuleController@show');
 
-// Маршруты для аналитики (Analytics)
+
 $router->get('/analytics', 'AnalyticsController@index', 'analytics.index');
 $router->get('/analytics/categories', 'AnalyticsController@categories', 'analytics.categories');
 $router->get('/analytics/colors', 'AnalyticsController@colors', 'analytics.colors');
@@ -112,12 +112,12 @@ $router->get('/api/analytics/colors', 'AnalyticsController@colors');
 $router->get('/api/analytics/usage', 'AnalyticsController@usage');
 $router->get('/api/analytics/compatibility', 'AnalyticsController@compatibility');
 
-// Диагностика
+
 $router->get('/diagnostic', function() {
     require dirname(__DIR__) . '/public/setup.php';
 }, 'diagnostic');
 
-// Обработка ошибок
+
 $router->notFound(function() {
     http_response_code(404);
 
@@ -144,7 +144,7 @@ $router->error(function($exception) {
             <p class="lead">Внутренняя ошибка сервера</p>'
     ];
 
-    // Получаем конфиг приложения для проверки debug режима
+    
     $configPath = dirname(__DIR__) . '/config/app.php';
     $appConfig = file_exists($configPath) ? require $configPath : ['debug' => true];
 

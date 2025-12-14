@@ -1,11 +1,5 @@
 <?php
-/**
- * Карта сочетаемости вещей
- * 
- * @var array $compatibility
- * @var int $limit
- * @var string $title
- */
+
 ?>
 
 <div class="analytics-page">

@@ -1,10 +1,5 @@
 <?php
-/**
- * Распределение по цветам
- * 
- * @var array $color_distribution
- * @var string $title
- */
+
 ?>
 
 <div class="analytics-page">

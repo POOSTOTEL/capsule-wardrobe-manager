@@ -1,5 +1,5 @@
 <?php
-// app/Controllers/ItemController.php
+
 
 namespace App\Controllers;
 
@@ -18,7 +18,7 @@ class ItemController extends Controller
 
     public function __construct()
     {
-        // Проверяем аутентификацию
+        
         $authMiddleware = new AuthMiddleware();
         if (!$authMiddleware->handle()) {
             if ($this->isAjax()) {
@@ -37,10 +37,10 @@ class ItemController extends Controller
         $this->userId = $_SESSION['user_id'] ?? null;
     }
 
-    // Список всех вещей пользователя
+    
     public function index(): void
     {
-        // Получаем фильтры из запроса
+        
         $filters = [
             'category_id' => $this->input('category_id') ? (int) $this->input('category_id') : null,
             'color_id' => $this->input('color_id') ? (int) $this->input('color_id') : null,
@@ -53,7 +53,7 @@ class ItemController extends Controller
             'offset' => $this->input('offset', 0)
         ];
 
-        // Удаляем пустые фильтры
+        
         $filters = array_filter($filters, function($value) {
             return $value !== '' && $value !== null && $value !== [] && $value !== 0;
         });
@@ -61,14 +61,14 @@ class ItemController extends Controller
         if ($this->isAjax()) {
             $items = $this->itemModel->getByUser($this->userId, $filters);
             
-            // Удаляем бинарные данные изображений из ответа для всех вещей
+            
             foreach ($items as &$item) {
                 if (isset($item['image_data'])) {
                     unset($item['image_data']);
                     $item['image_url'] = "/api/items/{$item['id']}/image";
                 }
             }
-            unset($item); // Сбрасываем ссылку
+            unset($item); 
             
             $this->json([
                 'success' => true,
@@ -78,7 +78,7 @@ class ItemController extends Controller
             return;
         }
 
-        // Загружаем справочники для фильтров
+        
         $categoryModel = new Category();
         $colorModel = new Color();
         $seasonModel = new Season();
@@ -98,7 +98,7 @@ class ItemController extends Controller
         $this->render('items/index', $data);
     }
 
-    // Показать детальную информацию о вещи
+    
     public function show(int $id): void
     {
         $item = $this->itemModel->getWithDetails($id, $this->userId);
@@ -110,7 +110,7 @@ class ItemController extends Controller
         }
 
         if ($this->isAjax()) {
-            // Удаляем бинарные данные изображения из ответа
+            
             if ($item && isset($item['image_data'])) {
                 unset($item['image_data']);
                 $item['image_url'] = "/api/items/{$id}/image";
@@ -132,7 +132,7 @@ class ItemController extends Controller
         $this->render('items/show', $data);
     }
 
-    // Форма создания новой вещи
+    
     public function create(): void
     {
         $categoryModel = new Category();
@@ -152,7 +152,7 @@ class ItemController extends Controller
         $this->render('items/create', $data);
     }
 
-    // Сохранить новую вещь
+    
     public function store(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -160,7 +160,7 @@ class ItemController extends Controller
             return;
         }
 
-        // Валидация
+        
         $errors = $this->validateItemData($this->input());
 
         if (!empty($errors)) {
@@ -178,7 +178,7 @@ class ItemController extends Controller
             return;
         }
 
-        // Проверяем загрузку изображения
+        
         $imageFile = $this->file('image');
         if (!$imageFile || $imageFile['error'] !== UPLOAD_ERR_OK) {
             $message = 'Ошибка загрузки изображения';
@@ -191,15 +191,15 @@ class ItemController extends Controller
             return;
         }
 
-        // Валидация изображения
+        
         $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
         
-        // Определяем MIME тип
+        
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
         $mimeType = finfo_file($finfo, $imageFile['tmp_name']);
         finfo_close($finfo);
         
-        // Fallback на mime_content_type если finfo недоступен
+        
         if (!$mimeType) {
             $mimeType = mime_content_type($imageFile['tmp_name']);
         }
@@ -215,7 +215,7 @@ class ItemController extends Controller
             return;
         }
 
-        // Подготавливаем данные
+        
         $data = [
             'name' => trim($this->input('name')),
             'category_id' => (int) $this->input('category_id'),
@@ -225,7 +225,7 @@ class ItemController extends Controller
             'tag_ids' => $this->input('tags') ? explode(',', $this->input('tags')) : []
         ];
 
-        // Логируем начало создания вещи
+        
         Logger::info('Начало создания вещи', [
             'user_id' => $this->userId,
             'data' => array_merge($data, ['tag_ids_count' => count($data['tag_ids'])]),
@@ -242,8 +242,8 @@ class ItemController extends Controller
             ]);
 
             if ($this->isAjax()) {
-                // Упрощенный ответ - только ID и сообщение
-                // Это предотвращает проблемы с сериализацией больших объектов
+                
+                
                 $this->success([
                     'id' => $itemId,
                     'redirect_url' => '/items'
@@ -254,7 +254,7 @@ class ItemController extends Controller
             $this->setFlash('success', 'Вещь успешно добавлена');
             $this->redirect('/items');
         } catch (\Exception $e) {
-            // Детальное логирование ошибки
+            
             Logger::error('Ошибка при создании вещи', [
                 'user_id' => $this->userId,
                 'message' => $e->getMessage(),
@@ -264,11 +264,11 @@ class ItemController extends Controller
                 'data' => $data
             ]);
 
-            // Упрощенное сообщение об ошибке для пользователя
+            
             $message = 'Ошибка при создании вещи. Попробуйте еще раз.';
             
             if ($this->isAjax()) {
-                // Всегда возвращаем JSON для AJAX запросов
+                
                 $this->error($message, 500);
                 return;
             }
@@ -278,7 +278,7 @@ class ItemController extends Controller
         }
     }
 
-    // Форма редактирования вещи
+    
     public function edit(int $id): void
     {
         $item = $this->itemModel->getWithDetails($id, $this->userId);
@@ -308,7 +308,7 @@ class ItemController extends Controller
         $this->render('items/edit', $data);
     }
 
-    // Обновить вещь
+    
     public function update(int $id): void
     {
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -323,7 +323,7 @@ class ItemController extends Controller
             return;
         }
 
-        // Валидация
+        
         $inputData = $this->input();
         $errors = $this->validateItemData($inputData, $id);
 
@@ -342,7 +342,7 @@ class ItemController extends Controller
             return;
         }
 
-        // Подготавливаем данные
+        
         $data = [
             'name' => trim($this->input('name')),
             'category_id' => (int) $this->input('category_id'),
@@ -352,19 +352,19 @@ class ItemController extends Controller
             'tag_ids' => $this->input('tags') ? explode(',', $this->input('tags')) : []
         ];
 
-        // Обрабатываем новое изображение, если загружено
+        
         $imageFile = $this->file('image');
         $imagePath = null;
 
         if ($imageFile && $imageFile['error'] === UPLOAD_ERR_OK) {
             $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
             
-            // Определяем MIME тип
+            
             $finfo = finfo_open(FILEINFO_MIME_TYPE);
             $mimeType = finfo_file($finfo, $imageFile['tmp_name']);
             finfo_close($finfo);
             
-            // Fallback на mime_content_type если finfo недоступен
+            
             if (!$mimeType) {
                 $mimeType = mime_content_type($imageFile['tmp_name']);
             }
@@ -392,7 +392,7 @@ class ItemController extends Controller
             if ($this->isAjax()) {
                 $item = $this->itemModel->getWithDetails($id, $this->userId);
                 
-                // Удаляем бинарные данные изображения из ответа
+                
                 if ($item && isset($item['image_data'])) {
                     unset($item['image_data']);
                     $item['image_url'] = "/api/items/{$id}/image";
@@ -415,7 +415,7 @@ class ItemController extends Controller
         }
     }
 
-    // Удалить вещь
+    
     public function destroy(int $id): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $_SERVER['REQUEST_METHOD'] !== 'DELETE') {
@@ -439,12 +439,12 @@ class ItemController extends Controller
         $this->redirect('/items');
     }
 
-    // Получить изображение вещи (API endpoint)
+    
     public function getImage(int $id): void
     {
         try {
-            // Используем SQL функцию encode для получения BYTEA в hex-формате
-            // Это гарантирует правильную обработку бинарных данных
+            
+            
             $sql = "SELECT encode(image_data, 'hex') as image_data_hex, 
                            image_mime_type, 
                            user_id 
@@ -461,10 +461,10 @@ class ItemController extends Controller
                 exit();
             }
 
-            // Конвертируем hex-строку в бинарные данные
+            
             $imageData = hex2bin($item['image_data_hex']);
             
-            // Проверяем, что данные не пустые после обработки
+            
             if (empty($imageData)) {
                 Logger::error('getImage: пустые данные после обработки', [
                     'item_id' => $id,
@@ -475,7 +475,7 @@ class ItemController extends Controller
                 exit();
             }
 
-            // Устанавливаем заголовки
+            
             header('Content-Type: ' . ($item['image_mime_type'] ?? 'image/jpeg'));
             header('Content-Length: ' . strlen($imageData));
             header('Cache-Control: public, max-age=31536000');
@@ -495,19 +495,19 @@ class ItemController extends Controller
         }
     }
 
-    // Валидация данных вещи
+    
     private function validateItemData(array $data, int $itemId = null): array
     {
         $errors = [];
 
-        // Название
+        
         if (empty($data['name'])) {
             $errors['name'][] = 'Название вещи обязательно для заполнения';
         } elseif (strlen($data['name']) > 200) {
             $errors['name'][] = 'Название не должно превышать 200 символов';
         }
 
-        // Категория
+        
         if (empty($data['category_id'])) {
             $errors['category_id'][] = 'Категория обязательна для выбора';
         } else {
@@ -518,7 +518,7 @@ class ItemController extends Controller
             }
         }
 
-        // Цвет (опционально)
+        
         if (!empty($data['color_id'])) {
             $colorModel = new Color();
             $color = $colorModel->find((int) $data['color_id']);
@@ -527,7 +527,7 @@ class ItemController extends Controller
             }
         }
 
-        // Сезон (опционально)
+        
         if (!empty($data['season_id'])) {
             $seasonModel = new Season();
             $season = $seasonModel->find((int) $data['season_id']);
@@ -536,7 +536,7 @@ class ItemController extends Controller
             }
         }
 
-        // Заметки (опционально)
+        
         if (!empty($data['notes']) && strlen($data['notes']) > 1000) {
             $errors['notes'][] = 'Заметки не должны превышать 1000 символов';
         }

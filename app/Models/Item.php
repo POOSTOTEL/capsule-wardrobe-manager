@@ -1,5 +1,5 @@
 <?php
-// app/Models/Item.php
+
 
 namespace App\Models;
 
@@ -16,7 +16,7 @@ class Item extends BaseModel
         'image_data', 'image_mime_type', 'notes', 'usage_count'
     ];
 
-    // Получить все вещи пользователя с дополнительной информацией
+    
     public function getByUser(int $userId, array $filters = []): array
     {
         $sql = "SELECT i.*, 
@@ -32,7 +32,7 @@ class Item extends BaseModel
 
         $params = ['user_id' => $userId];
 
-        // Применяем фильтры
+        
         if (!empty($filters['category_id'])) {
             $sql .= " AND i.category_id = :category_id";
             $params['category_id'] = $filters['category_id'];
@@ -53,7 +53,7 @@ class Item extends BaseModel
             $params['search'] = '%' . $filters['search'] . '%';
         }
 
-        // Фильтр по тегам
+        
         if (!empty($filters['tag_ids']) && is_array($filters['tag_ids'])) {
             $tagIds = array_filter(array_map('intval', $filters['tag_ids']));
             if (!empty($tagIds)) {
@@ -68,11 +68,11 @@ class Item extends BaseModel
             }
         }
 
-        // Сортировка
+        
         $orderBy = $filters['order_by'] ?? 'created_at';
         $orderDir = strtoupper($filters['order_dir'] ?? 'DESC');
         
-        // Безопасная сортировка
+        
         $allowedOrderBy = ['created_at', 'updated_at', 'name', 'usage_count', 'category_id'];
         if (in_array($orderBy, $allowedOrderBy)) {
             $sql .= " ORDER BY i.{$orderBy} {$orderDir}";
@@ -80,7 +80,7 @@ class Item extends BaseModel
             $sql .= " ORDER BY i.created_at {$orderDir}";
         }
 
-        // Пагинация
+        
         if (!empty($filters['limit'])) {
             $limit = (int) $filters['limit'];
             $offset = (int) ($filters['offset'] ?? 0);
@@ -92,7 +92,7 @@ class Item extends BaseModel
             $stmt->execute($params);
             $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            // Загружаем теги для каждой вещи
+            
             foreach ($items as &$item) {
                 $item['tags'] = $this->getTags($item['id']);
             }
@@ -103,7 +103,7 @@ class Item extends BaseModel
         }
     }
 
-    // Получить вещь с полной информацией
+    
     public function getWithDetails(int $id, int $userId = null): ?array
     {
         $sql = "SELECT i.*, 
@@ -134,7 +134,7 @@ class Item extends BaseModel
                 return null;
             }
 
-            // Загружаем теги
+            
             $item['tags'] = $this->getTags($id);
 
             return $item;
@@ -143,7 +143,7 @@ class Item extends BaseModel
         }
     }
 
-    // Создать вещь с изображением
+    
     public function createWithImage(int $userId, array $data, string $imagePath = null): int
     {
         Logger::debug('createWithImage: начало', [
@@ -152,33 +152,33 @@ class Item extends BaseModel
             'data_keys' => array_keys($data)
         ]);
 
-        // Обрабатываем изображение
+        
         if ($imagePath && file_exists($imagePath)) {
             Logger::debug('createWithImage: чтение файла', ['path' => $imagePath, 'size' => filesize($imagePath)]);
             
             $imageData = file_get_contents($imagePath);
             
-            // Определяем MIME тип
+            
             $finfo = finfo_open(FILEINFO_MIME_TYPE);
             $mimeType = finfo_file($finfo, $imagePath);
             finfo_close($finfo);
             
-            // Fallback на mime_content_type если finfo недоступен
+            
             if (!$mimeType) {
                 $mimeType = mime_content_type($imagePath);
             }
 
             Logger::debug('createWithImage: MIME тип определен', ['mime_type' => $mimeType]);
 
-            // Валидация MIME типа
+            
             $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
             if (!in_array($mimeType, $allowedTypes)) {
                 Logger::error('createWithImage: неподдерживаемый тип', ['mime_type' => $mimeType]);
                 throw new \RuntimeException("Неподдерживаемый тип изображения: {$mimeType}");
             }
 
-            // Сжимаем изображение, если оно слишком большое
-            $maxSize = 2 * 1024 * 1024; // 2MB
+            
+            $maxSize = 2 * 1024 * 1024; 
             $originalSize = strlen($imageData);
             if ($originalSize > $maxSize) {
                 Logger::info('createWithImage: сжатие изображения', [
@@ -189,7 +189,7 @@ class Item extends BaseModel
                 Logger::info('createWithImage: изображение сжато', ['new_size' => strlen($imageData)]);
             }
 
-            // Сохраняем бинарные данные как есть (будем обрабатывать отдельно)
+            
             $data['image_data'] = $imageData;
             $data['image_mime_type'] = $mimeType;
             
@@ -210,12 +210,12 @@ class Item extends BaseModel
             'has_image_data' => isset($data['image_data'])
         ]);
 
-        // Создаем вещь с использованием специального метода для BYTEA
+        
         $itemId = $this->createWithBinaryData($data);
 
         Logger::info('createWithImage: вещь создана в БД', ['item_id' => $itemId]);
 
-        // Привязываем теги, если указаны
+        
         if (!empty($data['tag_ids']) && is_array($data['tag_ids'])) {
             Logger::debug('createWithImage: синхронизация тегов', ['tag_ids' => $data['tag_ids']]);
             $this->syncTags($itemId, $data['tag_ids']);
@@ -224,25 +224,25 @@ class Item extends BaseModel
         return $itemId;
     }
 
-    // Обновить вещь
+    
     public function updateItem(int $id, int $userId, array $data, string $imagePath = null): bool
     {
-        // Проверяем права доступа
+        
         $item = $this->find($id);
         if (!$item || $item['user_id'] != $userId) {
             return false;
         }
 
-        // Обрабатываем новое изображение, если загружено
+        
         if ($imagePath && file_exists($imagePath)) {
             $imageData = file_get_contents($imagePath);
             
-            // Определяем MIME тип
+            
             $finfo = finfo_open(FILEINFO_MIME_TYPE);
             $mimeType = finfo_file($finfo, $imagePath);
             finfo_close($finfo);
             
-            // Fallback на mime_content_type если finfo недоступен
+            
             if (!$mimeType) {
                 $mimeType = mime_content_type($imagePath);
             }
@@ -252,20 +252,20 @@ class Item extends BaseModel
                 throw new \RuntimeException("Неподдерживаемый тип изображения: {$mimeType}");
             }
 
-            $maxSize = 2 * 1024 * 1024; // 2MB
+            $maxSize = 2 * 1024 * 1024; 
             if (strlen($imageData) > $maxSize) {
                 $imageData = $this->compressImage($imageData, $mimeType);
             }
 
-            // Сохраняем бинарные данные как есть (будем обрабатывать отдельно)
+            
             $data['image_data'] = $imageData;
             $data['image_mime_type'] = $mimeType;
         }
 
-        // Обновляем вещь с использованием специального метода для BYTEA
+        
         $success = $this->updateWithBinaryData($id, $data);
 
-        // Синхронизируем теги
+        
         if (isset($data['tag_ids']) && is_array($data['tag_ids'])) {
             $this->syncTags($id, $data['tag_ids']);
         }
@@ -273,7 +273,7 @@ class Item extends BaseModel
         return $success;
     }
 
-    // Удалить вещь
+    
     public function deleteItem(int $id, int $userId): bool
     {
         $item = $this->find($id);
@@ -284,7 +284,7 @@ class Item extends BaseModel
         return $this->delete($id);
     }
 
-    // Получить теги вещи
+    
     public function getTags(int $itemId): array
     {
         $sql = "SELECT t.* FROM tags t
@@ -301,15 +301,15 @@ class Item extends BaseModel
         }
     }
 
-    // Синхронизировать теги вещи
+    
     public function syncTags(int $itemId, array $tagIds): void
     {
-        // Удаляем все существующие связи
+        
         $sql = "DELETE FROM item_tags WHERE item_id = :item_id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['item_id' => $itemId]);
 
-        // Добавляем новые связи
+        
         if (!empty($tagIds)) {
             $tagIds = array_filter(array_map('intval', $tagIds));
             if (!empty($tagIds)) {
@@ -330,7 +330,7 @@ class Item extends BaseModel
         }
     }
 
-    // Получить изображение вещи в base64
+    
     public function getImageBase64(int $id): ?string
     {
         $item = $this->find($id, ['image_data', 'image_mime_type']);
@@ -342,13 +342,13 @@ class Item extends BaseModel
         return "data:{$item['image_mime_type']};base64,{$base64}";
     }
 
-    // Получить URL изображения (для использования в img src)
+    
     public function getImageUrl(int $id): string
     {
         return "/api/items/{$id}/image";
     }
 
-    // Получить статистику вещей пользователя
+    
     public function getStatistics(int $userId): array
     {
         $sql = "SELECT 
@@ -370,7 +370,7 @@ class Item extends BaseModel
         }
     }
 
-    // Получить вещи по категориям (для аналитики)
+    
     public function getByCategories(int $userId): array
     {
         $sql = "SELECT c.id, c.name, COUNT(i.id) as count
@@ -388,7 +388,7 @@ class Item extends BaseModel
         }
     }
 
-    // Получить вещи по цветам (для аналитики)
+    
     public function getByColors(int $userId): array
     {
         $sql = "SELECT cl.id, cl.name, cl.hex_code, COUNT(i.id) as count
@@ -407,26 +407,26 @@ class Item extends BaseModel
         }
     }
 
-    // Создать запись с бинарными данными (BYTEA)
+    
     private function createWithBinaryData(array $data): int
     {
-        // Отделяем бинарные данные от обычных
+        
         $imageData = $data['image_data'] ?? null;
         $imageMimeType = $data['image_mime_type'] ?? null;
         unset($data['image_data'], $data['image_mime_type']);
         
-        // Фильтруем данные по fillable
+        
         $filteredData = array_intersect_key($data, array_flip($this->fillable));
 
         if (empty($filteredData) && !$imageData) {
             throw new \RuntimeException("No fillable fields provided for insert");
         }
 
-        // Строим SQL запрос
+        
         $columns = array_keys($filteredData);
         $placeholders = array_map(fn($col) => ':' . $col, $columns);
         
-        // Добавляем image_data и image_mime_type если есть
+        
         if ($imageData !== null) {
             $columns[] = 'image_data';
             $columns[] = 'image_mime_type';
@@ -437,7 +437,7 @@ class Item extends BaseModel
         $sql = "INSERT INTO {$this->table} (" . implode(', ', $columns) . ") VALUES (" . implode(', ', $placeholders) . ") RETURNING {$this->primaryKey}";
 
         try {
-            // Логируем SQL запрос (без бинарных данных)
+            
             Logger::debug('Выполнение INSERT для items', [
                 'columns' => $columns,
                 'filtered_data_keys' => array_keys($filteredData),
@@ -447,16 +447,16 @@ class Item extends BaseModel
 
             $stmt = $this->db->prepare($sql);
             
-            // Привязываем обычные параметры
+            
             foreach ($filteredData as $key => $value) {
                 $stmt->bindValue(':' . $key, $value);
                 Logger::debug("Привязка параметра: {$key}", ['value' => is_string($value) ? substr($value, 0, 50) : $value]);
             }
             
-            // Привязываем бинарные данные для BYTEA
+            
             if ($imageData !== null) {
-                // Для PostgreSQL BYTEA используем hex-формат через параметр
-                // Конвертируем бинарные данные в hex-строку с префиксом \x
+                
+                
                 $hexData = '\\x' . bin2hex($imageData);
                 $stmt->bindValue(':image_data', $hexData, PDO::PARAM_STR);
                 $stmt->bindValue(':image_mime_type', $imageMimeType ?? 'image/jpeg');
@@ -479,7 +479,7 @@ class Item extends BaseModel
             Logger::info('Вещь создана через lastInsertId', ['item_id' => $lastId]);
             return $lastId ? (int) $lastId : 0;
         } catch (PDOException $e) {
-            // Детальное логирование ошибки БД
+            
             Logger::error('Ошибка БД при создании вещи', [
                 'sql_state' => $e->getCode(),
                 'message' => $e->getMessage(),
@@ -491,25 +491,25 @@ class Item extends BaseModel
         }
     }
 
-    // Обновить запись с бинарными данными (BYTEA)
+    
     private function updateWithBinaryData(int $id, array $data): bool
     {
-        // Отделяем бинарные данные от обычных
+        
         $imageData = $data['image_data'] ?? null;
         $imageMimeType = $data['image_mime_type'] ?? null;
         unset($data['image_data'], $data['image_mime_type']);
         
-        // Фильтруем данные по fillable
+        
         $filteredData = array_intersect_key($data, array_flip($this->fillable));
 
         if (empty($filteredData) && $imageData === null) {
             throw new \RuntimeException("No fillable fields provided for update");
         }
 
-        // Строим SET clause
+        
         $setParts = array_map(fn($key) => "{$key} = :{$key}", array_keys($filteredData));
         
-        // Добавляем image_data и image_mime_type если есть
+        
         if ($imageData !== null) {
             $setParts[] = 'image_data = :image_data';
             $setParts[] = 'image_mime_type = :image_mime_type';
@@ -520,15 +520,15 @@ class Item extends BaseModel
         try {
             $stmt = $this->db->prepare($sql);
             
-            // Привязываем обычные параметры
+            
             foreach ($filteredData as $key => $value) {
                 $stmt->bindValue(':' . $key, $value);
             }
             
-            // Привязываем бинарные данные для BYTEA
+            
             if ($imageData !== null) {
-                // Для PostgreSQL BYTEA используем hex-формат через параметр
-                // Конвертируем бинарные данные в hex-строку с префиксом \x
+                
+                
                 $hexData = '\\x' . bin2hex($imageData);
                 $stmt->bindValue(':image_data', $hexData, PDO::PARAM_STR);
                 $stmt->bindValue(':image_mime_type', $imageMimeType ?? 'image/jpeg');
@@ -543,7 +543,7 @@ class Item extends BaseModel
         }
     }
 
-    // Сжатие изображения
+    
     private function compressImage(string $imageData, string $mimeType): string
     {
         $image = imagecreatefromstring($imageData);
@@ -557,7 +557,7 @@ class Item extends BaseModel
         $width = imagesx($image);
         $height = imagesy($image);
 
-        // Вычисляем новые размеры
+        
         if ($width > $maxWidth || $height > $maxHeight) {
             $ratio = min($maxWidth / $width, $maxHeight / $height);
             $newWidth = (int) ($width * $ratio);
@@ -569,7 +569,7 @@ class Item extends BaseModel
             $image = $newImage;
         }
 
-        // Сохраняем в нужном формате
+        
         ob_start();
         switch ($mimeType) {
             case 'image/jpeg':
@@ -593,7 +593,7 @@ class Item extends BaseModel
         return $compressed;
     }
 
-    // Получить общее количество вещей пользователя
+    
     public function getTotalCount(int $userId): int
     {
         $sql = "SELECT COUNT(*) as total FROM {$this->table} WHERE user_id = :user_id";

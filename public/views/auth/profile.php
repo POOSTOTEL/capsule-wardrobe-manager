@@ -1,5 +1,5 @@
 <?php
-// public/views/auth/profile.php
+
 $user = $user ?? [];
 $stats = $stats ?? [];
 $errors = $errors ?? [];

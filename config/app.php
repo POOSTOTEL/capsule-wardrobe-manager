@@ -1,5 +1,5 @@
 <?php
-// config/app.php
+
 
 return [
     'name' => 'Капсульный Гардероб',
@@ -16,14 +16,14 @@ return [
         'path' => '/var/www/public/uploads',
         'url' => '/uploads',
         'allowed_types' => ['jpg', 'jpeg', 'png', 'gif', 'webp'],
-        'max_size' => 5 * 1024 * 1024, // 5MB
+        'max_size' => 5 * 1024 * 1024, 
         'thumb_width' => 300,
         'thumb_height' => 300,
     ],
 
     'session' => [
         'name' => 'capsule_session',
-        'lifetime' => 120, // 2 часа
+        'lifetime' => 120, 
         'path' => '/',
         'domain' => null,
         'secure' => false,

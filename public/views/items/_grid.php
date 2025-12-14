@@ -1,9 +1,5 @@
 <?php
-/**
- * Компонент сетки для отображения вещей
- * 
- * @var array $items
- */
+
 ?>
 
 <div class="items-grid">
@@ -76,7 +72,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Обработка удаления вещи
+    
     document.querySelectorAll('.delete-item-btn').forEach(btn => {
         btn.addEventListener('click', async function(e) {
             e.preventDefault();
@@ -100,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const result = await response.json();
 
                 if (result.success) {
-                    // Удаляем карточку из DOM
+                    
                     const card = this.closest('.item-card');
                     if (card) {
                         card.style.transition = 'opacity 0.3s';
@@ -108,7 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         setTimeout(() => card.remove(), 300);
                     }
 
-                    // Показываем сообщение об успехе
+                    
                     showNotification('Вещь успешно удалена', 'success');
                 } else {
                     showNotification(result.message || 'Ошибка при удалении вещи', 'error');
@@ -121,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function showNotification(message, type) {
-        // Простая реализация уведомлений
+        
         const notification = document.createElement('div');
         notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'}`;
         notification.style.position = 'fixed';

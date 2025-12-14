@@ -1,5 +1,5 @@
 <?php
-// app/Controllers/CapsuleController.php
+
 
 namespace App\Controllers;
 
@@ -17,7 +17,7 @@ class CapsuleController extends Controller
 
     public function __construct()
     {
-        // Проверяем аутентификацию
+        
         $authMiddleware = new AuthMiddleware();
         if (!$authMiddleware->handle()) {
             if ($this->isAjax()) {
@@ -36,10 +36,10 @@ class CapsuleController extends Controller
         $this->userId = $_SESSION['user_id'] ?? null;
     }
 
-    // Список всех капсул пользователя
+    
     public function index(): void
     {
-        // Получаем фильтры из запроса
+        
         $filters = [
             'season_id' => $this->input('season_id'),
             'search' => $this->input('search'),
@@ -49,7 +49,7 @@ class CapsuleController extends Controller
             'offset' => $this->input('offset', 0)
         ];
 
-        // Удаляем пустые фильтры
+        
         $filters = array_filter($filters, function($value) {
             return $value !== '' && $value !== null && $value !== [];
         });
@@ -65,7 +65,7 @@ class CapsuleController extends Controller
             return;
         }
 
-        // Загружаем справочники для фильтров
+        
         $seasonModel = new Season();
 
         $data = [
@@ -79,7 +79,7 @@ class CapsuleController extends Controller
         $this->render('capsules/index', $data);
     }
 
-    // Показать детальную информацию о капсуле
+    
     public function show(int $id): void
     {
         $capsule = $this->capsuleModel->getWithDetails($id, $this->userId);
@@ -107,7 +107,7 @@ class CapsuleController extends Controller
         $this->render('capsules/show', $data);
     }
 
-    // Форма создания новой капсулы
+    
     public function create(): void
     {
         $itemModel = new Item();
@@ -125,7 +125,7 @@ class CapsuleController extends Controller
         $this->render('capsules/create', $data);
     }
 
-    // Сохранить новую капсулу
+    
     public function store(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -133,7 +133,7 @@ class CapsuleController extends Controller
             return;
         }
 
-        // Валидация
+        
         $errors = $this->validateCapsuleData($this->input());
 
         if (!empty($errors)) {
@@ -151,7 +151,7 @@ class CapsuleController extends Controller
             return;
         }
 
-        // Подготавливаем данные
+        
         $data = [
             'name' => trim($this->input('name')),
             'description' => trim($this->input('description', '')),
@@ -210,7 +210,7 @@ class CapsuleController extends Controller
         }
     }
 
-    // Форма редактирования капсулы
+    
     public function edit(int $id): void
     {
         $capsule = $this->capsuleModel->getWithDetails($id, $this->userId);
@@ -239,7 +239,7 @@ class CapsuleController extends Controller
         $this->render('capsules/edit', $data);
     }
 
-    // Обновить капсулу
+    
     public function update(int $id): void
     {
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -254,7 +254,7 @@ class CapsuleController extends Controller
             return;
         }
 
-        // Валидация
+        
         $inputData = $this->input();
         $errors = $this->validateCapsuleData($inputData, $id);
 
@@ -273,14 +273,14 @@ class CapsuleController extends Controller
             return;
         }
 
-        // Подготавливаем данные
+        
         $data = [
             'name' => trim($this->input('name')),
             'description' => trim($this->input('description', '')),
             'season_id' => $this->input('season_id') ? (int) $this->input('season_id') : null
         ];
 
-        // Обновляем вещи и образы только если они переданы
+        
         if ($this->input('item_ids') !== null) {
             $data['item_ids'] = is_array($this->input('item_ids')) 
                 ? $this->input('item_ids') 
@@ -319,7 +319,7 @@ class CapsuleController extends Controller
         }
     }
 
-    // Удалить капсулу
+    
     public function destroy(int $id): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $_SERVER['REQUEST_METHOD'] !== 'DELETE') {
@@ -343,7 +343,7 @@ class CapsuleController extends Controller
         $this->redirect('/capsules');
     }
 
-    // Генерация комбинаций внутри капсулы
+    
     public function combinations(int $id): void
     {
         $capsule = $this->capsuleModel->getWithDetails($id, $this->userId);
@@ -354,7 +354,7 @@ class CapsuleController extends Controller
             return;
         }
 
-        // Генерируем комбинации
+        
         $combinations = $this->capsuleModel->generateCombinations($id, $this->userId);
 
         $data = [
@@ -367,7 +367,7 @@ class CapsuleController extends Controller
         $this->render('capsules/combinations', $data);
     }
 
-    // Генерация образов из вещей капсулы
+    
     public function generateOutfits(int $id): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -382,16 +382,16 @@ class CapsuleController extends Controller
             return;
         }
 
-        // Проверяем, что в капсуле есть вещи
+        
         if (empty($capsule['items'])) {
             $this->error('В капсуле нет вещей для генерации образов', 400);
             return;
         }
 
-        // Получаем количество образов для генерации
+        
         $count = (int) $this->input('count', 5);
         
-        // Валидация количества
+        
         if ($count < 1 || $count > 50) {
             $this->error('Количество образов должно быть от 1 до 50', 400);
             return;
@@ -404,7 +404,7 @@ class CapsuleController extends Controller
                 'count' => $count
             ]);
 
-            // Генерируем образы
+            
             $generatedOutfitIds = $this->capsuleModel->generateOutfits($id, $this->userId, $count);
 
             Logger::info('Образы успешно сгенерированы', [
@@ -414,7 +414,7 @@ class CapsuleController extends Controller
                 'requested_count' => $count
             ]);
 
-            // Обновляем данные капсулы
+            
             $capsule = $this->capsuleModel->getWithDetails($id, $this->userId);
 
             if ($this->isAjax()) {
@@ -450,24 +450,24 @@ class CapsuleController extends Controller
         }
     }
 
-    // Валидация данных капсулы
+    
     private function validateCapsuleData(array $data, int $capsuleId = null): array
     {
         $errors = [];
 
-        // Название
+        
         if (empty($data['name'])) {
             $errors['name'][] = 'Название капсулы обязательно для заполнения';
         } elseif (strlen($data['name']) > 200) {
             $errors['name'][] = 'Название не должно превышать 200 символов';
         }
 
-        // Описание (опционально)
+        
         if (!empty($data['description']) && strlen($data['description']) > 1000) {
             $errors['description'][] = 'Описание не должно превышать 1000 символов';
         }
 
-        // Сезон (опционально)
+        
         if (!empty($data['season_id'])) {
             $seasonModel = new Season();
             $season = $seasonModel->find((int) $data['season_id']);

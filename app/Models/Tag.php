@@ -1,5 +1,5 @@
 <?php
-// app/Models/Tag.php
+
 
 namespace App\Models;
 
@@ -10,9 +10,7 @@ class Tag extends BaseModel
     protected $table = 'tags';
     protected $fillable = ['user_id', 'name', 'color', 'is_system'];
 
-    /**
-     * Получить все теги пользователя (системные + пользовательские)
-     */
+    
     public function getByUser(int $userId): array
     {
         $sql = "SELECT * FROM {$this->table} 
@@ -28,12 +26,10 @@ class Tag extends BaseModel
         }
     }
 
-    /**
-     * Создать пользовательский тег
-     */
+    
     public function createUserTag(int $userId, array $data): ?int
     {
-        // Проверяем, существует ли уже такой тег у пользователя
+        
         $sql = "SELECT * FROM {$this->table} 
                 WHERE user_id = :user_id AND LOWER(name) = LOWER(:name)
                 LIMIT 1";
@@ -47,7 +43,7 @@ class Tag extends BaseModel
             $existing = $stmt->fetch(\PDO::FETCH_ASSOC);
             
             if ($existing) {
-                return null; // Тег уже существует у этого пользователя
+                return null; 
             }
         } catch (\PDOException $e) {
             throw new \RuntimeException("Database error: " . $e->getMessage());
@@ -57,7 +53,7 @@ class Tag extends BaseModel
         $data['is_system'] = false;
         $data['name'] = trim($data['name']);
 
-        // Если цвет не указан, генерируем случайный
+        
         if (empty($data['color'])) {
             $data['color'] = $this->generateRandomColor();
         }
@@ -65,7 +61,7 @@ class Tag extends BaseModel
         try {
             return $this->create($data);
         } catch (\PDOException $e) {
-            // Если ошибка уникальности - тег уже существует
+            
             if (strpos($e->getMessage(), 'unique') !== false || 
                 strpos($e->getMessage(), 'duplicate') !== false) {
                 return null;
@@ -74,18 +70,16 @@ class Tag extends BaseModel
         }
     }
 
-    /**
-     * Обновить пользовательский тег
-     */
+    
     public function updateUserTag(int $tagId, int $userId, array $data): bool
     {
-        // Проверяем права доступа
+        
         $tag = $this->find($tagId);
         if (!$tag || $tag['is_system'] || $tag['user_id'] != $userId) {
             return false;
         }
 
-        // Проверяем, не конфликтует ли новое имя с существующим тегом
+        
         if (isset($data['name'])) {
             $newName = trim($data['name']);
             
@@ -105,7 +99,7 @@ class Tag extends BaseModel
                 $existing = $stmt->fetch(\PDO::FETCH_ASSOC);
                 
                 if ($existing) {
-                    return false; // Тег с таким именем уже существует
+                    return false; 
                 }
             } catch (\PDOException $e) {
                 throw new \RuntimeException("Database error: " . $e->getMessage());
@@ -117,7 +111,7 @@ class Tag extends BaseModel
         try {
             return $this->update($tagId, $data);
         } catch (\PDOException $e) {
-            // Если ошибка уникальности - тег уже существует
+            
             if (strpos($e->getMessage(), 'unique') !== false || 
                 strpos($e->getMessage(), 'duplicate') !== false) {
                 return false;
@@ -126,9 +120,7 @@ class Tag extends BaseModel
         }
     }
 
-    /**
-     * Удалить пользовательский тег
-     */
+    
     public function deleteUserTag(int $tagId, int $userId): bool
     {
         $tag = $this->find($tagId);
@@ -140,25 +132,19 @@ class Tag extends BaseModel
         return $this->delete($tagId);
     }
 
-    /**
-     * Получить системные теги
-     */
+    
     public function getSystemTags(): array
     {
         return $this->where('is_system', true);
     }
 
-    /**
-     * Получить пользовательские теги
-     */
+    
     public function getUserTags(int $userId): array
     {
         return $this->where('user_id', $userId);
     }
 
-    /**
-     * Получить теги для определенной вещи
-     */
+    
     public function getForItem(int $itemId): array
     {
         $sql = "SELECT t.* FROM tags t
@@ -175,9 +161,7 @@ class Tag extends BaseModel
         }
     }
 
-    /**
-     * Получить теги для определенного образа
-     */
+    
     public function getForOutfit(int $outfitId): array
     {
         $sql = "SELECT t.* FROM tags t
@@ -194,9 +178,7 @@ class Tag extends BaseModel
         }
     }
 
-    /**
-     * Получить теги для формы выбора (с группировкой)
-     */
+    
     public function getForSelectGrouped(int $userId): array
     {
         $allTags = $this->getByUser($userId);
@@ -216,9 +198,7 @@ class Tag extends BaseModel
         return $grouped;
     }
 
-    /**
-     * Поиск тегов по имени (с автодополнением)
-     */
+    
     public function searchByName(string $query, int $userId, int $limit = 10): array
     {
         $sql = "SELECT * FROM {$this->table} 
@@ -248,9 +228,7 @@ class Tag extends BaseModel
         }
     }
 
-    /**
-     * Получить самые популярные теги пользователя
-     */
+    
     public function getPopularTags(int $userId, int $limit = 10): array
     {
         $sql = "SELECT t.*, 
@@ -275,9 +253,7 @@ class Tag extends BaseModel
         }
     }
 
-    /**
-     * Привязать тег к вещи
-     */
+    
     public function attachToItem(int $tagId, int $itemId): bool
     {
         $sql = "INSERT INTO item_tags (item_id, tag_id) 
@@ -295,9 +271,7 @@ class Tag extends BaseModel
         }
     }
 
-    /**
-     * Отвязать тег от вещи
-     */
+    
     public function detachFromItem(int $tagId, int $itemId): bool
     {
         $sql = "DELETE FROM item_tags 
@@ -314,9 +288,7 @@ class Tag extends BaseModel
         }
     }
 
-    /**
-     * Привязать тег к образу
-     */
+    
     public function attachToOutfit(int $tagId, int $outfitId): bool
     {
         $sql = "INSERT INTO outfit_tags (outfit_id, tag_id) 
@@ -334,9 +306,7 @@ class Tag extends BaseModel
         }
     }
 
-    /**
-     * Отвязать тег от образа
-     */
+    
     public function detachFromOutfit(int $tagId, int $outfitId): bool
     {
         $sql = "DELETE FROM outfit_tags 
@@ -353,17 +323,15 @@ class Tag extends BaseModel
         }
     }
 
-    /**
-     * Синхронизировать теги для вещи (удалить все и добавить новые)
-     */
+    
     public function syncItemTags(int $itemId, array $tagIds): void
     {
-        // Удаляем все существующие связи
+        
         $sql = "DELETE FROM item_tags WHERE item_id = :item_id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['item_id' => $itemId]);
 
-        // Добавляем новые связи
+        
         if (!empty($tagIds)) {
             $tagIds = array_filter(array_map('intval', $tagIds));
             if (!empty($tagIds)) {
@@ -384,17 +352,15 @@ class Tag extends BaseModel
         }
     }
 
-    /**
-     * Синхронизировать теги для образа (удалить все и добавить новые)
-     */
+    
     public function syncOutfitTags(int $outfitId, array $tagIds): void
     {
-        // Удаляем все существующие связи
+        
         $sql = "DELETE FROM outfit_tags WHERE outfit_id = :outfit_id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['outfit_id' => $outfitId]);
 
-        // Добавляем новые связи
+        
         if (!empty($tagIds)) {
             $tagIds = array_filter(array_map('intval', $tagIds));
             if (!empty($tagIds)) {
@@ -415,9 +381,7 @@ class Tag extends BaseModel
         }
     }
 
-    /**
-     * Получить все вещи с определенным тегом
-     */
+    
     public function getItemsWithTag(int $tagId, int $userId): array
     {
         $sql = "SELECT i.* FROM items i
@@ -437,9 +401,7 @@ class Tag extends BaseModel
         }
     }
 
-    /**
-     * Получить все образы с определенным тегом
-     */
+    
     public function getOutfitsWithTag(int $tagId, int $userId): array
     {
         $sql = "SELECT o.* FROM outfits o
@@ -459,9 +421,7 @@ class Tag extends BaseModel
         }
     }
 
-    /**
-     * Генерация случайного цвета для тега
-     */
+    
     private function generateRandomColor(): string
     {
         $colors = [

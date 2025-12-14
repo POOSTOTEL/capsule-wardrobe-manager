@@ -1,5 +1,5 @@
 <?php
-// app/Utils/Logger.php
+
 
 namespace App\Utils;
 
@@ -12,7 +12,7 @@ class Logger
         if (self::$logPath === null) {
             self::$logPath = defined('LOG_PATH') ? LOG_PATH : dirname(__DIR__, 2) . '/logs';
             
-            // Создаем директорию логов, если её нет
+            
             if (!is_dir(self::$logPath)) {
                 mkdir(self::$logPath, 0755, true);
             }

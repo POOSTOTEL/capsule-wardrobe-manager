@@ -1933,3 +1933,23 @@
 [2025-12-14 23:05:09] [INFO] createCapsule: капсула создана в БД {"capsule_id":3}
 [2025-12-14 23:05:09] [DEBUG] createCapsule: добавление вещей {"item_ids":["4","2","1"]}
 [2025-12-14 23:05:09] [INFO] Капсула успешно создана {"user_id":1,"capsule_id":3}
+[2025-12-14 23:21:17] [INFO] Начало создания вещи {"user_id":1,"data":{"name":"Кроссовки","category_id":4,"color_id":10,"season_id":1,"notes":"Беговые кроссовки","tag_ids":[],"tag_ids_count":0},"image_size":7600,"image_type":"image\/jpeg"}
+[2025-12-14 23:21:17] [DEBUG] createWithImage: начало {"user_id":1,"image_path":"\/tmp\/phpMOGDOC","data_keys":["name","category_id","color_id","season_id","notes","tag_ids"]}
+[2025-12-14 23:21:17] [DEBUG] createWithImage: чтение файла {"path":"\/tmp\/phpMOGDOC","size":7600}
+[2025-12-14 23:21:17] [DEBUG] createWithImage: MIME тип определен {"mime_type":"image\/jpeg"}
+[2025-12-14 23:21:17] [DEBUG] createWithImage: данные изображения подготовлены {"image_size":7600,"mime_type":"image\/jpeg"}
+[2025-12-14 23:21:17] [DEBUG] createWithImage: вызов createWithBinaryData {"data_keys":["name","category_id","color_id","season_id","notes","tag_ids","image_data","image_mime_type","user_id","usage_count"],"has_image_data":true}
+[2025-12-14 23:21:17] [DEBUG] Выполнение INSERT для items {"columns":["name","category_id","color_id","season_id","notes","user_id","usage_count","image_data","image_mime_type"],"filtered_data_keys":["name","category_id","color_id","season_id","notes","user_id","usage_count"],"has_image":true,"image_size":7600}
+[2025-12-14 23:21:17] [DEBUG] Привязка параметра: name {"value":"Кроссовки"}
+[2025-12-14 23:21:17] [DEBUG] Привязка параметра: category_id {"value":4}
+[2025-12-14 23:21:17] [DEBUG] Привязка параметра: color_id {"value":10}
+[2025-12-14 23:21:17] [DEBUG] Привязка параметра: season_id {"value":1}
+[2025-12-14 23:21:17] [DEBUG] Привязка параметра: notes {"value":"Беговые кроссовки"}
+[2025-12-14 23:21:17] [DEBUG] Привязка параметра: user_id {"value":1}
+[2025-12-14 23:21:17] [DEBUG] Привязка параметра: usage_count {"value":0}
+[2025-12-14 23:21:17] [DEBUG] Привязка бинарных данных {"hex_length":15202,"mime_type":"image\/jpeg"}
+[2025-12-14 23:21:17] [INFO] Вещь создана успешно {"item_id":6}
+[2025-12-14 23:21:17] [INFO] createWithImage: вещь создана в БД {"item_id":6}
+[2025-12-14 23:21:17] [INFO] Вещь успешно создана {"user_id":1,"item_id":6}
+[2025-12-14 23:21:21] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-14 23:21:58] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}

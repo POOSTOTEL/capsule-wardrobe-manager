@@ -1,13 +1,5 @@
 <?php
-/**
- * Форма создания новой вещи
- * 
- * @var array $categories
- * @var array $colors
- * @var array $seasons
- * @var array $tags
- * @var string $title
- */
+
 ?>
 
 <div class="page-header mb-4">
@@ -18,7 +10,7 @@
 </div>
 
 <form id="item-form" method="POST" action="/items" enctype="multipart/form-data">
-        <!-- Основная информация -->
+        
         <div class="form-section">
             <h2 class="section-title">Основная информация</h2>
 
@@ -52,7 +44,7 @@
             </div>
         </div>
 
-        <!-- Изображение -->
+        
         <div class="form-section">
             <h2 class="section-title">Фотография</h2>
 
@@ -80,7 +72,7 @@
             <div class="invalid-feedback" id="image-error"></div>
         </div>
 
-        <!-- Атрибуты -->
+        
         <div class="form-section">
             <h2 class="section-title">Атрибуты</h2>
 
@@ -110,7 +102,7 @@
             </div>
         </div>
 
-        <!-- Заметки -->
+        
         <div class="form-section">
             <h2 class="section-title">Заметки</h2>
             <div class="mb-3">
@@ -125,7 +117,7 @@
             </div>
         </div>
 
-        <!-- Кнопки действий -->
+        
         <div class="form-actions d-grid gap-2 d-md-flex justify-content-md-end">
             <a href="/items" class="btn btn-outline-secondary">Отмена</a>
             <button type="submit" class="btn btn-primary">
@@ -148,7 +140,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const notesTextarea = document.getElementById('item-notes');
     const notesCounter = document.getElementById('notes-counter');
 
-    // Обработка загрузки изображения
+    
     uploadArea.addEventListener('click', function() {
         imageInput.click();
     });
@@ -156,20 +148,20 @@ document.addEventListener('DOMContentLoaded', function() {
     imageInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
-            // Валидация размера
+            
             if (file.size > 5 * 1024 * 1024) {
                 alert('Файл слишком большой. Максимальный размер: 5MB');
                 return;
             }
 
-            // Валидация типа
+            
             const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
             if (!allowedTypes.includes(file.type)) {
                 alert('Неподдерживаемый тип файла. Разрешены: JPEG, PNG, GIF, WebP');
                 return;
             }
 
-            // Показываем превью
+            
             const reader = new FileReader();
             reader.onload = function(e) {
                 previewImage.src = e.target.result;
@@ -180,7 +172,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Удаление изображения
+    
     removeImageBtn.addEventListener('click', function(e) {
         e.stopPropagation();
         imageInput.value = '';
@@ -188,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function() {
         uploadPreview.style.display = 'none';
     });
 
-    // Счетчик символов для заметок
+    
     if (notesTextarea && notesCounter) {
         notesTextarea.addEventListener('input', function() {
             const remaining = 1000 - this.value.length;
@@ -197,11 +189,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Валидация формы
+    
     form.addEventListener('submit', function(e) {
         e.preventDefault();
 
-        // Сбрасываем предыдущие ошибки
+        
         document.querySelectorAll('.is-invalid').forEach(el => {
             el.classList.remove('is-invalid');
         });
@@ -209,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function() {
             el.textContent = '';
         });
 
-        // Простая валидация на клиенте
+        
         let isValid = true;
 
         if (!document.getElementById('item-name').value.trim()) {
@@ -231,7 +223,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Отправляем форму
+        
         const formData = new FormData(form);
 
         fetch('/items', {
@@ -242,23 +234,23 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .then(async response => {
-            // Логируем статус ответа
+            
             console.log('Response status:', response.status);
             
-            // Проверяем Content-Type перед чтением
+            
             const contentType = response.headers.get('content-type') || '';
             const isJson = contentType.includes('application/json');
             
-            // Читаем тело ответа только один раз
+            
             if (isJson) {
                 const data = await response.json();
                 console.log('Response data:', data);
                 return data;
             } else {
-                // Если не JSON, читаем как текст
+                
                 const text = await response.text();
                 console.error('Non-JSON response:', text);
-                // Пытаемся распарсить как JSON, если это текст с JSON
+                
                 try {
                     const data = JSON.parse(text);
                     return data;
@@ -271,11 +263,11 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Response data:', data);
             
             if (data.success) {
-                // Редирект на список всех вещей
+                
                 const redirectUrl = data.data?.redirect_url || '/items';
                 window.location.href = redirectUrl;
             } else {
-                // Показываем ошибки
+                
                 if (data.errors) {
                     console.error('Validation errors:', data.errors);
                     Object.keys(data.errors).forEach(field => {

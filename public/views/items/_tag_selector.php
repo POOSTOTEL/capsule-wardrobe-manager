@@ -1,29 +1,22 @@
 <?php
-// public/views/items/_tag_selector.php
 
-/**
- * Компонент выбора тегов
- *
- * @var array $selectedTags Массив ID выбранных тегов (опционально)
- * @var string $name Имя поля формы (по умолчанию 'tags')
- * @var bool $allowCreate Разрешить создание новых тегов (по умолчанию true)
- * @var int $maxTags Максимальное количество тегов (по умолчанию 10)
- */
+
+
 ?>
 
 <div class="tag-selector-component mb-4">
     <label for="tag-selector-input" class="form-label">Теги</label>
 
-    <!-- Скрытое поле для отправки выбранных ID тегов -->
+    
     <input type="hidden"
            name="<?= htmlspecialchars($name ?? 'tag_ids') ?>"
            id="tag-ids-input"
            value="<?= htmlspecialchars(implode(',', $selectedTags ?? [])) ?>">
 
-    <!-- Контейнер для селектора тегов -->
+    
     <div id="tag-selector-container"></div>
 
-    <!-- Популярные теги (опционально) -->
+    
     <div class="popular-tags mt-3" style="display: none;">
         <small class="text-muted mb-2 d-block">Популярные теги:</small>
         <div id="popular-tags-container"></div>
@@ -32,9 +25,9 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Инициализируем менеджер тегов
+        
         TagManager.init().then(() => {
-            // Создаем селектор тегов
+            
             const container = document.getElementById('tag-selector-container');
             const hiddenInput = document.getElementById('tag-ids-input');
 
@@ -43,13 +36,13 @@
                 maxTags: <?= $maxTags ?? 10 ?>,
                 allowCreate: <?= json_encode($allowCreate ?? true) ?>,
                 onChange: function(selectedTags) {
-                    // Обновляем скрытое поле с ID выбранных тегов
+                    
                     const tagIds = selectedTags.map(tag => tag.id).join(',');
                     hiddenInput.value = tagIds;
                 }
             });
 
-            // Устанавливаем выбранные теги, если они есть
+            
             const initialTagIds = hiddenInput.value
                 .split(',')
                 .filter(id => id.trim() !== '')
@@ -59,11 +52,11 @@
                 tagSelector.setSelectedTags(initialTagIds);
             }
 
-            // Загружаем и показываем популярные теги
+            
             loadPopularTags(tagSelector);
         });
 
-        // Функция загрузки популярных тегов
+        
         async function loadPopularTags(tagSelector) {
             const popularTags = await TagManager.getPopularTags(5);
 
@@ -71,10 +64,10 @@
                 const container = document.getElementById('popular-tags-container');
                 const section = container.parentElement.parentElement;
 
-                // Показываем секцию
+                
                 section.style.display = 'block';
 
-                // Добавляем популярные теги
+                
                 popularTags.forEach(tag => {
                     const tagElement = document.createElement('span');
                     tagElement.className = 'popular-tag';
@@ -94,7 +87,7 @@
             }
         }
 
-        // Функция определения контрастного цвета текста
+        
         function getContrastColor(hexColor) {
             hexColor = hexColor.replace('#', '');
 

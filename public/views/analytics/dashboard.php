@@ -1,17 +1,5 @@
 <?php
-/**
- * Главная страница аналитики (дашборд)
- * 
- * @var int $total_items
- * @var int $total_outfits
- * @var int $total_capsules
- * @var array $category_distribution
- * @var array $color_distribution
- * @var array $top_used_items
- * @var array $season_stats
- * @var array $usage_stats
- * @var string $title
- */
+
 ?>
 
 <div class="analytics-dashboard">
@@ -33,7 +21,7 @@
         </div>
     </div>
 
-    <!-- Общая статистика -->
+    
     <div class="stats-overview mb-5">
         <div class="overview-card">
             <div class="overview-icon">
@@ -75,7 +63,7 @@
     </div>
 
     <div class="row">
-        <!-- Распределение по категориям -->
+        
         <div class="col-md-6 mb-4">
             <div class="charts-section">
                 <div class="charts-header">
@@ -92,7 +80,7 @@
             </div>
         </div>
 
-        <!-- Распределение по цветам -->
+        
         <div class="col-md-6 mb-4">
             <div class="charts-section">
                 <div class="charts-header">
@@ -110,7 +98,7 @@
         </div>
     </div>
 
-    <!-- Топ используемых вещей -->
+    
     <div class="charts-section mb-4">
         <div class="charts-header">
             <h3>
@@ -183,7 +171,7 @@
         </div>
     </div>
 
-    <!-- Статистика по сезонам -->
+    
     <div class="charts-section mb-4">
         <div class="charts-header">
             <h3>
@@ -228,11 +216,11 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Данные для диаграмм
+    
     const categoryData = <?= json_encode($category_distribution, JSON_UNESCAPED_UNICODE) ?>;
     const colorData = <?= json_encode($color_distribution, JSON_UNESCAPED_UNICODE) ?>;
 
-    // Диаграмма категорий
+    
     if (categoryData && categoryData.length > 0 && typeof Chart !== 'undefined') {
         const categoryCtx = document.getElementById('categoryChart');
         if (categoryCtx) {
@@ -261,7 +249,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Диаграмма цветов
+    
     if (colorData && colorData.length > 0 && typeof Chart !== 'undefined') {
         const colorCtx = document.getElementById('colorChart');
         if (colorCtx) {

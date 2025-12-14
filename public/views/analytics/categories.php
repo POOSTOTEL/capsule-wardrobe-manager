@@ -1,10 +1,5 @@
 <?php
-/**
- * Распределение по категориям
- * 
- * @var array $category_distribution
- * @var string $title
- */
+
 ?>
 
 <div class="analytics-page">

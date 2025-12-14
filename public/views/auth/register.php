@@ -1,5 +1,5 @@
 <?php
-// public/views/auth/register.php
+
 $errors = $errors ?? [];
 $form_data = $form_data ?? [];
 ?>

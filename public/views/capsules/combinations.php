@@ -1,11 +1,5 @@
 <?php
-/**
- * Комбинации внутри капсулы
- * 
- * @var array $capsule
- * @var array $combinations
- * @var string $title
- */
+
 ?>
 
 <div class="capsule-combinations">

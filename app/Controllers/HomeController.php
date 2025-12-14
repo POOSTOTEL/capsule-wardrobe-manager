@@ -1,5 +1,5 @@
 <?php
-// app/Controllers/HomeController.php
+
 
 namespace App\Controllers;
 
@@ -7,7 +7,7 @@ class HomeController extends Controller
 {
     public function index(): void
     {
-        // Получаем статистику для авторизованных пользователей
+        
         $stats = [];
         if (isset($_SESSION['user_id'])) {
             $itemModel = new \App\Models\Item();
@@ -15,7 +15,7 @@ class HomeController extends Controller
             $capsuleModel = new \App\Models\Capsule();
             $analyticsModel = new \App\Models\Analytics();
             
-            // Получаем статистику использования гардероба
+            
             $usageStats = $analyticsModel->getUsageStatistics($_SESSION['user_id']);
             $wardrobeUsagePercentage = $usageStats['used_percentage'] ?? 0;
             
@@ -37,7 +37,7 @@ class HomeController extends Controller
         $this->renderLayout('main', $data);
     }
 
-    // Вспомогательный метод для рендеринга представления
+    
     protected function renderView(string $view, array $data = []): string
     {
         extract($data, EXTR_SKIP);
@@ -53,7 +53,7 @@ class HomeController extends Controller
         return ob_get_clean();
     }
 
-    // Вспомогательный метод для рендеринга макета
+    
     protected function renderLayout(string $layout, array $data = []): void
     {
         extract($data, EXTR_SKIP);

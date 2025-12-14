@@ -1,5 +1,5 @@
 <?php
-// app/Controllers/OutfitController.php
+
 
 namespace App\Controllers;
 
@@ -18,7 +18,7 @@ class OutfitController extends Controller
 
     public function __construct()
     {
-        // Проверяем аутентификацию
+        
         $authMiddleware = new AuthMiddleware();
         if (!$authMiddleware->handle()) {
             if ($this->isAjax()) {
@@ -37,12 +37,10 @@ class OutfitController extends Controller
         $this->userId = $_SESSION['user_id'] ?? null;
     }
 
-    /**
-     * Список всех образов пользователя с фильтрацией, поиском и сортировкой
-     */
+    
     public function index(): void
     {
-        // Получаем фильтры из запроса
+        
         $filters = [
             'season_id' => $this->input('season_id'),
             'formality_level' => $this->input('formality_level'),
@@ -55,7 +53,7 @@ class OutfitController extends Controller
             'offset' => $this->input('offset', 0)
         ];
 
-        // Удаляем пустые фильтры
+        
         $filters = array_filter($filters, function($value) {
             return $value !== '' && $value !== null && $value !== [];
         });
@@ -91,7 +89,7 @@ class OutfitController extends Controller
             }
         }
 
-        // Загружаем справочники для фильтров
+        
         $seasonModel = new Season();
         $tagModel = new Tag();
 
@@ -107,9 +105,7 @@ class OutfitController extends Controller
         $this->render('outfits/index', $data);
     }
 
-    /**
-     * Показать детальную информацию об образе
-     */
+    
     public function show(int $id): void
     {
         Logger::debug('Просмотр образа', [
@@ -152,9 +148,7 @@ class OutfitController extends Controller
         $this->render('outfits/show', $data);
     }
 
-    /**
-     * Форма создания нового образа
-     */
+    
     public function create(): void
     {
         $itemModel = new Item();
@@ -172,9 +166,7 @@ class OutfitController extends Controller
         $this->render('outfits/create', $data);
     }
 
-    /**
-     * Сохранить новый образ
-     */
+    
     public function store(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -182,7 +174,7 @@ class OutfitController extends Controller
             return;
         }
 
-        // Валидация
+        
         $errors = $this->validateOutfitData($this->input());
 
         if (!empty($errors)) {
@@ -200,7 +192,7 @@ class OutfitController extends Controller
             return;
         }
 
-        // Подготавливаем данные
+        
         $data = [
             'name' => trim($this->input('name')),
             'description' => trim($this->input('description', '')),
@@ -267,9 +259,7 @@ class OutfitController extends Controller
         }
     }
 
-    /**
-     * Форма редактирования образа
-     */
+    
     public function edit(int $id): void
     {
         $outfit = $this->outfitModel->getWithDetails($id, $this->userId);
@@ -298,9 +288,7 @@ class OutfitController extends Controller
         $this->render('outfits/edit', $data);
     }
 
-    /**
-     * Обновить образ
-     */
+    
     public function update(int $id): void
     {
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -315,7 +303,7 @@ class OutfitController extends Controller
             return;
         }
 
-        // Валидация
+        
         $inputData = $this->input();
         $errors = $this->validateOutfitData($inputData, $id);
 
@@ -334,7 +322,7 @@ class OutfitController extends Controller
             return;
         }
 
-        // Подготавливаем данные
+        
         $data = [
             'name' => trim($this->input('name')),
             'description' => trim($this->input('description', '')),
@@ -343,7 +331,7 @@ class OutfitController extends Controller
             'is_favorite' => $this->input('is_favorite') === '1' || $this->input('is_favorite') === true
         ];
 
-        // Обновляем вещи и теги только если они переданы
+        
         if ($this->input('item_ids') !== null) {
             $data['item_ids'] = is_array($this->input('item_ids')) 
                 ? $this->input('item_ids') 
@@ -404,9 +392,7 @@ class OutfitController extends Controller
         }
     }
 
-    /**
-     * Удалить образ
-     */
+    
     public function destroy(int $id): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $_SERVER['REQUEST_METHOD'] !== 'DELETE') {
@@ -444,9 +430,7 @@ class OutfitController extends Controller
         $this->redirect('/outfits');
     }
 
-    /**
-     * Переключить избранное
-     */
+    
     public function toggleFavorite(int $id): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -482,9 +466,7 @@ class OutfitController extends Controller
         ], 'Статус избранного обновлен');
     }
 
-    /**
-     * Добавить образ в капсулу (добавить вещи из образа в капсулу)
-     */
+    
     public function addToCapsule(int $id): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -525,9 +507,7 @@ class OutfitController extends Controller
         $this->success(null, 'Вещи из образа успешно добавлены в капсулу');
     }
 
-    /**
-     * Генерировать образы из капсулы (без сохранения)
-     */
+    
     public function generateFromCapsule(int $capsuleId): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -573,9 +553,7 @@ class OutfitController extends Controller
         }
     }
 
-    /**
-     * Сохранить сгенерированный образ
-     */
+    
     public function saveGenerated(int $capsuleId): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -608,7 +586,7 @@ class OutfitController extends Controller
         try {
             $outfitId = $this->outfitModel->saveGeneratedOutfit($this->userId, $outfitData);
             
-            // Связываем образ с капсулой
+            
             $capsuleModel = new Capsule();
             $capsuleModel->linkOutfitToCapsule($capsuleId, $outfitId);
 
@@ -636,9 +614,7 @@ class OutfitController extends Controller
         }
     }
 
-    /**
-     * Добавить вещь в образ
-     */
+    
     public function addItem(int $id): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -654,14 +630,14 @@ class OutfitController extends Controller
             return;
         }
 
-        // Проверяем права на образ
+        
         $outfit = $this->outfitModel->find($id);
         if (!$outfit || $outfit['user_id'] != $this->userId) {
             $this->error('Образ не найден', 404);
             return;
         }
 
-        // Проверяем права на вещь
+        
         $itemModel = new Item();
         $item = $itemModel->find($itemId);
         if (!$item || $item['user_id'] != $this->userId) {
@@ -684,9 +660,7 @@ class OutfitController extends Controller
         }
     }
 
-    /**
-     * Удалить вещь из образа
-     */
+    
     public function removeItem(int $id): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $_SERVER['REQUEST_METHOD'] !== 'DELETE') {
@@ -701,7 +675,7 @@ class OutfitController extends Controller
             return;
         }
 
-        // Проверяем права на образ
+        
         $outfit = $this->outfitModel->find($id);
         if (!$outfit || $outfit['user_id'] != $this->userId) {
             $this->error('Образ не найден', 404);
@@ -723,26 +697,24 @@ class OutfitController extends Controller
         }
     }
 
-    /**
-     * Валидация данных образа
-     */
+    
     private function validateOutfitData(array $data, int $outfitId = null): array
     {
         $errors = [];
 
-        // Название
+        
         if (empty($data['name'])) {
             $errors['name'][] = 'Название образа обязательно для заполнения';
         } elseif (strlen($data['name']) > 200) {
             $errors['name'][] = 'Название не должно превышать 200 символов';
         }
 
-        // Описание (опционально)
+        
         if (!empty($data['description']) && strlen($data['description']) > 1000) {
             $errors['description'][] = 'Описание не должно превышать 1000 символов';
         }
 
-        // Уровень формальности (опционально)
+        
         if (!empty($data['formality_level'])) {
             $formalityLevel = (int) $data['formality_level'];
             if ($formalityLevel < 1 || $formalityLevel > 5) {
@@ -750,7 +722,7 @@ class OutfitController extends Controller
             }
         }
 
-        // Сезон (опционально)
+        
         if (!empty($data['season_id'])) {
             $seasonModel = new Season();
             $season = $seasonModel->find((int) $data['season_id']);

@@ -5,16 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($title ?? 'Капсульный Гардероб'); ?></title>
 
-    <!-- Подключение Font Awesome -->
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Основные стили -->
+    
     <link rel="stylesheet" href="/assets/css/app.css">
     
-    <!-- Адаптивные стили -->
+    
     <link rel="stylesheet" href="/assets/css/responsive.css">
 
-    <!-- Дополнительные стили -->
+    
     <?php if (isset($styles) && is_array($styles)): ?>
         <?php foreach ($styles as $style): ?>
             <link rel="stylesheet" href="<?php echo htmlspecialchars($style); ?>">
@@ -81,7 +81,7 @@
 <main class="main-content">
     <div class="container">
         <?php
-        // Отображение флеш-сообщений
+        
         if (isset($_SESSION['flash'])):
             foreach ($_SESSION['flash'] as $type => $messages):
                 foreach ($messages as $message): ?>
@@ -124,7 +124,7 @@
 </footer>
 
 <script>
-// Мобильное меню
+
 document.addEventListener('DOMContentLoaded', function() {
     const toggle = document.getElementById('navbar-toggle');
     const nav = document.getElementById('navbar-nav');
@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function() {
             toggle.classList.toggle('active');
         });
         
-        // Закрываем меню при клике вне его
+        
         document.addEventListener('click', function(e) {
             if (!toggle.contains(e.target) && !nav.contains(e.target)) {
                 nav.classList.remove('active');

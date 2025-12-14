@@ -1,15 +1,12 @@
 <?php
-// public/views/tags/manage.php
 
-/**
- * @var array $tags
- * @var string $title
- */
+
+
 ?>
 <div class="container tags-management mt-4">
     <h1 class="mb-4"><?= htmlspecialchars($title) ?></h1>
 
-    <!-- Форма создания нового тега -->
+    
     <div class="tag-form">
         <h3 class="mb-3">Создать новый тег</h3>
         <form id="create-tag-form">
@@ -43,7 +40,7 @@
         </form>
     </div>
 
-    <!-- Список всех тегов -->
+    
     <div class="tags-list">
         <h3 class="mb-3">Все теги</h3>
 
@@ -92,7 +89,7 @@
     </div>
 </div>
 
-<!-- Модальное окно редактирования тега -->
+
 <div class="modal fade" id="editTagModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -131,25 +128,25 @@
     </div>
 </div>
 
-<!-- Подключаем скрипты -->
+
 <script src="/assets/js/tags.js"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Инициализируем менеджер тегов
+        
         TagManager.init();
 
-        // Обработка формы создания тега
+        
         const createForm = document.getElementById('create-tag-form');
         const colorInput = document.getElementById('tag-color');
         const colorPreview = document.getElementById('color-preview');
 
-        // Обновление предпросмотра цвета
+        
         colorInput.addEventListener('input', function() {
             colorPreview.style.backgroundColor = this.value;
         });
 
-        // Создание тега
+        
         createForm.addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -157,7 +154,7 @@
             const name = nameInput.value.trim();
             const color = colorInput.value;
 
-            // Валидация
+            
             if (!name) {
                 showError(nameInput, 'Введите название тега');
                 return;
@@ -168,35 +165,35 @@
                 return;
             }
 
-            // Создаем тег
+            
             const tag = await TagManager.createTag(name, color);
 
             if (tag) {
-                // Обновляем страницу
+                
                 location.reload();
             }
         });
 
-        // Обработка кнопок редактирования
+        
         document.querySelectorAll('.edit-tag-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const tagId = this.dataset.tagId;
                 const tagName = this.dataset.tagName;
                 const tagColor = this.dataset.tagColor;
 
-                // Заполняем форму в модальном окне
+                
                 document.getElementById('edit-tag-id').value = tagId;
                 document.getElementById('edit-tag-name').value = tagName;
                 document.getElementById('edit-tag-color').value = tagColor;
                 document.getElementById('edit-color-preview').style.backgroundColor = tagColor;
 
-                // Показываем модальное окно
+                
                 const modal = new bootstrap.Modal(document.getElementById('editTagModal'));
                 modal.show();
             });
         });
 
-        // Обработка формы редактирования тега
+        
         const editForm = document.getElementById('edit-tag-form');
 
         editForm.addEventListener('submit', async function(e) {
@@ -214,13 +211,13 @@
             const tag = await TagManager.updateTag(tagId, name, color);
 
             if (tag) {
-                // Закрываем модальное окно и обновляем страницу
+                
                 bootstrap.Modal.getInstance(document.getElementById('editTagModal')).hide();
                 location.reload();
             }
         });
 
-        // Обработка кнопок удаления
+        
         document.querySelectorAll('.delete-tag-btn').forEach(btn => {
             btn.addEventListener('click', async function() {
                 const tagId = this.dataset.tagId;
@@ -228,7 +225,7 @@
                 const confirmed = await TagManager.deleteTag(tagId);
 
                 if (confirmed) {
-                    // Удаляем карточку тега из DOM
+                    
                     const tagCard = document.querySelector(`.tag-card[data-tag-id="${tagId}"]`);
                     if (tagCard) {
                         tagCard.remove();
@@ -237,7 +234,7 @@
             });
         });
 
-        // Вспомогательная функция для показа ошибок
+        
         function showError(input, message) {
             input.classList.add('is-invalid');
             const errorElement = input.nextElementSibling;
@@ -246,7 +243,7 @@
                 errorElement.style.display = 'block';
             }
 
-            // Убираем ошибку при исправлении
+            
             input.addEventListener('input', function() {
                 this.classList.remove('is-invalid');
                 if (errorElement) {

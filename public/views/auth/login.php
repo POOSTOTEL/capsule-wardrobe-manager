@@ -1,5 +1,5 @@
 <?php
-// public/views/auth/login.php
+
 $errors = $errors ?? [];
 $email = $email ?? '';
 ?>

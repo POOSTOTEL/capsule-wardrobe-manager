@@ -1,5 +1,5 @@
 <?php
-// public/views/home/index.php
+
 ?>
 <div class="hero-section">
     <h1 class="hero-title">Добро пожаловать в Капсульный Гардероб!</h1>

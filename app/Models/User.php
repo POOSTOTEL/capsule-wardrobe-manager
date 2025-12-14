@@ -1,5 +1,5 @@
 <?php
-// app/Models/User.php
+
 
 namespace App\Models;
 
@@ -14,21 +14,21 @@ class User
 
     public function __construct()
     {
-        // Получаем экземпляр Database через Singleton
+        
         $database = Database::getInstance();
         $this->db = $database->getConnection();
     }
 
-    // Регистрация нового пользователя
+    
     public function register(array $data): ?int
     {
         try {
-            // Проверяем, существует ли пользователь с таким email
+            
             if ($this->findByEmail($data['email'])) {
                 return null;
             }
 
-            // Хэшируем пароль
+            
             $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
 
             $sql = "INSERT INTO {$this->table} (email, username, password_hash, full_name, created_at) 
@@ -49,7 +49,7 @@ class User
         }
     }
 
-    // Поиск пользователя по email
+    
     public function findByEmail(string $email): ?array
     {
         try {
@@ -65,7 +65,7 @@ class User
         }
     }
 
-    // Поиск пользователя по ID
+    
     public function findById(int $id): ?array
     {
         try {
@@ -83,7 +83,7 @@ class User
         }
     }
 
-    // Проверка учетных данных
+    
     public function verifyCredentials(string $email, string $password): ?array
     {
         $user = $this->findByEmail($email);
@@ -92,12 +92,12 @@ class User
             return null;
         }
 
-        // Убираем пароль из возвращаемых данных
+        
         unset($user['password_hash']);
         return $user;
     }
 
-    // Обновление профиля пользователя
+    
     public function updateProfile(int $userId, array $data): bool
     {
         try {
@@ -115,7 +115,7 @@ class User
             }
 
             if (isset($data['email'])) {
-                // Проверяем, не занят ли email другим пользователем
+                
                 $existing = $this->findByEmail($data['email']);
                 if ($existing && $existing['id'] != $userId) {
                     return false;
@@ -145,7 +145,7 @@ class User
         }
     }
 
-    // Проверка существования пользователя
+    
     public function exists(int $userId): bool
     {
         try {
@@ -160,7 +160,7 @@ class User
         }
     }
 
-    // Получение статистики пользователя
+    
     public function getStats(int $userId): array
     {
         try {
@@ -170,19 +170,19 @@ class User
                 'total_capsules' => 0
             ];
 
-            // Количество вещей
+            
             $sql = "SELECT COUNT(*) FROM items WHERE user_id = :user_id";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([':user_id' => $userId]);
             $stats['total_items'] = (int)$stmt->fetchColumn();
 
-            // Количество образов
+            
             $sql = "SELECT COUNT(*) FROM outfits WHERE user_id = :user_id";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([':user_id' => $userId]);
             $stats['total_outfits'] = (int)$stmt->fetchColumn();
 
-            // Количество капсул
+            
             $sql = "SELECT COUNT(*) FROM capsules WHERE user_id = :user_id";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([':user_id' => $userId]);
@@ -195,7 +195,7 @@ class User
         }
     }
 
-    // Проверка, может ли пользователь получить доступ к ресурсу
+    
     public function canAccessResource(int $userId, int $resourceId, string $table): bool
     {
         try {

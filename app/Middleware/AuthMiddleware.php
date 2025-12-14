@@ -1,5 +1,5 @@
 <?php
-// app/Middleware/AuthMiddleware.php
+
 
 namespace App\Middleware;
 
@@ -14,27 +14,27 @@ class AuthMiddleware
         $this->session = new Session();
     }
 
-    // Основной метод обработки middleware
+    
     public function handle(): bool
     {
-        // Проверяем, авторизован ли пользователь
+        
         if (!$this->session->get('user_id')) {
             return false;
         }
 
-        // Можно добавить дополнительную проверку, например:
-        // - Проверка активности пользователя в БД
-        // - Проверка времени последней активности
-        // - Проверка IP адреса
+        
+        
+        
+        
 
         return true;
     }
 
-    // Проверка и редирект если не авторизован
+    
     public function requireAuth(string $redirectTo = '/login'): void
     {
         if (!$this->handle()) {
-            // Сохраняем URL для редиректа после входа
+            
             if ($redirectTo === '/login') {
                 $currentUrl = $_SERVER['REQUEST_URI'] ?? '/';
                 header("Location: /login?redirect=" . urlencode($currentUrl));
@@ -45,7 +45,7 @@ class AuthMiddleware
         }
     }
 
-    // Проверка и редирект если уже авторизован (для страниц логина/регистрации)
+    
     public function requireGuest(string $redirectTo = '/'): void
     {
         if ($this->handle()) {
@@ -54,13 +54,13 @@ class AuthMiddleware
         }
     }
 
-    // Получение ID текущего пользователя
+    
     public function getUserId(): ?int
     {
         return $this->session->get('user_id');
     }
 
-    // Получение данных текущего пользователя
+    
     public function getUserData(): ?array
     {
         $userId = $this->getUserId();
@@ -68,8 +68,8 @@ class AuthMiddleware
             return null;
         }
 
-        // Здесь можно добавить получение данных пользователя из БД
-        // или использовать данные из сессии
+        
+        
         return [
             'id' => $userId,
             'email' => $this->session->get('user_email'),
@@ -78,31 +78,31 @@ class AuthMiddleware
         ];
     }
 
-    // Проверка роли пользователя (базовая реализация)
+    
     public function hasRole(string $role): bool
     {
-        // В текущей реализации у всех пользователей одинаковая роль
-        // Можно расширить в будущем
-        return $this->handle(); // Если авторизован, значит имеет роль "user"
+        
+        
+        return $this->handle(); 
     }
 
-    // Проверка доступа к ресурсу
+    
     public function canAccessResource(int $resourceUserId): bool
     {
         $currentUserId = $this->getUserId();
 
-        // Пользователь может обращаться только к своим ресурсам
+        
         return $currentUserId && $currentUserId === $resourceUserId;
     }
 
-    // Обновление времени последней активности
+    
     public function updateLastActivity(): void
     {
         $this->session->set('last_activity', time());
     }
 
-    // Проверка времени бездействия
-    public function checkInactivity(int $timeout = 1800): bool // 30 минут по умолчанию
+    
+    public function checkInactivity(int $timeout = 1800): bool 
     {
         $lastActivity = $this->session->get('last_activity');
 
@@ -114,7 +114,7 @@ class AuthMiddleware
         $inactiveTime = time() - $lastActivity;
 
         if ($inactiveTime > $timeout) {
-            // Время бездействия истекло
+            
             $this->session->destroy();
             return false;
         }

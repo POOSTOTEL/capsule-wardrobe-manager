@@ -1,5 +1,5 @@
 <?php
-// app/Models/Analytics.php
+
 
 namespace App\Models;
 
@@ -9,9 +9,9 @@ use PDOException;
 
 class Analytics extends BaseModel
 {
-    protected $table = 'usage_history'; // Используем таблицу истории для аналитики
+    protected $table = 'usage_history'; 
 
-    // Получить распределение по категориям
+    
     public function getCategoryDistribution(int $userId, int $limit = null): array
     {
         $sql = "SELECT 
@@ -42,7 +42,7 @@ class Analytics extends BaseModel
         }
     }
 
-    // Получить распределение по цветам
+    
     public function getColorDistribution(int $userId, int $limit = null): array
     {
         $sql = "SELECT 
@@ -74,7 +74,7 @@ class Analytics extends BaseModel
         }
     }
 
-    // Получить топ используемых вещей
+    
     public function getTopUsedItems(int $userId, int $limit = 10): array
     {
         $sql = "SELECT 
@@ -100,7 +100,7 @@ class Analytics extends BaseModel
             $stmt->execute();
             $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            // Удаляем бинарные данные изображений
+            
             foreach ($items as &$item) {
                 if (isset($item['image_data'])) {
                     unset($item['image_data']);
@@ -114,7 +114,7 @@ class Analytics extends BaseModel
         }
     }
 
-    // Получить индекс использования вещей с фильтрацией
+    
     public function getItemsUsageIndex(int $userId, string $filter = 'all'): array
     {
         $sql = "SELECT 
@@ -131,7 +131,7 @@ class Analytics extends BaseModel
                 LEFT JOIN colors cl ON i.color_id = cl.id
                 WHERE i.user_id = :user_id";
 
-        // Применяем фильтры
+        
         switch ($filter) {
             case 'top':
                 $sql .= " AND i.usage_count > (SELECT AVG(usage_count) FROM items WHERE user_id = :user_id)";
@@ -152,7 +152,7 @@ class Analytics extends BaseModel
             $stmt->execute();
             $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            // Удаляем бинарные данные изображений
+            
             foreach ($items as &$item) {
                 if (isset($item['image_data'])) {
                     unset($item['image_data']);
@@ -166,7 +166,7 @@ class Analytics extends BaseModel
         }
     }
 
-    // Получить карту сочетаемости
+    
     public function getCompatibilityMap(int $userId, int $limit = 20): array
     {
         $sql = "SELECT 
@@ -206,7 +206,7 @@ class Analytics extends BaseModel
         }
     }
 
-    // Получить статистику по сезонам
+    
     public function getSeasonStatistics(int $userId): array
     {
         $sql = "SELECT 
@@ -233,7 +233,7 @@ class Analytics extends BaseModel
         }
     }
 
-    // Получить статистику использования
+    
     public function getUsageStatistics(int $userId): array
     {
         $sql = "SELECT 
@@ -253,7 +253,7 @@ class Analytics extends BaseModel
             $stmt->execute();
             $stats = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // Вычисляем проценты
+            
             if ($stats['total_items'] > 0) {
                 $stats['used_percentage'] = round(($stats['used_items'] / $stats['total_items']) * 100, 2);
                 $stats['unused_percentage'] = round(($stats['unused_items'] / $stats['total_items']) * 100, 2);

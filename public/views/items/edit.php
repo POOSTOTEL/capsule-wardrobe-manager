@@ -1,15 +1,5 @@
 <?php
-/**
- * Форма редактирования вещи
- * 
- * @var array $item
- * @var array $categories
- * @var array $colors
- * @var array $seasons
- * @var array $tags
- * @var array $selectedTagIds
- * @var string $title
- */
+
 ?>
 
 <div class="page-header mb-4">
@@ -22,7 +12,7 @@
 <form id="item-form" method="POST" action="/items/<?= $item['id'] ?>" enctype="multipart/form-data">
         <input type="hidden" name="_method" value="PUT">
 
-        <!-- Основная информация -->
+        
         <div class="form-section">
             <h2 class="section-title">Основная информация</h2>
 
@@ -57,7 +47,7 @@
             </div>
         </div>
 
-        <!-- Изображение -->
+        
         <div class="form-section">
             <h2 class="section-title">Фотография</h2>
 
@@ -89,7 +79,7 @@
             <div class="invalid-feedback" id="image-error"></div>
         </div>
 
-        <!-- Атрибуты -->
+        
         <div class="form-section">
             <h2 class="section-title">Атрибуты</h2>
 
@@ -121,7 +111,7 @@
             </div>
         </div>
 
-        <!-- Заметки -->
+        
         <div class="form-section">
             <h2 class="section-title">Заметки</h2>
             <div class="mb-3">
@@ -136,7 +126,7 @@
             </div>
         </div>
 
-        <!-- Кнопки действий -->
+        
         <div class="form-actions d-grid gap-2 d-md-flex justify-content-md-end">
             <a href="/items/<?= $item['id'] ?>" class="btn btn-outline-secondary">Отмена</a>
             <button type="submit" class="btn btn-primary">
@@ -158,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const notesTextarea = document.getElementById('item-notes');
     const notesCounter = document.getElementById('notes-counter');
 
-    // Обработка загрузки нового изображения
+    
     uploadArea.addEventListener('click', function() {
         imageInput.click();
     });
@@ -166,20 +156,20 @@ document.addEventListener('DOMContentLoaded', function() {
     imageInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
-            // Валидация размера
+            
             if (file.size > 5 * 1024 * 1024) {
                 alert('Файл слишком большой. Максимальный размер: 5MB');
                 return;
             }
 
-            // Валидация типа
+            
             const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
             if (!allowedTypes.includes(file.type)) {
                 alert('Неподдерживаемый тип файла. Разрешены: JPEG, PNG, GIF, WebP');
                 return;
             }
 
-            // Показываем превью нового изображения
+            
             const reader = new FileReader();
             reader.onload = function(e) {
                 previewImage.src = e.target.result;
@@ -188,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Счетчик символов для заметок
+    
     if (notesTextarea && notesCounter) {
         notesTextarea.addEventListener('input', function() {
             const remaining = 1000 - this.value.length;
@@ -197,11 +187,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Валидация формы
+    
     form.addEventListener('submit', function(e) {
         e.preventDefault();
 
-        // Сбрасываем предыдущие ошибки
+        
         document.querySelectorAll('.is-invalid').forEach(el => {
             el.classList.remove('is-invalid');
         });
@@ -209,7 +199,7 @@ document.addEventListener('DOMContentLoaded', function() {
             el.textContent = '';
         });
 
-        // Простая валидация на клиенте
+        
         let isValid = true;
 
         if (!document.getElementById('item-name').value.trim()) {
@@ -226,7 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Отправляем форму
+        
         const formData = new FormData(form);
 
         fetch('/items/<?= $item['id'] ?>', {
@@ -261,7 +251,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.success) {
                 window.location.href = `/items/${data.data.id}`;
             } else {
-                // Показываем ошибки
+                
                 if (data.errors) {
                     console.error('Validation errors:', data.errors);
                     Object.keys(data.errors).forEach(field => {

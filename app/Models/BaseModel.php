@@ -1,5 +1,5 @@
 <?php
-// app/Models/BaseModel.php
+
 
 namespace App\Models;
 
@@ -19,7 +19,7 @@ abstract class BaseModel
         $this->db = Database::getInstance();
     }
 
-    // Получить все записи
+    
     public function all(array $columns = ['*']): array
     {
         $columns = implode(', ', $columns);
@@ -34,7 +34,7 @@ abstract class BaseModel
         }
     }
 
-    // Найти запись по ID
+    
     public function find(int $id, array $columns = ['*']): ?array
     {
         $columns = implode(', ', $columns);
@@ -50,25 +50,25 @@ abstract class BaseModel
         }
     }
 
-    // Создать запись
+    
     public function create(array $data): int
     {
-        // Фильтруем данные по fillable
+        
         $filteredData = array_intersect_key($data, array_flip($this->fillable));
 
         if (empty($filteredData)) {
             throw new \RuntimeException("No fillable fields provided for insert");
         }
 
-        // Обрабатываем boolean значения - конвертируем в правильный формат для PostgreSQL
+        
         foreach ($filteredData as $key => $value) {
             if (is_bool($value)) {
                 $filteredData[$key] = $value;
             } elseif ($value === '' && in_array($key, ['is_favorite', 'is_active'])) {
-                // Если пустая строка для boolean поля, устанавливаем false
+                
                 $filteredData[$key] = false;
             } elseif (is_string($value) && in_array(strtolower($value), ['true', 'false', '1', '0', ''])) {
-                // Конвертируем строковые представления boolean
+                
                 $filteredData[$key] = in_array(strtolower($value), ['true', '1']);
             }
         }
@@ -82,14 +82,14 @@ abstract class BaseModel
             $stmt = $this->db->prepare($sql);
             $stmt->execute($filteredData);
             
-            // Для PostgreSQL используем RETURNING, для других БД - lastInsertId
+            
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($result && isset($result[$this->primaryKey])) {
                 return (int) $result[$this->primaryKey];
             }
             
-            // Fallback на lastInsertId для других БД
-            // В PostgreSQL нужно указать имя последовательности
+            
+            
             $sequenceName = $this->table . '_' . $this->primaryKey . '_seq';
             $lastId = $this->db->lastInsertId($sequenceName);
             return $lastId ? (int) $lastId : 0;
@@ -98,10 +98,10 @@ abstract class BaseModel
         }
     }
 
-    // Обновить запись
+    
     public function update(int $id, array $data): bool
     {
-        // Фильтруем данные по fillable
+        
         $filteredData = array_intersect_key($data, array_flip($this->fillable));
 
         if (empty($filteredData)) {
@@ -120,14 +120,14 @@ abstract class BaseModel
             $stmt = $this->db->prepare($sql);
             $result = $stmt->execute($filteredData);
             
-            // Проверяем, были ли затронуты строки
+            
             return $result && $stmt->rowCount() > 0;
         } catch (PDOException $e) {
             throw new \RuntimeException("Database error: " . $e->getMessage());
         }
     }
 
-    // Удалить запись
+    
     public function delete(int $id): bool
     {
         $sql = "DELETE FROM {$this->table} WHERE {$this->primaryKey} = :id";
@@ -140,7 +140,7 @@ abstract class BaseModel
         }
     }
 
-    // Получить записи с условием WHERE
+    
     public function where(string $column, $value, string $operator = '='): array
     {
         $sql = "SELECT * FROM {$this->table} WHERE {$column} {$operator} :value";
@@ -154,14 +154,14 @@ abstract class BaseModel
         }
     }
 
-    // Получить первую запись с условием
+    
     public function firstWhere(string $column, $value, string $operator = '='): ?array
     {
         $results = $this->where($column, $value, $operator);
         return $results[0] ?? null;
     }
 
-    // Получить все записи с сортировкой
+    
     public function allOrdered(string $orderBy = 'id', string $direction = 'ASC'): array
     {
         $sql = "SELECT * FROM {$this->table} ORDER BY {$orderBy} {$direction}";
@@ -175,7 +175,7 @@ abstract class BaseModel
         }
     }
 
-    // Получить записи в виде массива для select (id => name)
+    
     public function getForSelect(string $valueField = 'name', string $keyField = 'id'): array
     {
         $items = $this->all();
@@ -188,7 +188,7 @@ abstract class BaseModel
         return $result;
     }
 
-    // Получить количество записей
+    
     public function count(): int
     {
         $sql = "SELECT COUNT(*) as count FROM {$this->table}";

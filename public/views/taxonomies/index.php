@@ -1,16 +1,13 @@
 <?php
-// public/views/taxonomies/index.php
 
-/**
- * @var array $taxonomies
- * @var string $title
- */
+
+
 ?>
 <div class="container mt-4">
     <h1 class="mb-4"><?= htmlspecialchars($title) ?></h1>
 
     <div class="row">
-        <!-- Категории -->
+        
         <div class="col-md-4 mb-4">
             <div class="card">
                 <div class="card-header bg-primary text-white">
@@ -36,7 +33,7 @@
             </div>
         </div>
 
-        <!-- Цвета -->
+        
         <div class="col-md-4 mb-4">
             <div class="card">
                 <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
@@ -59,7 +56,7 @@
             </div>
         </div>
 
-        <!-- Сезоны -->
+        
         <div class="col-md-4 mb-4">
             <div class="card">
                 <div class="card-header bg-success text-white">
@@ -106,7 +103,7 @@
         </div>
     </div>
 
-    <!-- Статистика -->
+    
     <div class="row mt-4">
         <div class="col-12">
             <div class="card">
@@ -133,7 +130,7 @@
         </div>
     </div>
 
-    <!-- Инструкция -->
+    
     <div class="row mt-4">
         <div class="col-12">
             <div class="card">

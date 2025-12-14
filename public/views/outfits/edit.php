@@ -1,15 +1,5 @@
 <?php
-/**
- * Форма редактирования образа
- * 
- * @var array $outfit
- * @var array $items
- * @var array $seasons
- * @var array $tags
- * @var array $selectedItemIds
- * @var array $selectedTagIds
- * @var string $title
- */
+
 ?>
 
 <div class="page-header mb-4">
@@ -22,7 +12,7 @@
 <form id="outfit-form" method="POST" action="/outfits/<?= $outfit['id'] ?>">
         <input type="hidden" name="_method" value="PUT">
 
-        <!-- Основная информация -->
+        
         <div class="form-section">
             <h2 class="section-title">Основная информация</h2>
 
@@ -52,7 +42,7 @@
             </div>
         </div>
 
-        <!-- Параметры образа -->
+        
         <div class="form-section">
             <h2 class="section-title">Параметры</h2>
 
@@ -99,7 +89,7 @@
             </div>
         </div>
 
-        <!-- Выбор вещей -->
+        
         <div class="form-section">
             <h2 class="section-title">Вещи в образе</h2>
             <p class="text-muted mb-3">Выберите вещи, которые входят в этот образ</p>
@@ -136,7 +126,7 @@
             </div>
         </div>
 
-        <!-- Кнопки действий -->
+        
         <div class="form-actions d-grid gap-2 d-md-flex justify-content-md-end">
             <a href="/outfits/<?= $outfit['id'] ?>" class="btn btn-outline-secondary">Отмена</a>
             <button type="submit" class="btn btn-primary">
@@ -153,10 +143,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const descriptionTextarea = document.getElementById('outfit-description');
     const descriptionCounter = document.getElementById('description-counter');
     
-    // Инициализируем выбранные вещи
+    
     let selectedItems = <?= json_encode($selectedItemIds ?? []) ?>;
 
-    // Обработка выбора вещей
+    
     document.querySelectorAll('.item-selector-card').forEach(card => {
         card.addEventListener('click', function() {
             const itemId = parseInt(this.dataset.itemId);
@@ -179,7 +169,7 @@ document.addEventListener('DOMContentLoaded', function() {
         selectedCountSpan.textContent = selectedItems.length;
     }
 
-    // Счетчик символов для описания
+    
     if (descriptionTextarea && descriptionCounter) {
         descriptionTextarea.addEventListener('input', function() {
             const remaining = 1000 - this.value.length;
@@ -188,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Валидация формы
+    
     form.addEventListener('submit', function(e) {
         e.preventDefault();
 
@@ -212,12 +202,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const formData = new FormData(form);
         
-        // Добавляем теги
+        
         const tagInput = document.getElementById('tag-ids-input');
         if (tagInput && tagInput.value) {
             const tagIds = tagInput.value.split(',').filter(id => id.trim() !== '');
             if (tagIds.length > 0) {
-                // Отправляем как массив
+                
                 tagIds.forEach(tagId => {
                     formData.append('tag_ids[]', tagId.trim());
                 });

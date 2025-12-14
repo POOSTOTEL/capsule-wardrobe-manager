@@ -1,9 +1,9 @@
 <?php
-// config/uploads.php
+
 
 return [
     'allowed_extensions' => ['jpg', 'jpeg', 'png', 'gif', 'webp'],
-    'max_size' => 5 * 1024 * 1024, // 5MB
+    'max_size' => 5 * 1024 * 1024, 
     'thumbnails' => [
         'small' => ['width' => 150, 'height' => 150],
         'medium' => ['width' => 300, 'height' => 300],

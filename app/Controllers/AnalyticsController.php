@@ -1,5 +1,5 @@
 <?php
-// app/Controllers/AnalyticsController.php
+
 
 namespace App\Controllers;
 
@@ -16,7 +16,7 @@ class AnalyticsController extends Controller
 
     public function __construct()
     {
-        // Проверяем аутентификацию
+        
         $authMiddleware = new AuthMiddleware();
         if (!$authMiddleware->handle()) {
             if ($this->isAjax()) {
@@ -35,31 +35,31 @@ class AnalyticsController extends Controller
         $this->userId = $_SESSION['user_id'] ?? null;
     }
 
-    // Главная страница аналитики (дашборд)
+    
     public function index(): void
     {
         $itemModel = new Item();
         $outfitModel = new Outfit();
         $capsuleModel = new Capsule();
 
-        // Общая статистика
+        
         $totalItems = $itemModel->getTotalCount($this->userId);
         $totalOutfits = $outfitModel->getTotalCount($this->userId);
         $totalCapsules = $capsuleModel->getTotalCount($this->userId);
 
-        // Распределение по категориям (топ 5)
+        
         $categoryDistribution = $this->analyticsModel->getCategoryDistribution($this->userId, 5);
         
-        // Распределение по цветам (топ 5)
+        
         $colorDistribution = $this->analyticsModel->getColorDistribution($this->userId, 5);
 
-        // Топ используемых вещей
+        
         $topUsedItems = $this->analyticsModel->getTopUsedItems($this->userId, 5);
 
-        // Статистика по сезонам
+        
         $seasonStats = $this->analyticsModel->getSeasonStatistics($this->userId);
 
-        // Статистика по использованию
+        
         $usageStats = $this->analyticsModel->getUsageStatistics($this->userId);
 
         if ($this->isAjax()) {
@@ -95,7 +95,7 @@ class AnalyticsController extends Controller
         $this->render('analytics/dashboard', $data);
     }
 
-    // Распределение по категориям
+    
     public function categories(): void
     {
         $categoryDistribution = $this->analyticsModel->getCategoryDistribution($this->userId);
@@ -117,7 +117,7 @@ class AnalyticsController extends Controller
         $this->render('analytics/categories', $data);
     }
 
-    // Распределение по цветам
+    
     public function colors(): void
     {
         $colorDistribution = $this->analyticsModel->getColorDistribution($this->userId);
@@ -139,10 +139,10 @@ class AnalyticsController extends Controller
         $this->render('analytics/colors', $data);
     }
 
-    // Индекс использования вещей
+    
     public function usage(): void
     {
-        $filter = $this->input('filter', 'all'); // all, top, bottom, unused
+        $filter = $this->input('filter', 'all'); 
 
         $items = $this->analyticsModel->getItemsUsageIndex($this->userId, $filter);
 
@@ -164,7 +164,7 @@ class AnalyticsController extends Controller
         $this->render('analytics/usage', $data);
     }
 
-    // Карта сочетаемости
+    
     public function compatibility(): void
     {
         $limit = (int) $this->input('limit', 20);

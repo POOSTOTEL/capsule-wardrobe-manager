@@ -1,5 +1,5 @@
 <?php
-// app/Services/TaxonomyService.php
+
 
 namespace App\Services;
 
@@ -20,7 +20,7 @@ class TaxonomyService
         $this->seasonModel = new Season();
     }
 
-    // Получить все справочники для форм
+    
     public function getAllForSelect(): array
     {
         return [
@@ -30,7 +30,7 @@ class TaxonomyService
         ];
     }
 
-    // Получить все справочники с деталями
+    
     public function getAllWithDetails(): array
     {
         return [
@@ -40,7 +40,7 @@ class TaxonomyService
         ];
     }
 
-    // Получить категории для формы выбора
+    
     public function getCategoriesForForm(): array
     {
         $categories = $this->categoryModel->getAllSorted();
@@ -53,7 +53,7 @@ class TaxonomyService
         return $options;
     }
 
-    // Получить цвета для формы выбора
+    
     public function getColorsForForm(): array
     {
         $colors = $this->colorModel->getAllSorted();
@@ -66,7 +66,7 @@ class TaxonomyService
         return $options;
     }
 
-    // Получить сезоны для формы выбора
+    
     public function getSeasonsForForm(): array
     {
         $seasons = $this->seasonModel->getAllSorted();
@@ -79,7 +79,7 @@ class TaxonomyService
         return $options;
     }
 
-    // Получить все данные для формы добавления вещи
+    
     public function getFormData(): array
     {
         return [
@@ -90,7 +90,7 @@ class TaxonomyService
         ];
     }
 
-    // Валидация ID справочников
+    
     public function validateTaxonomyIds(array $data): array
     {
         $errors = [];
@@ -119,7 +119,7 @@ class TaxonomyService
         return $errors;
     }
 
-    // Получить название по ID
+    
     public function getNameById(string $type, int $id): ?string
     {
         switch ($type) {
@@ -139,7 +139,7 @@ class TaxonomyService
         return $item ? $item['name'] : null;
     }
 
-    // Получить все справочники для API
+    
     public function getForApi(): array
     {
         return [

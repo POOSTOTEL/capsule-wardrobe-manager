@@ -1,10 +1,5 @@
 <?php
-/**
- * Детальная информация о капсуле
- * 
- * @var array $capsule
- * @var string $title
- */
+
 ?>
 
 <div class="page-header mb-4">
@@ -54,7 +49,7 @@
     <?php endif; ?>
 
     <div class="row">
-        <!-- Вещи -->
+        
         <div class="col-md-6 mb-4">
             <div class="card">
                 <div class="card-header">
@@ -136,7 +131,7 @@
             </div>
         </div>
 
-        <!-- Образы -->
+        
         <div class="col-md-6 mb-4">
             <div class="card">
                 <div class="card-header">
@@ -192,7 +187,7 @@
         </div>
     </div>
 
-    <!-- Статистика -->
+    
     <div class="card p-4">
         <h3 class="mb-3">Статистика капсулы</h3>
         <div class="row">
@@ -244,7 +239,7 @@
     </div>
 </div>
 
-<!-- Модальное окно для генерации образов -->
+
 <div class="modal fade" id="generateOutfitsModal" tabindex="-1" aria-labelledby="generateOutfitsModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -301,7 +296,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            // Блокируем кнопку
+            
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Генерация...';
             
@@ -317,29 +312,29 @@ document.addEventListener('DOMContentLoaded', function() {
                     })
                 });
                 
-                // Проверяем, является ли ответ JSON
+                
                 const contentType = response.headers.get('content-type') || '';
                 let data;
                 
                 if (contentType.includes('application/json')) {
                     data = await response.json();
                 } else {
-                    // Если ответ не JSON, пытаемся распарсить как текст
+                    
                     const text = await response.text();
                     try {
                         data = JSON.parse(text);
                     } catch (e) {
-                        // Если не JSON, значит сервер вернул HTML (редирект или ошибка)
+                        
                         throw new Error('Сервер вернул неожиданный ответ. Попробуйте обновить страницу.');
                     }
                 }
                 
                 if (data.success) {
                     modal.hide();
-                    // Показываем сообщение об успехе
+                    
                     const message = data.message || `Успешно сгенерировано ${data.data?.generated_count || count} образов`;
                     alert(message);
-                    // Перезагружаем страницу для отображения новых образов
+                    
                     window.location.reload();
                 } else {
                     alert(data.message || 'Ошибка при генерации образов');

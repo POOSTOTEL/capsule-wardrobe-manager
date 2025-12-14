@@ -1,7 +1,7 @@
 <?php
-// config/paths.php
 
-// Определяем корневую директорию
+
+
 $rootPath = dirname(__DIR__);
 
 define('ROOT_PATH', $rootPath);

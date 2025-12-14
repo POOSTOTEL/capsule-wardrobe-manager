@@ -1,5 +1,5 @@
 <?php
-// app/Controllers/TagController.php
+
 
 namespace App\Controllers;
 
@@ -14,7 +14,7 @@ class TagController extends Controller
 
     public function __construct()
     {
-        // Проверяем аутентификацию
+        
         $authMiddleware = new AuthMiddleware();
         if (!$authMiddleware->handle()) {
             if ($this->isAjax()) {
@@ -33,9 +33,7 @@ class TagController extends Controller
         $this->userId = $_SESSION['user_id'] ?? null;
     }
 
-    /**
-     * Получить все теги пользователя (JSON)
-     */
+    
     public function index(): void
     {
         Logger::debug('Получение списка тегов', [
@@ -67,9 +65,7 @@ class TagController extends Controller
         }
     }
 
-    /**
-     * Получить теги с группировкой
-     */
+    
     public function grouped(): void
     {
         $groupedTags = $this->tagModel->getForSelectGrouped($this->userId);
@@ -80,9 +76,7 @@ class TagController extends Controller
         ]);
     }
 
-    /**
-     * Поиск тегов (для автодополнения)
-     */
+    
     public function search(): void
     {
         $query = $this->input('query', '');
@@ -105,9 +99,7 @@ class TagController extends Controller
         ]);
     }
 
-    /**
-     * Создать новый пользовательский тег
-     */
+    
     public function store(): void
     {
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -122,7 +114,7 @@ class TagController extends Controller
         $name = trim($this->input('name', ''));
         $color = trim($this->input('color', ''));
 
-        // Валидация
+        
         if (empty($name)) {
             $this->json([
                 'success' => false,
@@ -203,9 +195,7 @@ class TagController extends Controller
         }
     }
 
-    /**
-     * Обновить пользовательский тег
-     */
+    
     public function update(int $id): void
     {
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -227,7 +217,7 @@ class TagController extends Controller
             return;
         }
 
-        // Проверяем права доступа
+        
         if ($tag['is_system'] || ($tag['user_id'] != $this->userId && !$tag['is_system'])) {
             $this->json([
                 'success' => false,
@@ -236,7 +226,7 @@ class TagController extends Controller
             return;
         }
 
-        // Получаем данные из запроса
+        
         $name = trim($this->input('name', ''));
         $color = trim($this->input('color', ''));
 
@@ -256,7 +246,7 @@ class TagController extends Controller
             return;
         }
 
-        // Подготавливаем данные для обновления
+        
         $updateData = ['name' => $name];
         if (!empty($color)) {
             $updateData['color'] = $color;
@@ -308,9 +298,7 @@ class TagController extends Controller
         ]);
     }
 
-    /**
-     * Удалить пользовательский тег
-     */
+    
     public function destroy(int $id): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $_SERVER['REQUEST_METHOD'] !== 'DELETE') {
@@ -351,9 +339,7 @@ class TagController extends Controller
         ]);
     }
 
-    /**
-     * Получить популярные теги
-     */
+    
     public function popular(): void
     {
         $limit = (int) $this->input('limit', 10);
@@ -365,9 +351,7 @@ class TagController extends Controller
         ]);
     }
 
-    /**
-     * Получить теги для вещи
-     */
+    
     public function forItem(int $itemId): void
     {
         $tags = $this->tagModel->getForItem($itemId);
@@ -379,9 +363,7 @@ class TagController extends Controller
         ]);
     }
 
-    /**
-     * Получить теги для образа
-     */
+    
     public function forOutfit(int $outfitId): void
     {
         $tags = $this->tagModel->getForOutfit($outfitId);
@@ -393,9 +375,7 @@ class TagController extends Controller
         ]);
     }
 
-    /**
-     * Привязать тег к вещи
-     */
+    
     public function attachToItem(int $itemId): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -449,9 +429,7 @@ class TagController extends Controller
         ]);
     }
 
-    /**
-     * Отвязать тег от вещи
-     */
+    
     public function detachFromItem(int $itemId, int $tagId): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $_SERVER['REQUEST_METHOD'] !== 'DELETE') {
@@ -478,9 +456,7 @@ class TagController extends Controller
         ]);
     }
 
-    /**
-     * Привязать тег к образу
-     */
+    
     public function attachToOutfit(int $outfitId): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -534,9 +510,7 @@ class TagController extends Controller
         ]);
     }
 
-    /**
-     * Отвязать тег от образа
-     */
+    
     public function detachFromOutfit(int $outfitId, int $tagId): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $_SERVER['REQUEST_METHOD'] !== 'DELETE') {
@@ -563,9 +537,7 @@ class TagController extends Controller
         ]);
     }
 
-    /**
-     * HTML страница управления тегами
-     */
+    
     public function manage(): void
     {
         $tags = $this->tagModel->getByUser($this->userId);

@@ -1,10 +1,5 @@
 <?php
-/**
- * Детальная страница вещи
- * 
- * @var array $item
- * @var string $title
- */
+
 ?>
 
 <div class="detail-header mb-4">
