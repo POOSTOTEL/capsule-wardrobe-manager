@@ -98,31 +98,3 @@
         <div class="action-description">Проанализируйте ваш гардероб</div>
     </a>
 </div>
-
-<div class="recent-activity mt-5">
-    <h2 class="mb-4">Недавняя активность</h2>
-
-    <div class="activity-list">
-        <?php if (isset($_SESSION['user_id'])): ?>
-            <div class="activity-item">
-                <div class="activity-icon">
-                    <i class="fas fa-user-check"></i>
-                </div>
-                <div class="activity-content">
-                    <div class="activity-text">Вы успешно вошли в систему</div>
-                    <div class="activity-time">Только что</div>
-                </div>
-            </div>
-        <?php else: ?>
-            <div class="activity-item">
-                <div class="activity-icon">
-                    <i class="fas fa-info-circle"></i>
-                </div>
-                <div class="activity-content">
-                    <div class="activity-text">Добро пожаловать в систему! Зарегистрируйтесь или войдите, чтобы начать.</div>
-                    <div class="activity-time">Только что</div>
-                </div>
-            </div>
-        <?php endif; ?>
-    </div>
-</div>

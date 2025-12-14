@@ -31,6 +31,7 @@
         </div>
 
         <form id="filters-form" method="GET" action="/outfits">
+            <input type="hidden" name="tag_ids" id="filter-tag-ids" value="<?= htmlspecialchars(implode(',', $filters['tag_ids'] ?? [])) ?>">
             <div class="filters-grid">
                 <!-- Поиск -->
                 <div class="filter-group">
@@ -215,6 +216,16 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Обновление скрытого поля с тегами при изменении выбора
+    const filterTags = document.getElementById('filter-tags');
+    const filterTagIds = document.getElementById('filter-tag-ids');
+    if (filterTags && filterTagIds) {
+        filterTags.addEventListener('change', function() {
+            const selected = Array.from(this.selectedOptions).map(opt => opt.value);
+            filterTagIds.value = selected.join(',');
+        });
+    }
+
     // Сброс фильтров
     const resetBtn = document.getElementById('reset-filters');
     if (resetBtn) {

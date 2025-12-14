@@ -16,7 +16,7 @@
 
     <!-- Скрытое поле для отправки выбранных ID тегов -->
     <input type="hidden"
-           name="<?= htmlspecialchars($name ?? 'tags') ?>"
+           name="<?= htmlspecialchars($name ?? 'tag_ids') ?>"
            id="tag-ids-input"
            value="<?= htmlspecialchars(implode(',', $selectedTags ?? [])) ?>">
 

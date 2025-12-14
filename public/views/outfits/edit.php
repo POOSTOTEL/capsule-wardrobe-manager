@@ -136,15 +136,6 @@
             </div>
         </div>
 
-        <!-- Теги -->
-        <div class="form-section">
-            <h2 class="section-title">Теги</h2>
-            <?php 
-            $selectedTags = $selectedTagIds ?? [];
-            include __DIR__ . '/../items/_tag_selector.php'; 
-            ?>
-        </div>
-
         <!-- Кнопки действий -->
         <div class="form-actions d-grid gap-2 d-md-flex justify-content-md-end">
             <a href="/outfits/<?= $outfit['id'] ?>" class="btn btn-outline-secondary">Отмена</a>
@@ -221,9 +212,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const formData = new FormData(form);
         
-        const tagInput = document.querySelector('input[name="tags"]');
-        if (tagInput) {
-            formData.append('tag_ids', tagInput.value);
+        // Добавляем теги
+        const tagInput = document.getElementById('tag-ids-input');
+        if (tagInput && tagInput.value) {
+            const tagIds = tagInput.value.split(',').filter(id => id.trim() !== '');
+            if (tagIds.length > 0) {
+                // Отправляем как массив
+                tagIds.forEach(tagId => {
+                    formData.append('tag_ids[]', tagId.trim());
+                });
+            }
         }
 
         fetch('/outfits/<?= $outfit['id'] ?>', {

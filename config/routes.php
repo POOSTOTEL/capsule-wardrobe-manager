@@ -30,10 +30,15 @@ $router->get('/api/tags/search', 'TagController@search', 'tags.search');
 $router->get('/api/tags/popular', 'TagController@popular', 'tags.popular');
 $router->post('/api/tags', 'TagController@store', 'tags.store');
 $router->put('/api/tags/{id}', 'TagController@update', 'tags.update');
+$router->post('/api/tags/{id}', 'TagController@update');
+$router->patch('/api/tags/{id}', 'TagController@update');
 $router->delete('/api/tags/{id}', 'TagController@destroy', 'tags.destroy');
 $router->get('/api/tags/item/{id}', 'TagController@forItem', 'tags.forItem');
+$router->get('/api/tags/outfit/{id}', 'TagController@forOutfit', 'tags.forOutfit');
 $router->post('/api/tags/item/{id}/attach', 'TagController@attachToItem', 'tags.attach');
 $router->delete('/api/tags/item/{itemId}/{tagId}', 'TagController@detachFromItem', 'tags.detach');
+$router->post('/api/tags/outfit/{id}/attach', 'TagController@attachToOutfit', 'tags.attachOutfit');
+$router->delete('/api/tags/outfit/{outfitId}/{tagId}', 'TagController@detachFromOutfit', 'tags.detachOutfit');
 
 // Страница управления тегами
 $router->get('/tags', 'TagController@manage', 'tags.manage');
@@ -72,6 +77,9 @@ $router->post('/outfits/{id}/favorite', 'OutfitController@toggleFavorite', 'outf
 $router->post('/outfits/{id}/items', 'OutfitController@addItem', 'outfits.addItem');
 $router->post('/outfits/{id}/items/remove', 'OutfitController@removeItem', 'outfits.removeItem');
 $router->delete('/outfits/{id}/items/{itemId}', 'OutfitController@removeItem');
+$router->post('/outfits/{id}/capsule', 'OutfitController@addToCapsule', 'outfits.addToCapsule');
+$router->post('/api/capsules/{id}/generate-outfits', 'OutfitController@generateFromCapsule', 'outfits.generateFromCapsule');
+$router->post('/api/capsules/{id}/save-outfit', 'OutfitController@saveGenerated', 'outfits.saveGenerated');
 $router->get('/api/outfits', 'OutfitController@index');
 $router->get('/api/outfits/{id}', 'OutfitController@show');
 

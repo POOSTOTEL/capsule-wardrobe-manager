@@ -75,16 +75,6 @@
                 </select>
             </div>
 
-            <!-- Теги -->
-            <div class="filter-group filter-tags">
-                <label class="form-label">Теги</label>
-                <div class="tag-selector-filter">
-                    <input type="hidden" name="tag_ids" id="filter-tag-ids" 
-                           value="<?= htmlspecialchars(implode(',', $filters['tag_ids'] ?? [])) ?>">
-                    <div id="filter-tag-selector-container"></div>
-                </div>
-            </div>
-
             <!-- Сортировка -->
             <div class="filter-group">
                 <label for="filter-order" class="form-label">Сортировка</label>

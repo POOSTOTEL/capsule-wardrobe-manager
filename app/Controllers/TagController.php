@@ -5,6 +5,7 @@ namespace App\Controllers;
 
 use App\Models\Tag;
 use App\Middleware\AuthMiddleware;
+use App\Utils\Logger;
 
 class TagController extends Controller
 {
@@ -32,19 +33,43 @@ class TagController extends Controller
         $this->userId = $_SESSION['user_id'] ?? null;
     }
 
-    // Получить все теги пользователя (JSON)
+    /**
+     * Получить все теги пользователя (JSON)
+     */
     public function index(): void
     {
-        $tags = $this->tagModel->getByUser($this->userId);
-
-        $this->json([
-            'success' => true,
-            'data' => $tags,
-            'count' => count($tags)
+        Logger::debug('Получение списка тегов', [
+            'user_id' => $this->userId
         ]);
+
+        try {
+            $tags = $this->tagModel->getByUser($this->userId);
+
+            Logger::info('Список тегов получен', [
+                'user_id' => $this->userId,
+                'count' => count($tags)
+            ]);
+
+            $this->json([
+                'success' => true,
+                'data' => $tags,
+                'count' => count($tags)
+            ]);
+        } catch (\Exception $e) {
+            Logger::error('Ошибка при получении списка тегов', [
+                'user_id' => $this->userId,
+                'message' => $e->getMessage()
+            ]);
+            $this->json([
+                'success' => false,
+                'message' => 'Ошибка при получении тегов'
+            ], 500);
+        }
     }
 
-    // Получить теги с группировкой
+    /**
+     * Получить теги с группировкой
+     */
     public function grouped(): void
     {
         $groupedTags = $this->tagModel->getForSelectGrouped($this->userId);
@@ -55,7 +80,9 @@ class TagController extends Controller
         ]);
     }
 
-    // Поиск тегов (для автодополнения)
+    /**
+     * Поиск тегов (для автодополнения)
+     */
     public function search(): void
     {
         $query = $this->input('query', '');
@@ -78,7 +105,9 @@ class TagController extends Controller
         ]);
     }
 
-    // Создать новый тег
+    /**
+     * Создать новый пользовательский тег
+     */
     public function store(): void
     {
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -110,6 +139,12 @@ class TagController extends Controller
             return;
         }
 
+        Logger::info('Создание нового тега', [
+            'user_id' => $this->userId,
+            'name' => $name,
+            'color' => $color
+        ]);
+
         try {
             $tagId = $this->tagModel->createUserTag($this->userId, [
                 'name' => $name,
@@ -117,6 +152,10 @@ class TagController extends Controller
             ]);
 
             if ($tagId === null || $tagId === 0) {
+                Logger::warning('Попытка создать дублирующий тег', [
+                    'user_id' => $this->userId,
+                    'name' => $name
+                ]);
                 $this->json([
                     'success' => false,
                     'message' => 'Тег с таким названием уже существует'
@@ -127,6 +166,10 @@ class TagController extends Controller
             $newTag = $this->tagModel->find($tagId);
 
             if (!$newTag) {
+                Logger::error('Тег создан, но не найден после создания', [
+                    'user_id' => $this->userId,
+                    'tag_id' => $tagId
+                ]);
                 $this->json([
                     'success' => false,
                     'message' => 'Тег создан, но не найден'
@@ -134,12 +177,25 @@ class TagController extends Controller
                 return;
             }
 
+            Logger::info('Тег успешно создан', [
+                'user_id' => $this->userId,
+                'tag_id' => $tagId,
+                'tag_name' => $name
+            ]);
+
             $this->json([
                 'success' => true,
                 'message' => 'Тег успешно создан',
                 'data' => $newTag
             ], 201);
         } catch (\Exception $e) {
+            Logger::error('Ошибка при создании тега', [
+                'user_id' => $this->userId,
+                'name' => $name,
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
             $this->json([
                 'success' => false,
                 'message' => 'Ошибка при создании тега: ' . $e->getMessage()
@@ -147,7 +203,9 @@ class TagController extends Controller
         }
     }
 
-    // Обновить тег
+    /**
+     * Обновить пользовательский тег
+     */
     public function update(int $id): void
     {
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -178,7 +236,7 @@ class TagController extends Controller
             return;
         }
 
-        // Получаем данные из запроса (поддерживает JSON и form-data)
+        // Получаем данные из запроса
         $name = trim($this->input('name', ''));
         $color = trim($this->input('color', ''));
 
@@ -204,9 +262,19 @@ class TagController extends Controller
             $updateData['color'] = $color;
         }
 
-        $success = $this->tagModel->updateTag($id, $updateData);
+        Logger::info('Обновление тега', [
+            'user_id' => $this->userId,
+            'tag_id' => $id,
+            'new_name' => $name
+        ]);
+
+        $success = $this->tagModel->updateUserTag($id, $this->userId, $updateData);
 
         if (!$success) {
+            Logger::warning('Не удалось обновить тег', [
+                'user_id' => $this->userId,
+                'tag_id' => $id
+            ]);
             $this->json([
                 'success' => false,
                 'message' => 'Ошибка при обновлении тега. Возможно, тег с таким названием уже существует'
@@ -217,12 +285,21 @@ class TagController extends Controller
         $updatedTag = $this->tagModel->find($id);
 
         if (!$updatedTag) {
+            Logger::error('Тег не найден после обновления', [
+                'user_id' => $this->userId,
+                'tag_id' => $id
+            ]);
             $this->json([
                 'success' => false,
                 'message' => 'Тег не найден после обновления'
             ], 500);
             return;
         }
+
+        Logger::info('Тег успешно обновлен', [
+            'user_id' => $this->userId,
+            'tag_id' => $id
+        ]);
 
         $this->json([
             'success' => true,
@@ -231,7 +308,9 @@ class TagController extends Controller
         ]);
     }
 
-    // Удалить тег
+    /**
+     * Удалить пользовательский тег
+     */
     public function destroy(int $id): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $_SERVER['REQUEST_METHOD'] !== 'DELETE') {
@@ -242,9 +321,18 @@ class TagController extends Controller
             return;
         }
 
+        Logger::info('Попытка удаления тега', [
+            'user_id' => $this->userId,
+            'tag_id' => $id
+        ]);
+
         $success = $this->tagModel->deleteUserTag($id, $this->userId);
 
         if (!$success) {
+            Logger::warning('Не удалось удалить тег', [
+                'user_id' => $this->userId,
+                'tag_id' => $id
+            ]);
             $this->json([
                 'success' => false,
                 'message' => 'Не удалось удалить тег. Возможно, тег не существует или у вас нет прав'
@@ -252,13 +340,20 @@ class TagController extends Controller
             return;
         }
 
+        Logger::info('Тег успешно удален', [
+            'user_id' => $this->userId,
+            'tag_id' => $id
+        ]);
+
         $this->json([
             'success' => true,
             'message' => 'Тег успешно удален'
         ]);
     }
 
-    // Получить популярные теги
+    /**
+     * Получить популярные теги
+     */
     public function popular(): void
     {
         $limit = (int) $this->input('limit', 10);
@@ -270,7 +365,9 @@ class TagController extends Controller
         ]);
     }
 
-    // Получить теги для вещи
+    /**
+     * Получить теги для вещи
+     */
     public function forItem(int $itemId): void
     {
         $tags = $this->tagModel->getForItem($itemId);
@@ -282,7 +379,23 @@ class TagController extends Controller
         ]);
     }
 
-    // Привязать тег к вещи
+    /**
+     * Получить теги для образа
+     */
+    public function forOutfit(int $outfitId): void
+    {
+        $tags = $this->tagModel->getForOutfit($outfitId);
+
+        $this->json([
+            'success' => true,
+            'data' => $tags,
+            'outfit_id' => $outfitId
+        ]);
+    }
+
+    /**
+     * Привязать тег к вещи
+     */
     public function attachToItem(int $itemId): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -303,9 +416,20 @@ class TagController extends Controller
             return;
         }
 
+        Logger::debug('Привязка тега к вещи', [
+            'user_id' => $this->userId,
+            'tag_id' => $tagId,
+            'item_id' => $itemId
+        ]);
+
         $success = $this->tagModel->attachToItem($tagId, $itemId);
 
         if (!$success) {
+            Logger::warning('Не удалось привязать тег к вещи', [
+                'user_id' => $this->userId,
+                'tag_id' => $tagId,
+                'item_id' => $itemId
+            ]);
             $this->json([
                 'success' => false,
                 'message' => 'Не удалось привязать тег'
@@ -313,13 +437,21 @@ class TagController extends Controller
             return;
         }
 
+        Logger::info('Тег успешно привязан к вещи', [
+            'user_id' => $this->userId,
+            'tag_id' => $tagId,
+            'item_id' => $itemId
+        ]);
+
         $this->json([
             'success' => true,
             'message' => 'Тег успешно привязан к вещи'
         ]);
     }
 
-    // Отвязать тег от вещи
+    /**
+     * Отвязать тег от вещи
+     */
     public function detachFromItem(int $itemId, int $tagId): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $_SERVER['REQUEST_METHOD'] !== 'DELETE') {
@@ -346,7 +478,94 @@ class TagController extends Controller
         ]);
     }
 
-    // HTML страница управления тегами
+    /**
+     * Привязать тег к образу
+     */
+    public function attachToOutfit(int $outfitId): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->json([
+                'success' => false,
+                'message' => 'Метод не разрешен'
+            ], 405);
+            return;
+        }
+
+        $tagId = (int) $this->input('tag_id');
+
+        if (!$tagId) {
+            $this->json([
+                'success' => false,
+                'message' => 'Не указан ID тега'
+            ], 400);
+            return;
+        }
+
+        Logger::debug('Привязка тега к образу', [
+            'user_id' => $this->userId,
+            'tag_id' => $tagId,
+            'outfit_id' => $outfitId
+        ]);
+
+        $success = $this->tagModel->attachToOutfit($tagId, $outfitId);
+
+        if (!$success) {
+            Logger::warning('Не удалось привязать тег к образу', [
+                'user_id' => $this->userId,
+                'tag_id' => $tagId,
+                'outfit_id' => $outfitId
+            ]);
+            $this->json([
+                'success' => false,
+                'message' => 'Не удалось привязать тег'
+            ], 500);
+            return;
+        }
+
+        Logger::info('Тег успешно привязан к образу', [
+            'user_id' => $this->userId,
+            'tag_id' => $tagId,
+            'outfit_id' => $outfitId
+        ]);
+
+        $this->json([
+            'success' => true,
+            'message' => 'Тег успешно привязан к образу'
+        ]);
+    }
+
+    /**
+     * Отвязать тег от образа
+     */
+    public function detachFromOutfit(int $outfitId, int $tagId): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $_SERVER['REQUEST_METHOD'] !== 'DELETE') {
+            $this->json([
+                'success' => false,
+                'message' => 'Метод не разрешен'
+            ], 405);
+            return;
+        }
+
+        $success = $this->tagModel->detachFromOutfit($tagId, $outfitId);
+
+        if (!$success) {
+            $this->json([
+                'success' => false,
+                'message' => 'Не удалось отвязать тег'
+            ], 500);
+            return;
+        }
+
+        $this->json([
+            'success' => true,
+            'message' => 'Тег успешно отвязан от образа'
+        ]);
+    }
+
+    /**
+     * HTML страница управления тегами
+     */
     public function manage(): void
     {
         $tags = $this->tagModel->getByUser($this->userId);

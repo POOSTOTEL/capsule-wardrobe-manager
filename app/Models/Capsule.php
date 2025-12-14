@@ -556,7 +556,7 @@ class Capsule extends BaseModel
     }
 
     // Связать образ с капсулой
-    private function linkOutfitToCapsule(int $capsuleId, int $outfitId): void
+    public function linkOutfitToCapsule(int $capsuleId, int $outfitId): void
     {
         // Проверяем, не связан ли уже образ с капсулой
         $sql = "SELECT * FROM capsule_outfits 

@@ -16,7 +16,9 @@ class Outfit extends BaseModel
         'season_id', 'is_favorite'
     ];
 
-    // Получить все образы пользователя с дополнительной информацией
+    /**
+     * Получить все образы пользователя с фильтрацией, поиском и сортировкой
+     */
     public function getByUser(int $userId, array $filters = []): array
     {
         $sql = "SELECT o.*, 
@@ -32,12 +34,12 @@ class Outfit extends BaseModel
         // Применяем фильтры
         if (!empty($filters['season_id'])) {
             $sql .= " AND o.season_id = :season_id";
-            $params['season_id'] = $filters['season_id'];
+            $params['season_id'] = (int) $filters['season_id'];
         }
 
         if (!empty($filters['formality_level'])) {
             $sql .= " AND o.formality_level = :formality_level";
-            $params['formality_level'] = $filters['formality_level'];
+            $params['formality_level'] = (int) $filters['formality_level'];
         }
 
         if (isset($filters['is_favorite']) && $filters['is_favorite'] !== '') {
@@ -45,6 +47,7 @@ class Outfit extends BaseModel
             $params['is_favorite'] = $filters['is_favorite'] === '1' || $filters['is_favorite'] === true;
         }
 
+        // Поиск по названию и описанию
         if (!empty($filters['search'])) {
             $sql .= " AND (LOWER(o.name) LIKE LOWER(:search) OR LOWER(o.description) LIKE LOWER(:search))";
             $params['search'] = '%' . $filters['search'] . '%';
@@ -73,9 +76,13 @@ class Outfit extends BaseModel
         $orderDir = strtoupper($filters['order_dir'] ?? 'DESC');
         
         // Безопасная сортировка
-        $allowedOrderBy = ['created_at', 'updated_at', 'name', 'formality_level', 'is_favorite'];
+        $allowedOrderBy = ['created_at', 'updated_at', 'name', 'formality_level', 'is_favorite', 'items_count'];
         if (in_array($orderBy, $allowedOrderBy)) {
-            $sql .= " ORDER BY o.{$orderBy} {$orderDir}";
+            if ($orderBy === 'items_count') {
+                $sql .= " ORDER BY items_count {$orderDir}";
+            } else {
+                $sql .= " ORDER BY o.{$orderBy} {$orderDir}";
+            }
         } else {
             $sql .= " ORDER BY o.created_at {$orderDir}";
         }
@@ -104,7 +111,9 @@ class Outfit extends BaseModel
         }
     }
 
-    // Получить образ с полной информацией
+    /**
+     * Получить образ с полной информацией
+     */
     public function getWithDetails(int $id, int $userId = null): ?array
     {
         $sql = "SELECT o.*, 
@@ -139,7 +148,9 @@ class Outfit extends BaseModel
         }
     }
 
-    // Создать образ с вещами и тегами
+    /**
+     * Создать образ с вещами и тегами
+     */
     public function createOutfit(int $userId, array $data): int
     {
         Logger::debug('createOutfit: начало', [
@@ -184,7 +195,9 @@ class Outfit extends BaseModel
         return $outfitId;
     }
 
-    // Обновить образ
+    /**
+     * Обновить образ
+     */
     public function updateOutfit(int $id, int $userId, array $data): bool
     {
         // Проверяем права доступа
@@ -239,7 +252,9 @@ class Outfit extends BaseModel
         return $success;
     }
 
-    // Удалить образ
+    /**
+     * Удалить образ
+     */
     public function deleteOutfit(int $id, int $userId): bool
     {
         $outfit = $this->find($id);
@@ -250,7 +265,9 @@ class Outfit extends BaseModel
         return $this->delete($id);
     }
 
-    // Получить вещи образа
+    /**
+     * Получить вещи образа
+     */
     public function getItems(int $outfitId): array
     {
         $sql = "SELECT i.*, 
@@ -288,7 +305,9 @@ class Outfit extends BaseModel
         }
     }
 
-    // Получить теги образа
+    /**
+     * Получить теги образа
+     */
     public function getTags(int $outfitId): array
     {
         $sql = "SELECT t.* FROM tags t
@@ -305,7 +324,9 @@ class Outfit extends BaseModel
         }
     }
 
-    // Получить теги вещи (вспомогательный метод)
+    /**
+     * Получить теги вещи (вспомогательный метод)
+     */
     private function getItemTags(int $itemId): array
     {
         $sql = "SELECT t.* FROM tags t
@@ -322,7 +343,9 @@ class Outfit extends BaseModel
         }
     }
 
-    // Синхронизировать вещи образа
+    /**
+     * Синхронизировать вещи образа
+     */
     public function syncItems(int $outfitId, array $itemIds): void
     {
         // Удаляем все существующие связи
@@ -352,7 +375,9 @@ class Outfit extends BaseModel
         }
     }
 
-    // Синхронизировать теги образа
+    /**
+     * Синхронизировать теги образа
+     */
     public function syncTags(int $outfitId, array $tagIds): void
     {
         // Удаляем все существующие связи
@@ -381,7 +406,9 @@ class Outfit extends BaseModel
         }
     }
 
-    // Добавить вещь в образ
+    /**
+     * Добавить вещь в образ
+     */
     public function addItem(int $outfitId, int $itemId, int $position = null): bool
     {
         // Проверяем, не добавлена ли уже эта вещь
@@ -419,7 +446,9 @@ class Outfit extends BaseModel
         }
     }
 
-    // Удалить вещь из образа
+    /**
+     * Удалить вещь из образа
+     */
     public function removeItem(int $outfitId, int $itemId): bool
     {
         $sql = "DELETE FROM outfit_items 
@@ -436,7 +465,9 @@ class Outfit extends BaseModel
         }
     }
 
-    // Переключить избранное
+    /**
+     * Переключить избранное
+     */
     public function toggleFavorite(int $id, int $userId): bool
     {
         $outfit = $this->find($id);
@@ -448,7 +479,182 @@ class Outfit extends BaseModel
         return $this->update($id, ['is_favorite' => $newValue]);
     }
 
-    // Получить статистику образов пользователя
+    /**
+     * Добавить образ в капсулу (создать набор вещей из образа)
+     */
+    public function addToCapsule(int $outfitId, int $capsuleId, int $userId): bool
+    {
+        // Проверяем права на образ
+        $outfit = $this->find($outfitId);
+        if (!$outfit || $outfit['user_id'] != $userId) {
+            return false;
+        }
+
+        // Получаем вещи образа
+        $items = $this->getItems($outfitId);
+        if (empty($items)) {
+            return false;
+        }
+
+        // Проверяем права на капсулу
+        $capsuleModel = new Capsule();
+        $capsule = $capsuleModel->find($capsuleId);
+        if (!$capsule || $capsule['user_id'] != $userId) {
+            return false;
+        }
+
+        // Добавляем вещи в капсулу
+        try {
+            foreach ($items as $item) {
+                $capsuleModel->addItem($capsuleId, $item['id']);
+            }
+            return true;
+        } catch (\Exception $e) {
+            Logger::error('Ошибка при добавлении образа в капсулу', [
+                'outfit_id' => $outfitId,
+                'capsule_id' => $capsuleId,
+                'error' => $e->getMessage()
+            ]);
+            return false;
+        }
+    }
+
+    /**
+     * Генерировать образы из вещей капсулы (без сохранения)
+     */
+    public function generateFromCapsule(int $capsuleId, int $userId, int $count = 10): array
+    {
+        $capsuleModel = new Capsule();
+        $capsule = $capsuleModel->find($capsuleId);
+        
+        if (!$capsule || $capsule['user_id'] != $userId) {
+            throw new \RuntimeException('Капсула не найдена или нет прав доступа');
+        }
+
+        $items = $capsuleModel->getItems($capsuleId);
+        if (empty($items)) {
+            throw new \RuntimeException('В капсуле нет вещей для генерации образов');
+        }
+
+        // Группируем вещи по категориям
+        $itemsByCategory = [];
+        foreach ($items as $item) {
+            $categoryId = $item['category_id'];
+            if (!isset($itemsByCategory[$categoryId])) {
+                $itemsByCategory[$categoryId] = [];
+            }
+            $itemsByCategory[$categoryId][] = $item;
+        }
+
+        // Определяем категории для генерации
+        $tops = $itemsByCategory[1] ?? [];
+        $bottoms = $itemsByCategory[2] ?? [];
+        $dresses = $itemsByCategory[3] ?? [];
+        $shoes = $itemsByCategory[4] ?? [];
+        $outerwear = $itemsByCategory[5] ?? [];
+        $accessories = $itemsByCategory[6] ?? [];
+
+        $generatedOutfits = [];
+        $generated = 0;
+        $attempts = 0;
+        $maxAttempts = $count * 100;
+
+        while ($generated < $count && $attempts < $maxAttempts) {
+            $attempts++;
+            $outfitItems = [];
+            $itemIds = [];
+
+            // Если есть платья, можем использовать их как цельный образ
+            if (!empty($dresses) && rand(0, 100) < 30) {
+                $dress = $dresses[array_rand($dresses)];
+                $outfitItems[] = $dress;
+                $itemIds[] = $dress['id'];
+            } else {
+                // Генерируем комбинацию: верх + низ
+                if (!empty($tops) && !empty($bottoms)) {
+                    $top = $tops[array_rand($tops)];
+                    $bottom = $bottoms[array_rand($bottoms)];
+                    $outfitItems[] = $top;
+                    $outfitItems[] = $bottom;
+                    $itemIds[] = $top['id'];
+                    $itemIds[] = $bottom['id'];
+                } elseif (!empty($tops)) {
+                    $top = $tops[array_rand($tops)];
+                    $outfitItems[] = $top;
+                    $itemIds[] = $top['id'];
+                } elseif (!empty($bottoms)) {
+                    $bottom = $bottoms[array_rand($bottoms)];
+                    $outfitItems[] = $bottom;
+                    $itemIds[] = $bottom['id'];
+                } else {
+                    continue;
+                }
+            }
+
+            // Добавляем верхнюю одежду
+            if (!empty($outerwear) && rand(0, 100) < 40) {
+                $outer = $outerwear[array_rand($outerwear)];
+                if (!in_array($outer['id'], $itemIds)) {
+                    $outfitItems[] = $outer;
+                    $itemIds[] = $outer['id'];
+                }
+            }
+
+            // Добавляем обувь
+            if (!empty($shoes) && rand(0, 100) < 70) {
+                $shoe = $shoes[array_rand($shoes)];
+                if (!in_array($shoe['id'], $itemIds)) {
+                    $outfitItems[] = $shoe;
+                    $itemIds[] = $shoe['id'];
+                }
+            }
+
+            // Добавляем аксессуар
+            if (!empty($accessories) && rand(0, 100) < 50) {
+                $accessory = $accessories[array_rand($accessories)];
+                if (!in_array($accessory['id'], $itemIds)) {
+                    $outfitItems[] = $accessory;
+                    $itemIds[] = $accessory['id'];
+                }
+            }
+
+            if (empty($itemIds)) {
+                continue;
+            }
+
+            // Определяем сезон образа
+            $seasonId = $capsule['season_id'];
+            if (!$seasonId && !empty($outfitItems)) {
+                $seasonId = $outfitItems[0]['season_id'] ?? null;
+            }
+
+            // Создаем объект образа (без сохранения)
+            $generatedOutfits[] = [
+                'name' => 'Образ из капсулы "' . $capsule['name'] . '" #' . ($generated + 1),
+                'description' => 'Автоматически сгенерированный образ из капсулы',
+                'season_id' => $seasonId,
+                'items' => $outfitItems,
+                'item_ids' => $itemIds,
+                'is_generated' => true
+            ];
+
+            $generated++;
+        }
+
+        return $generatedOutfits;
+    }
+
+    /**
+     * Сохранить сгенерированный образ
+     */
+    public function saveGeneratedOutfit(int $userId, array $outfitData): int
+    {
+        return $this->createOutfit($userId, $outfitData);
+    }
+
+    /**
+     * Получить статистику образов пользователя
+     */
     public function getStatistics(int $userId): array
     {
         $sql = "SELECT 
@@ -470,44 +676,9 @@ class Outfit extends BaseModel
         }
     }
 
-    // Получить образы по сезонам (для аналитики)
-    public function getBySeasons(int $userId): array
-    {
-        $sql = "SELECT s.id, s.name, COUNT(o.id) as count
-                FROM seasons s
-                LEFT JOIN {$this->table} o ON s.id = o.season_id AND o.user_id = :user_id
-                GROUP BY s.id, s.name
-                HAVING COUNT(o.id) > 0
-                ORDER BY count DESC, s.name ASC";
-
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute(['user_id' => $userId]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            throw new \RuntimeException("Database error: " . $e->getMessage());
-        }
-    }
-
-    // Получить образы по уровню формальности (для аналитики)
-    public function getByFormalityLevel(int $userId): array
-    {
-        $sql = "SELECT formality_level, COUNT(*) as count
-                FROM {$this->table}
-                WHERE user_id = :user_id AND formality_level IS NOT NULL
-                GROUP BY formality_level
-                ORDER BY formality_level ASC";
-
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute(['user_id' => $userId]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            throw new \RuntimeException("Database error: " . $e->getMessage());
-        }
-    }
-
-    // Получить общее количество образов пользователя
+    /**
+     * Получить общее количество образов пользователя
+     */
     public function getTotalCount(int $userId): int
     {
         $sql = "SELECT COUNT(*) as total FROM {$this->table} WHERE user_id = :user_id";

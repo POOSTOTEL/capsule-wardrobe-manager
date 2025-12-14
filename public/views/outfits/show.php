@@ -60,22 +60,6 @@
         </div>
     <?php endif; ?>
 
-    <?php if (!empty($outfit['tags'])): ?>
-        <div class="detail-tags mb-4">
-            <h3 class="mb-3">
-                <i class="fas fa-tags me-2"></i>Теги
-            </h3>
-            <div class="tags-list">
-                <?php foreach ($outfit['tags'] as $tag): ?>
-                    <span class="outfit-tag" 
-                          style="background-color: <?= htmlspecialchars($tag['color'] ?? '#6B7280') ?>">
-                        <?= htmlspecialchars($tag['name']) ?>
-                    </span>
-                <?php endforeach; ?>
-            </div>
-        </div>
-    <?php endif; ?>
-
     <div class="detail-items">
         <h3 class="mb-4">
             <i class="fas fa-tshirt me-2"></i>Вещи в образе (<?= count($outfit['items']) ?>)

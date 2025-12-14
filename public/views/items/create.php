@@ -110,15 +110,6 @@
             </div>
         </div>
 
-        <!-- Теги -->
-        <div class="form-section">
-            <h2 class="section-title">Теги</h2>
-            <?php 
-            $selectedTags = [];
-            include __DIR__ . '/_tag_selector.php'; 
-            ?>
-        </div>
-
         <!-- Заметки -->
         <div class="form-section">
             <h2 class="section-title">Заметки</h2>

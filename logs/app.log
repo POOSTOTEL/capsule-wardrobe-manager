@@ -1838,3 +1838,98 @@
 [2025-12-14 21:51:44] [INFO] createCapsule: капсула создана в БД {"capsule_id":2}
 [2025-12-14 21:51:44] [DEBUG] createCapsule: добавление вещей {"item_ids":["4","3","1"]}
 [2025-12-14 21:51:44] [INFO] Капсула успешно создана {"user_id":1,"capsule_id":2}
+[2025-12-14 22:32:34] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-14 22:34:09] [DEBUG] Получение списка образов {"user_id":1,"filters":{"tag_ids":["5"],"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-14 22:34:19] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-14 22:34:23] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-14 22:35:09] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-14 22:35:33] [INFO] Начало создания образа {"user_id":1,"data":{"name":"Вечериночка","description":"вфыавыа","formality_level":2,"season_id":3,"is_favorite":true,"item_ids":["4","3"],"tag_ids":[],"item_ids_count":2,"tag_ids_count":0}}
+[2025-12-14 22:35:33] [DEBUG] createOutfit: начало {"user_id":1,"data_keys":["name","description","formality_level","season_id","is_favorite","item_ids","tag_ids"]}
+[2025-12-14 22:35:33] [INFO] createOutfit: образ создан в БД {"outfit_id":1}
+[2025-12-14 22:35:33] [DEBUG] createOutfit: добавление вещей {"item_ids":["4","3"]}
+[2025-12-14 22:35:33] [INFO] Образ успешно создан {"user_id":1,"outfit_id":1,"outfit_name":"Вечериночка","items_count":2,"tags_count":0}
+[2025-12-14 22:35:33] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-14 22:35:36] [DEBUG] Переключение избранного образа {"user_id":1,"outfit_id":1}
+[2025-12-14 22:35:41] [INFO] Начало обновления образа {"user_id":1,"outfit_id":1,"data_keys":["name","description","formality_level","season_id","is_favorite","item_ids","tag_ids"]}
+[2025-12-14 22:35:41] [ERROR] Ошибка при обновлении образа {"user_id":1,"outfit_id":1,"message":"Database error: SQLSTATE[22P02]: Invalid text representation: 7 ERROR:  invalid input syntax for type boolean: \"\"\nCONTEXT:  unnamed portal parameter $5 = ''","file":"\/var\/www\/app\/Models\/BaseModel.php","line":126}
+[2025-12-14 22:35:48] [INFO] Начало обновления образа {"user_id":1,"outfit_id":1,"data_keys":["name","description","formality_level","season_id","is_favorite","item_ids","tag_ids"]}
+[2025-12-14 22:35:48] [INFO] Образ успешно обновлен {"user_id":1,"outfit_id":1}
+[2025-12-14 22:35:48] [DEBUG] Просмотр образа {"user_id":1,"outfit_id":1}
+[2025-12-14 22:35:48] [INFO] Образ просмотрен {"user_id":1,"outfit_id":1,"outfit_name":"Вечериночка"}
+[2025-12-14 22:36:07] [DEBUG] Просмотр образа {"user_id":1,"outfit_id":1}
+[2025-12-14 22:36:07] [INFO] Образ просмотрен {"user_id":1,"outfit_id":1,"outfit_name":"Вечериночка"}
+[2025-12-14 22:36:09] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-14 22:36:11] [DEBUG] Просмотр образа {"user_id":1,"outfit_id":1}
+[2025-12-14 22:36:11] [INFO] Образ просмотрен {"user_id":1,"outfit_id":1,"outfit_name":"Вечериночка"}
+[2025-12-14 22:36:12] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-14 22:36:22] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-14 22:37:47] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-14 22:37:53] [DEBUG] Просмотр образа {"user_id":1,"outfit_id":1}
+[2025-12-14 22:37:53] [INFO] Образ просмотрен {"user_id":1,"outfit_id":1,"outfit_name":"Вечериночка"}
+[2025-12-14 22:37:55] [DEBUG] Переключение избранного образа {"user_id":1,"outfit_id":1}
+[2025-12-14 22:38:21] [DEBUG] Переключение избранного образа {"user_id":1,"outfit_id":1}
+[2025-12-14 22:40:18] [DEBUG] Переключение избранного образа {"user_id":1,"outfit_id":1}
+[2025-12-14 22:42:46] [INFO] Начало создания вещи {"user_id":1,"data":{"name":"Рубашка","category_id":1,"color_id":2,"season_id":1,"notes":"Красочная рубашка","tag_ids":[],"tag_ids_count":0},"image_size":90833,"image_type":"image\/jpeg"}
+[2025-12-14 22:42:46] [DEBUG] createWithImage: начало {"user_id":1,"image_path":"\/tmp\/phpLFPPLp","data_keys":["name","category_id","color_id","season_id","notes","tag_ids"]}
+[2025-12-14 22:42:46] [DEBUG] createWithImage: чтение файла {"path":"\/tmp\/phpLFPPLp","size":90833}
+[2025-12-14 22:42:46] [DEBUG] createWithImage: MIME тип определен {"mime_type":"image\/jpeg"}
+[2025-12-14 22:42:46] [DEBUG] createWithImage: данные изображения подготовлены {"image_size":90833,"mime_type":"image\/jpeg"}
+[2025-12-14 22:42:46] [DEBUG] createWithImage: вызов createWithBinaryData {"data_keys":["name","category_id","color_id","season_id","notes","tag_ids","image_data","image_mime_type","user_id","usage_count"],"has_image_data":true}
+[2025-12-14 22:42:46] [DEBUG] Выполнение INSERT для items {"columns":["name","category_id","color_id","season_id","notes","user_id","usage_count","image_data","image_mime_type"],"filtered_data_keys":["name","category_id","color_id","season_id","notes","user_id","usage_count"],"has_image":true,"image_size":90833}
+[2025-12-14 22:42:46] [DEBUG] Привязка параметра: name {"value":"Рубашка"}
+[2025-12-14 22:42:46] [DEBUG] Привязка параметра: category_id {"value":1}
+[2025-12-14 22:42:46] [DEBUG] Привязка параметра: color_id {"value":2}
+[2025-12-14 22:42:46] [DEBUG] Привязка параметра: season_id {"value":1}
+[2025-12-14 22:42:46] [DEBUG] Привязка параметра: notes {"value":"Красочная рубашка"}
+[2025-12-14 22:42:46] [DEBUG] Привязка параметра: user_id {"value":1}
+[2025-12-14 22:42:46] [DEBUG] Привязка параметра: usage_count {"value":0}
+[2025-12-14 22:42:46] [DEBUG] Привязка бинарных данных {"hex_length":181668,"mime_type":"image\/jpeg"}
+[2025-12-14 22:42:46] [INFO] Вещь создана успешно {"item_id":5}
+[2025-12-14 22:42:46] [INFO] createWithImage: вещь создана в БД {"item_id":5}
+[2025-12-14 22:42:46] [INFO] Вещь успешно создана {"user_id":1,"item_id":5}
+[2025-12-14 22:42:48] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-14 22:43:13] [INFO] Начало создания образа {"user_id":1,"data":{"name":"Летний стиляга","description":"Крутецкий парень","formality_level":4,"season_id":1,"is_favorite":false,"item_ids":["5","4","1"],"tag_ids":[],"item_ids_count":3,"tag_ids_count":0}}
+[2025-12-14 22:43:13] [DEBUG] createOutfit: начало {"user_id":1,"data_keys":["name","description","formality_level","season_id","is_favorite","item_ids","tag_ids"]}
+[2025-12-14 22:43:13] [ERROR] Ошибка при создании образа {"user_id":1,"message":"Database error: SQLSTATE[22P02]: Invalid text representation: 7 ERROR:  invalid input syntax for type boolean: \"\"\nCONTEXT:  unnamed portal parameter $6 = ''","file":"\/var\/www\/app\/Models\/BaseModel.php","line":97,"trace":"#0 \/var\/www\/app\/Models\/Outfit.php(179): App\\Models\\BaseModel->create(Array)\n#1 \/var\/www\/app\/Controllers\/OutfitController.php(223): App\\Models\\Outfit->createOutfit(1, Array)\n#2 [internal function]: App\\Controllers\\OutfitController->store()\n#3 \/var\/www\/app\/Core\/Router.php(180): call_user_func_array(Array, Array)\n#4 \/var\/www\/app\/Core\/Router.php(141): App\\Core\\Router->executeHandler('OutfitControlle...', Array)\n#5 \/var\/www\/public\/index.php(65): App\\Core\\Router->dispatch()\n#6 {main}","data":{"name":"Летний стиляга","description":"Крутецкий парень","formality_level":4,"season_id":1,"is_favorite":false,"item_ids":["5","4","1"],"tag_ids":[],"item_ids_count":3,"tag_ids_count":0}}
+[2025-12-14 22:43:17] [INFO] Начало создания образа {"user_id":1,"data":{"name":"Летний стиляга","description":"Крутецкий парень","formality_level":4,"season_id":1,"is_favorite":true,"item_ids":["5","4","1"],"tag_ids":[],"item_ids_count":3,"tag_ids_count":0}}
+[2025-12-14 22:43:17] [DEBUG] createOutfit: начало {"user_id":1,"data_keys":["name","description","formality_level","season_id","is_favorite","item_ids","tag_ids"]}
+[2025-12-14 22:43:17] [INFO] createOutfit: образ создан в БД {"outfit_id":2}
+[2025-12-14 22:43:17] [DEBUG] createOutfit: добавление вещей {"item_ids":["5","4","1"]}
+[2025-12-14 22:43:17] [INFO] Образ успешно создан {"user_id":1,"outfit_id":2,"outfit_name":"Летний стиляга","items_count":3,"tags_count":0}
+[2025-12-14 22:43:17] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-14 22:43:56] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-14 22:47:21] [DEBUG] Просмотр образа {"user_id":1,"outfit_id":2}
+[2025-12-14 22:47:21] [INFO] Образ просмотрен {"user_id":1,"outfit_id":2,"outfit_name":"Летний стиляга"}
+[2025-12-14 22:47:23] [DEBUG] Просмотр образа {"user_id":1,"outfit_id":2}
+[2025-12-14 22:47:23] [INFO] Образ просмотрен {"user_id":1,"outfit_id":2,"outfit_name":"Летний стиляга"}
+[2025-12-14 22:47:23] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-14 22:51:35] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-14 22:56:34] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-14 22:56:40] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-14 22:56:51] [INFO] Начало создания образа {"user_id":1,"data":{"name":"Праздники и не только","description":"ывапирто","formality_level":1,"season_id":3,"is_favorite":false,"item_ids":["4","3"],"tag_ids":[],"item_ids_count":2,"tag_ids_count":0}}
+[2025-12-14 22:56:51] [DEBUG] createOutfit: начало {"user_id":1,"data_keys":["name","description","formality_level","season_id","is_favorite","item_ids","tag_ids"]}
+[2025-12-14 22:56:51] [ERROR] Ошибка при создании образа {"user_id":1,"message":"Database error: SQLSTATE[22P02]: Invalid text representation: 7 ERROR:  invalid input syntax for type boolean: \"\"\nCONTEXT:  unnamed portal parameter $6 = ''","file":"\/var\/www\/app\/Models\/BaseModel.php","line":97,"trace":"#0 \/var\/www\/app\/Models\/Outfit.php(179): App\\Models\\BaseModel->create(Array)\n#1 \/var\/www\/app\/Controllers\/OutfitController.php(223): App\\Models\\Outfit->createOutfit(1, Array)\n#2 [internal function]: App\\Controllers\\OutfitController->store()\n#3 \/var\/www\/app\/Core\/Router.php(180): call_user_func_array(Array, Array)\n#4 \/var\/www\/app\/Core\/Router.php(141): App\\Core\\Router->executeHandler('OutfitControlle...', Array)\n#5 \/var\/www\/public\/index.php(65): App\\Core\\Router->dispatch()\n#6 {main}","data":{"name":"Праздники и не только","description":"ывапирто","formality_level":1,"season_id":3,"is_favorite":false,"item_ids":["4","3"],"tag_ids":[],"item_ids_count":2,"tag_ids_count":0}}
+[2025-12-14 22:57:11] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-14 22:57:13] [DEBUG] Просмотр образа {"user_id":1,"outfit_id":1}
+[2025-12-14 22:57:13] [INFO] Образ просмотрен {"user_id":1,"outfit_id":1,"outfit_name":"Вечериночка"}
+[2025-12-14 22:57:15] [DEBUG] Переключение избранного образа {"user_id":1,"outfit_id":1}
+[2025-12-14 22:57:58] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-14 22:58:00] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-14 22:58:05] [DEBUG] Переключение избранного образа {"user_id":1,"outfit_id":1}
+[2025-12-14 23:02:33] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-14 23:03:17] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-14 23:03:21] [DEBUG] Просмотр образа {"user_id":1,"outfit_id":2}
+[2025-12-14 23:03:21] [INFO] Образ просмотрен {"user_id":1,"outfit_id":2,"outfit_name":"Летний стиляга"}
+[2025-12-14 23:03:23] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-14 23:03:24] [DEBUG] Просмотр образа {"user_id":1,"outfit_id":2}
+[2025-12-14 23:03:24] [INFO] Образ просмотрен {"user_id":1,"outfit_id":2,"outfit_name":"Летний стиляга"}
+[2025-12-14 23:03:34] [DEBUG] Просмотр образа {"user_id":1,"outfit_id":2}
+[2025-12-14 23:03:34] [INFO] Образ просмотрен {"user_id":1,"outfit_id":2,"outfit_name":"Летний стиляга"}
+[2025-12-14 23:03:56] [DEBUG] Просмотр образа {"user_id":1,"outfit_id":2}
+[2025-12-14 23:03:56] [INFO] Образ просмотрен {"user_id":1,"outfit_id":2,"outfit_name":"Летний стиляга"}
+[2025-12-14 23:04:06] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-14 23:05:09] [INFO] Начало создания капсулы {"user_id":1,"data":{"name":"Казуальные вещи","description":"","season_id":3,"item_ids":["4","2","1"],"outfit_ids":[],"item_ids_count":3,"outfit_ids_count":0}}
+[2025-12-14 23:05:09] [DEBUG] createCapsule: начало {"user_id":1,"data_keys":["name","description","season_id","item_ids","outfit_ids"]}
+[2025-12-14 23:05:09] [INFO] createCapsule: капсула создана в БД {"capsule_id":3}
+[2025-12-14 23:05:09] [DEBUG] createCapsule: добавление вещей {"item_ids":["4","2","1"]}
+[2025-12-14 23:05:09] [INFO] Капсула успешно создана {"user_id":1,"capsule_id":3}

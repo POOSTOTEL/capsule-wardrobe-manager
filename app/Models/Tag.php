@@ -10,7 +10,9 @@ class Tag extends BaseModel
     protected $table = 'tags';
     protected $fillable = ['user_id', 'name', 'color', 'is_system'];
 
-    // Получить все теги пользователя
+    /**
+     * Получить все теги пользователя (системные + пользовательские)
+     */
     public function getByUser(int $userId): array
     {
         $sql = "SELECT * FROM {$this->table} 
@@ -26,11 +28,12 @@ class Tag extends BaseModel
         }
     }
 
-    // Создать пользовательский тег
+    /**
+     * Создать пользовательский тег
+     */
     public function createUserTag(int $userId, array $data): ?int
     {
         // Проверяем, существует ли уже такой тег у пользователя
-        // Учитываем уникальность по (user_id, name) согласно схеме БД
         $sql = "SELECT * FROM {$this->table} 
                 WHERE user_id = :user_id AND LOWER(name) = LOWER(:name)
                 LIMIT 1";
@@ -71,113 +74,34 @@ class Tag extends BaseModel
         }
     }
 
-    // Получить системные теги
-    public function getSystemTags(): array
+    /**
+     * Обновить пользовательский тег
+     */
+    public function updateUserTag(int $tagId, int $userId, array $data): bool
     {
-        return $this->where('is_system', true);
-    }
-
-    // Получить пользовательские теги
-    public function getUserTags(int $userId): array
-    {
-        return $this->where('user_id', $userId);
-    }
-
-    // Получить теги для определенной вещи
-    public function getForItem(int $itemId): array
-    {
-        $sql = "SELECT t.* FROM tags t
-                JOIN item_tags it ON t.id = it.tag_id
-                WHERE it.item_id = :item_id
-                ORDER BY t.name";
-
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute(['item_id' => $itemId]);
-            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        } catch (\PDOException $e) {
-            throw new \RuntimeException("Database error: " . $e->getMessage());
-        }
-    }
-
-    // Получить теги для определенного образа
-    public function getForOutfit(int $outfitId): array
-    {
-        $sql = "SELECT t.* FROM tags t
-                JOIN outfit_tags ot ON t.id = ot.tag_id
-                WHERE ot.outfit_id = :outfit_id
-                ORDER BY t.name";
-
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute(['outfit_id' => $outfitId]);
-            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        } catch (\PDOException $e) {
-            throw new \RuntimeException("Database error: " . $e->getMessage());
-        }
-    }
-
-    // Получить теги для формы выбора (с группировкой)
-    public function getForSelectGrouped(int $userId): array
-    {
-        $allTags = $this->getByUser($userId);
-        $grouped = [
-            'system' => [],
-            'user' => []
-        ];
-
-        foreach ($allTags as $tag) {
-            if ($tag['is_system']) {
-                $grouped['system'][$tag['id']] = $tag['name'];
-            } else {
-                $grouped['user'][$tag['id']] = $tag['name'];
-            }
+        // Проверяем права доступа
+        $tag = $this->find($tagId);
+        if (!$tag || $tag['is_system'] || $tag['user_id'] != $userId) {
+            return false;
         }
 
-        return $grouped;
-    }
-
-    // Обновить тег
-    public function updateTag(int $tagId, array $data): bool
-    {
-        // Проверяем, не конфликтует ли новое имя с существующим тегом того же пользователя
+        // Проверяем, не конфликтует ли новое имя с существующим тегом
         if (isset($data['name'])) {
-            $tag = $this->find($tagId);
-            if (!$tag) {
-                return false;
-            }
-            
-            $userId = $tag['user_id'];
             $newName = trim($data['name']);
             
-            // Проверяем, не существует ли уже тег с таким именем у этого пользователя
-            // Для системных тегов user_id может быть NULL
-            if ($userId === null) {
-                $sql = "SELECT * FROM {$this->table} 
-                        WHERE user_id IS NULL 
-                        AND LOWER(name) = LOWER(:name)
-                        AND id != :id
-                        LIMIT 1";
-                $params = [
-                    'name' => $newName,
-                    'id' => $tagId
-                ];
-            } else {
-                $sql = "SELECT * FROM {$this->table} 
-                        WHERE user_id = :user_id 
-                        AND LOWER(name) = LOWER(:name)
-                        AND id != :id
-                        LIMIT 1";
-                $params = [
-                    'user_id' => $userId,
-                    'name' => $newName,
-                    'id' => $tagId
-                ];
-            }
+            $sql = "SELECT * FROM {$this->table} 
+                    WHERE user_id = :user_id 
+                    AND LOWER(name) = LOWER(:name)
+                    AND id != :id
+                    LIMIT 1";
             
             try {
                 $stmt = $this->db->prepare($sql);
-                $stmt->execute($params);
+                $stmt->execute([
+                    'user_id' => $userId,
+                    'name' => $newName,
+                    'id' => $tagId
+                ]);
                 $existing = $stmt->fetch(\PDO::FETCH_ASSOC);
                 
                 if ($existing) {
@@ -202,7 +126,9 @@ class Tag extends BaseModel
         }
     }
 
-    // Удалить тег (только пользовательский)
+    /**
+     * Удалить пользовательский тег
+     */
     public function deleteUserTag(int $tagId, int $userId): bool
     {
         $tag = $this->find($tagId);
@@ -214,7 +140,85 @@ class Tag extends BaseModel
         return $this->delete($tagId);
     }
 
-    // Поиск тегов по имени (с автодополнением)
+    /**
+     * Получить системные теги
+     */
+    public function getSystemTags(): array
+    {
+        return $this->where('is_system', true);
+    }
+
+    /**
+     * Получить пользовательские теги
+     */
+    public function getUserTags(int $userId): array
+    {
+        return $this->where('user_id', $userId);
+    }
+
+    /**
+     * Получить теги для определенной вещи
+     */
+    public function getForItem(int $itemId): array
+    {
+        $sql = "SELECT t.* FROM tags t
+                JOIN item_tags it ON t.id = it.tag_id
+                WHERE it.item_id = :item_id
+                ORDER BY t.is_system DESC, t.name ASC";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['item_id' => $itemId]);
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            throw new \RuntimeException("Database error: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Получить теги для определенного образа
+     */
+    public function getForOutfit(int $outfitId): array
+    {
+        $sql = "SELECT t.* FROM tags t
+                JOIN outfit_tags ot ON t.id = ot.tag_id
+                WHERE ot.outfit_id = :outfit_id
+                ORDER BY t.is_system DESC, t.name ASC";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['outfit_id' => $outfitId]);
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            throw new \RuntimeException("Database error: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Получить теги для формы выбора (с группировкой)
+     */
+    public function getForSelectGrouped(int $userId): array
+    {
+        $allTags = $this->getByUser($userId);
+        $grouped = [
+            'system' => [],
+            'user' => []
+        ];
+
+        foreach ($allTags as $tag) {
+            if ($tag['is_system']) {
+                $grouped['system'][$tag['id']] = $tag['name'];
+            } else {
+                $grouped['user'][$tag['id']] = $tag['name'];
+            }
+        }
+
+        return $grouped;
+    }
+
+    /**
+     * Поиск тегов по имени (с автодополнением)
+     */
     public function searchByName(string $query, int $userId, int $limit = 10): array
     {
         $sql = "SELECT * FROM {$this->table} 
@@ -244,12 +248,16 @@ class Tag extends BaseModel
         }
     }
 
-    // Получить самые популярные теги пользователя
+    /**
+     * Получить самые популярные теги пользователя
+     */
     public function getPopularTags(int $userId, int $limit = 10): array
     {
-        $sql = "SELECT t.*, COUNT(it.item_id) as usage_count 
+        $sql = "SELECT t.*, 
+                       (COUNT(DISTINCT it.item_id) + COUNT(DISTINCT ot.outfit_id)) as usage_count 
                 FROM tags t
                 LEFT JOIN item_tags it ON t.id = it.tag_id
+                LEFT JOIN outfit_tags ot ON t.id = ot.tag_id
                 WHERE t.user_id = :user_id OR t.is_system = true
                 GROUP BY t.id
                 ORDER BY usage_count DESC, t.name
@@ -267,7 +275,9 @@ class Tag extends BaseModel
         }
     }
 
-    // Привязать тег к вещи
+    /**
+     * Привязать тег к вещи
+     */
     public function attachToItem(int $tagId, int $itemId): bool
     {
         $sql = "INSERT INTO item_tags (item_id, tag_id) 
@@ -285,7 +295,9 @@ class Tag extends BaseModel
         }
     }
 
-    // Отвязать тег от вещи
+    /**
+     * Отвязать тег от вещи
+     */
     public function detachFromItem(int $tagId, int $itemId): bool
     {
         $sql = "DELETE FROM item_tags 
@@ -302,7 +314,110 @@ class Tag extends BaseModel
         }
     }
 
-    // Получить все вещи с определенным тегом
+    /**
+     * Привязать тег к образу
+     */
+    public function attachToOutfit(int $tagId, int $outfitId): bool
+    {
+        $sql = "INSERT INTO outfit_tags (outfit_id, tag_id) 
+                VALUES (:outfit_id, :tag_id)
+                ON CONFLICT (outfit_id, tag_id) DO NOTHING";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([
+                'outfit_id' => $outfitId,
+                'tag_id' => $tagId
+            ]);
+        } catch (\PDOException $e) {
+            throw new \RuntimeException("Database error: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Отвязать тег от образа
+     */
+    public function detachFromOutfit(int $tagId, int $outfitId): bool
+    {
+        $sql = "DELETE FROM outfit_tags 
+                WHERE outfit_id = :outfit_id AND tag_id = :tag_id";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([
+                'outfit_id' => $outfitId,
+                'tag_id' => $tagId
+            ]);
+        } catch (\PDOException $e) {
+            throw new \RuntimeException("Database error: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Синхронизировать теги для вещи (удалить все и добавить новые)
+     */
+    public function syncItemTags(int $itemId, array $tagIds): void
+    {
+        // Удаляем все существующие связи
+        $sql = "DELETE FROM item_tags WHERE item_id = :item_id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['item_id' => $itemId]);
+
+        // Добавляем новые связи
+        if (!empty($tagIds)) {
+            $tagIds = array_filter(array_map('intval', $tagIds));
+            if (!empty($tagIds)) {
+                $sql = "INSERT INTO item_tags (item_id, tag_id) VALUES ";
+                $values = [];
+                $params = ['item_id' => $itemId];
+
+                foreach ($tagIds as $index => $tagId) {
+                    $key = "tag_{$index}";
+                    $values[] = "(:item_id, :{$key})";
+                    $params[$key] = $tagId;
+                }
+
+                $sql .= implode(', ', $values);
+                $stmt = $this->db->prepare($sql);
+                $stmt->execute($params);
+            }
+        }
+    }
+
+    /**
+     * Синхронизировать теги для образа (удалить все и добавить новые)
+     */
+    public function syncOutfitTags(int $outfitId, array $tagIds): void
+    {
+        // Удаляем все существующие связи
+        $sql = "DELETE FROM outfit_tags WHERE outfit_id = :outfit_id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['outfit_id' => $outfitId]);
+
+        // Добавляем новые связи
+        if (!empty($tagIds)) {
+            $tagIds = array_filter(array_map('intval', $tagIds));
+            if (!empty($tagIds)) {
+                $sql = "INSERT INTO outfit_tags (outfit_id, tag_id) VALUES ";
+                $values = [];
+                $params = ['outfit_id' => $outfitId];
+
+                foreach ($tagIds as $index => $tagId) {
+                    $key = "tag_{$index}";
+                    $values[] = "(:outfit_id, :{$key})";
+                    $params[$key] = $tagId;
+                }
+
+                $sql .= implode(', ', $values);
+                $stmt = $this->db->prepare($sql);
+                $stmt->execute($params);
+            }
+        }
+    }
+
+    /**
+     * Получить все вещи с определенным тегом
+     */
     public function getItemsWithTag(int $tagId, int $userId): array
     {
         $sql = "SELECT i.* FROM items i
@@ -322,7 +437,31 @@ class Tag extends BaseModel
         }
     }
 
-    // Генерация случайного цвета для тега
+    /**
+     * Получить все образы с определенным тегом
+     */
+    public function getOutfitsWithTag(int $tagId, int $userId): array
+    {
+        $sql = "SELECT o.* FROM outfits o
+                JOIN outfit_tags ot ON o.id = ot.outfit_id
+                WHERE ot.tag_id = :tag_id AND o.user_id = :user_id
+                ORDER BY o.name";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([
+                'tag_id' => $tagId,
+                'user_id' => $userId
+            ]);
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            throw new \RuntimeException("Database error: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Генерация случайного цвета для тега
+     */
     private function generateRandomColor(): string
     {
         $colors = [

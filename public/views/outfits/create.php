@@ -137,15 +137,6 @@
                         </label>
                     </div>
                 </div>
-
-                <!-- Теги -->
-                <div class="mb-3">
-                    <label class="form-label">Теги</label>
-                    <?php 
-                    $selectedTags = [];
-                    include __DIR__ . '/../items/_tag_selector.php'; 
-                    ?>
-                </div>
             </div>
 
             <!-- Область сборки образа -->
@@ -519,14 +510,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Разрешаем перетаскивание обратно в список (удаление из образа)
-    const itemsList = document.getElementById('items-list');
-    if (itemsList) {
-        itemsList.addEventListener('dragover', function(e) {
+    const itemsListForDrop = document.getElementById('items-list');
+    if (itemsListForDrop) {
+        itemsListForDrop.addEventListener('dragover', function(e) {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
         });
 
-        itemsList.addEventListener('drop', function(e) {
+        itemsListForDrop.addEventListener('drop', function(e) {
             e.preventDefault();
             const itemId = e.dataTransfer.getData('text/plain');
             if (itemId) {
@@ -611,9 +602,15 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             // Добавляем теги
-            const tagInput = document.querySelector('input[name="tags"]');
+            const tagInput = document.getElementById('tag-ids-input');
             if (tagInput && tagInput.value) {
-                formData.append('tag_ids', tagInput.value);
+                const tagIds = tagInput.value.split(',').filter(id => id.trim() !== '');
+                if (tagIds.length > 0) {
+                    // Отправляем как массив
+                    tagIds.forEach(tagId => {
+                        formData.append('tag_ids[]', tagId.trim());
+                    });
+                }
             }
 
             // Отправляем запрос

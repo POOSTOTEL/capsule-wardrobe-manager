@@ -7,6 +7,7 @@ use App\Models\Outfit;
 use App\Models\Item;
 use App\Models\Season;
 use App\Models\Tag;
+use App\Models\Capsule;
 use App\Middleware\AuthMiddleware;
 use App\Utils\Logger;
 
@@ -36,7 +37,9 @@ class OutfitController extends Controller
         $this->userId = $_SESSION['user_id'] ?? null;
     }
 
-    // Список всех образов пользователя
+    /**
+     * Список всех образов пользователя с фильтрацией, поиском и сортировкой
+     */
     public function index(): void
     {
         // Получаем фильтры из запроса
@@ -57,15 +60,35 @@ class OutfitController extends Controller
             return $value !== '' && $value !== null && $value !== [];
         });
 
+        Logger::debug('Получение списка образов', [
+            'user_id' => $this->userId,
+            'filters' => $filters,
+            'is_ajax' => $this->isAjax()
+        ]);
+
         if ($this->isAjax()) {
-            $outfits = $this->outfitModel->getByUser($this->userId, $filters);
-            
-            $this->json([
-                'success' => true,
-                'data' => $outfits,
-                'count' => count($outfits)
-            ]);
-            return;
+            try {
+                $outfits = $this->outfitModel->getByUser($this->userId, $filters);
+                
+                Logger::info('Список образов получен', [
+                    'user_id' => $this->userId,
+                    'count' => count($outfits)
+                ]);
+                
+                $this->json([
+                    'success' => true,
+                    'data' => $outfits,
+                    'count' => count($outfits)
+                ]);
+                return;
+            } catch (\Exception $e) {
+                Logger::error('Ошибка при получении списка образов', [
+                    'user_id' => $this->userId,
+                    'message' => $e->getMessage()
+                ]);
+                $this->error('Ошибка при получении списка образов', 500);
+                return;
+            }
         }
 
         // Загружаем справочники для фильтров
@@ -84,16 +107,33 @@ class OutfitController extends Controller
         $this->render('outfits/index', $data);
     }
 
-    // Показать детальную информацию об образе
+    /**
+     * Показать детальную информацию об образе
+     */
     public function show(int $id): void
     {
+        Logger::debug('Просмотр образа', [
+            'user_id' => $this->userId,
+            'outfit_id' => $id
+        ]);
+
         $outfit = $this->outfitModel->getWithDetails($id, $this->userId);
 
         if (!$outfit) {
+            Logger::warning('Попытка просмотра несуществующего образа', [
+                'user_id' => $this->userId,
+                'outfit_id' => $id
+            ]);
             $this->setFlash('error', 'Образ не найден');
             $this->redirect('/outfits');
             return;
         }
+
+        Logger::info('Образ просмотрен', [
+            'user_id' => $this->userId,
+            'outfit_id' => $id,
+            'outfit_name' => $outfit['name']
+        ]);
 
         if ($this->isAjax()) {
             $this->json([
@@ -112,7 +152,9 @@ class OutfitController extends Controller
         $this->render('outfits/show', $data);
     }
 
-    // Форма создания нового образа
+    /**
+     * Форма создания нового образа
+     */
     public function create(): void
     {
         $itemModel = new Item();
@@ -130,14 +172,9 @@ class OutfitController extends Controller
         $this->render('outfits/create', $data);
     }
 
-    // Конструктор образов (перенаправление на create)
-    public function builder(): void
-    {
-        // Перенаправляем на create, так как теперь это единая страница
-        $this->redirect('/outfits/create');
-    }
-
-    // Сохранить новый образ
+    /**
+     * Сохранить новый образ
+     */
     public function store(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -171,7 +208,7 @@ class OutfitController extends Controller
             'season_id' => $this->input('season_id') ? (int) $this->input('season_id') : null,
             'is_favorite' => $this->input('is_favorite') === '1' || $this->input('is_favorite') === true,
             'item_ids' => $this->input('item_ids') ? (is_array($this->input('item_ids')) ? $this->input('item_ids') : explode(',', $this->input('item_ids'))) : [],
-            'tag_ids' => $this->input('tag_ids') ? (is_array($this->input('tag_ids')) ? $this->input('tag_ids') : explode(',', $this->input('tag_ids'))) : []
+            'tag_ids' => $this->input('tag_ids') ? (is_array($this->input('tag_ids')) ? array_map('intval', $this->input('tag_ids')) : array_map('intval', explode(',', $this->input('tag_ids')))) : []
         ];
 
         Logger::info('Начало создания образа', [
@@ -187,7 +224,10 @@ class OutfitController extends Controller
 
             Logger::info('Образ успешно создан', [
                 'user_id' => $this->userId,
-                'outfit_id' => $outfitId
+                'outfit_id' => $outfitId,
+                'outfit_name' => $data['name'],
+                'items_count' => count($data['item_ids'] ?? []),
+                'tags_count' => count($data['tag_ids'] ?? [])
             ]);
 
             if ($this->isAjax()) {
@@ -209,7 +249,10 @@ class OutfitController extends Controller
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
-                'data' => $data
+                'data' => array_merge($data, [
+                    'item_ids_count' => count($data['item_ids'] ?? []),
+                    'tag_ids_count' => count($data['tag_ids'] ?? [])
+                ])
             ]);
 
             $message = 'Ошибка при создании образа. Попробуйте еще раз.';
@@ -224,7 +267,9 @@ class OutfitController extends Controller
         }
     }
 
-    // Форма редактирования образа
+    /**
+     * Форма редактирования образа
+     */
     public function edit(int $id): void
     {
         $outfit = $this->outfitModel->getWithDetails($id, $this->userId);
@@ -253,7 +298,9 @@ class OutfitController extends Controller
         $this->render('outfits/edit', $data);
     }
 
-    // Обновить образ
+    /**
+     * Обновить образ
+     */
     public function update(int $id): void
     {
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -305,16 +352,31 @@ class OutfitController extends Controller
 
         if ($this->input('tag_ids') !== null) {
             $data['tag_ids'] = is_array($this->input('tag_ids')) 
-                ? $this->input('tag_ids') 
-                : explode(',', $this->input('tag_ids'));
+                ? array_map('intval', $this->input('tag_ids'))
+                : array_map('intval', explode(',', $this->input('tag_ids')));
         }
 
         try {
+            Logger::info('Начало обновления образа', [
+                'user_id' => $this->userId,
+                'outfit_id' => $id,
+                'data_keys' => array_keys($data)
+            ]);
+
             $success = $this->outfitModel->updateOutfit($id, $this->userId, $data);
 
             if (!$success) {
+                Logger::warning('Не удалось обновить образ', [
+                    'user_id' => $this->userId,
+                    'outfit_id' => $id
+                ]);
                 throw new \RuntimeException('Не удалось обновить образ');
             }
+
+            Logger::info('Образ успешно обновлен', [
+                'user_id' => $this->userId,
+                'outfit_id' => $id
+            ]);
 
             if ($this->isAjax()) {
                 $outfit = $this->outfitModel->getWithDetails($id, $this->userId);
@@ -325,6 +387,13 @@ class OutfitController extends Controller
             $this->setFlash('success', 'Образ успешно обновлен');
             $this->redirect("/outfits/{$id}");
         } catch (\Exception $e) {
+            Logger::error('Ошибка при обновлении образа', [
+                'user_id' => $this->userId,
+                'outfit_id' => $id,
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
             $message = 'Ошибка при обновлении образа: ' . $e->getMessage();
             if ($this->isAjax()) {
                 $this->error($message, 500);
@@ -335,7 +404,9 @@ class OutfitController extends Controller
         }
     }
 
-    // Удалить образ
+    /**
+     * Удалить образ
+     */
     public function destroy(int $id): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $_SERVER['REQUEST_METHOD'] !== 'DELETE') {
@@ -343,12 +414,26 @@ class OutfitController extends Controller
             return;
         }
 
+        Logger::info('Попытка удаления образа', [
+            'user_id' => $this->userId,
+            'outfit_id' => $id
+        ]);
+
         $success = $this->outfitModel->deleteOutfit($id, $this->userId);
 
         if (!$success) {
+            Logger::warning('Не удалось удалить образ', [
+                'user_id' => $this->userId,
+                'outfit_id' => $id
+            ]);
             $this->error('Не удалось удалить образ. Возможно, образ не существует или у вас нет прав', 400);
             return;
         }
+
+        Logger::info('Образ успешно удален', [
+            'user_id' => $this->userId,
+            'outfit_id' => $id
+        ]);
 
         if ($this->isAjax()) {
             $this->success(null, 'Образ успешно удален');
@@ -359,7 +444,9 @@ class OutfitController extends Controller
         $this->redirect('/outfits');
     }
 
-    // Переключить избранное
+    /**
+     * Переключить избранное
+     */
     public function toggleFavorite(int $id): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -367,20 +454,191 @@ class OutfitController extends Controller
             return;
         }
 
+        Logger::debug('Переключение избранного образа', [
+            'user_id' => $this->userId,
+            'outfit_id' => $id
+        ]);
+
         $success = $this->outfitModel->toggleFavorite($id, $this->userId);
 
         if (!$success) {
+            Logger::warning('Не удалось переключить избранное образа', [
+                'user_id' => $this->userId,
+                'outfit_id' => $id
+            ]);
             $this->error('Не удалось обновить статус избранного', 400);
             return;
         }
 
         $outfit = $this->outfitModel->find($id);
+        Logger::info('Статус избранного образа обновлен', [
+            'user_id' => $this->userId,
+            'outfit_id' => $id,
+            'is_favorite' => $outfit['is_favorite']
+        ]);
+
         $this->success([
             'is_favorite' => $outfit['is_favorite']
         ], 'Статус избранного обновлен');
     }
 
-    // Добавить вещь в образ
+    /**
+     * Добавить образ в капсулу (добавить вещи из образа в капсулу)
+     */
+    public function addToCapsule(int $id): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->error('Метод не разрешен', 405);
+            return;
+        }
+
+        $capsuleId = (int) $this->input('capsule_id');
+        if (!$capsuleId) {
+            $this->error('ID капсулы обязателен', 400);
+            return;
+        }
+
+        Logger::info('Добавление образа в капсулу', [
+            'user_id' => $this->userId,
+            'outfit_id' => $id,
+            'capsule_id' => $capsuleId
+        ]);
+
+        $success = $this->outfitModel->addToCapsule($id, $capsuleId, $this->userId);
+
+        if (!$success) {
+            Logger::warning('Не удалось добавить образ в капсулу', [
+                'user_id' => $this->userId,
+                'outfit_id' => $id,
+                'capsule_id' => $capsuleId
+            ]);
+            $this->error('Не удалось добавить образ в капсулу', 400);
+            return;
+        }
+
+        Logger::info('Образ успешно добавлен в капсулу', [
+            'user_id' => $this->userId,
+            'outfit_id' => $id,
+            'capsule_id' => $capsuleId
+        ]);
+
+        $this->success(null, 'Вещи из образа успешно добавлены в капсулу');
+    }
+
+    /**
+     * Генерировать образы из капсулы (без сохранения)
+     */
+    public function generateFromCapsule(int $capsuleId): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->error('Метод не разрешен', 405);
+            return;
+        }
+
+        $count = (int) $this->input('count', 10);
+        if ($count < 1 || $count > 50) {
+            $this->error('Количество образов должно быть от 1 до 50', 400);
+            return;
+        }
+
+        Logger::info('Генерация образов из капсулы', [
+            'user_id' => $this->userId,
+            'capsule_id' => $capsuleId,
+            'count' => $count
+        ]);
+
+        try {
+            $generatedOutfits = $this->outfitModel->generateFromCapsule($capsuleId, $this->userId, $count);
+            
+            Logger::info('Образы успешно сгенерированы из капсулы', [
+                'user_id' => $this->userId,
+                'capsule_id' => $capsuleId,
+                'requested_count' => $count,
+                'generated_count' => count($generatedOutfits)
+            ]);
+            
+            $this->success([
+                'outfits' => $generatedOutfits,
+                'count' => count($generatedOutfits)
+            ], 'Образы успешно сгенерированы');
+        } catch (\Exception $e) {
+            Logger::error('Ошибка при генерации образов из капсулы', [
+                'user_id' => $this->userId,
+                'capsule_id' => $capsuleId,
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            $this->error('Ошибка при генерации образов: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Сохранить сгенерированный образ
+     */
+    public function saveGenerated(int $capsuleId): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->error('Метод не разрешен', 405);
+            return;
+        }
+
+        $outfitData = [
+            'name' => trim($this->input('name', '')),
+            'description' => trim($this->input('description', '')),
+            'formality_level' => $this->input('formality_level') ? (int) $this->input('formality_level') : null,
+            'season_id' => $this->input('season_id') ? (int) $this->input('season_id') : null,
+            'is_favorite' => $this->input('is_favorite') === '1' || $this->input('is_favorite') === true,
+            'item_ids' => $this->input('item_ids') ? (is_array($this->input('item_ids')) ? $this->input('item_ids') : explode(',', $this->input('item_ids'))) : [],
+            'tag_ids' => $this->input('tag_ids') ? (is_array($this->input('tag_ids')) ? array_map('intval', $this->input('tag_ids')) : array_map('intval', explode(',', $this->input('tag_ids')))) : []
+        ];
+
+        if (empty($outfitData['name'])) {
+            $this->error('Название образа обязательно', 400);
+            return;
+        }
+
+        Logger::info('Сохранение сгенерированного образа', [
+            'user_id' => $this->userId,
+            'capsule_id' => $capsuleId,
+            'outfit_name' => $outfitData['name'],
+            'items_count' => count($outfitData['item_ids'] ?? [])
+        ]);
+
+        try {
+            $outfitId = $this->outfitModel->saveGeneratedOutfit($this->userId, $outfitData);
+            
+            // Связываем образ с капсулой
+            $capsuleModel = new Capsule();
+            $capsuleModel->linkOutfitToCapsule($capsuleId, $outfitId);
+
+            Logger::info('Сгенерированный образ успешно сохранен', [
+                'user_id' => $this->userId,
+                'capsule_id' => $capsuleId,
+                'outfit_id' => $outfitId
+            ]);
+
+            $outfit = $this->outfitModel->getWithDetails($outfitId, $this->userId);
+            
+            $this->success([
+                'id' => $outfitId,
+                'outfit' => $outfit
+            ], 'Образ успешно сохранен', 201);
+        } catch (\Exception $e) {
+            Logger::error('Ошибка при сохранении сгенерированного образа', [
+                'user_id' => $this->userId,
+                'capsule_id' => $capsuleId,
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            $this->error('Ошибка при сохранении образа: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Добавить вещь в образ
+     */
     public function addItem(int $id): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -426,7 +684,9 @@ class OutfitController extends Controller
         }
     }
 
-    // Удалить вещь из образа
+    /**
+     * Удалить вещь из образа
+     */
     public function removeItem(int $id): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $_SERVER['REQUEST_METHOD'] !== 'DELETE') {
@@ -463,7 +723,9 @@ class OutfitController extends Controller
         }
     }
 
-    // Валидация данных образа
+    /**
+     * Валидация данных образа
+     */
     private function validateOutfitData(array $data, int $outfitId = null): array
     {
         $errors = [];
