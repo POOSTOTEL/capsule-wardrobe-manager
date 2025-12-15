@@ -1,0 +1,1367 @@
+================================================================================
+ОСНОВНЫЕ ФРАГМЕНТЫ ПРОГРАММНОГО КОДА
+Курсовая работа: "Капсульный Гардероб"
+================================================================================
+
+================================================================================
+1. ТОЧКА ВХОДА ПРИЛОЖЕНИЯ
+Файл: public/index.php
+================================================================================
+
+<?php
+set_time_limit(30);
+ini_set('memory_limit', '256M');
+
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+require_once __DIR__ . '/../config/paths.php';
+
+// Автозагрузка классов
+spl_autoload_register(function ($className) {
+    $className = str_replace('App\\', 'app/', $className);
+    $className = str_replace('\\', '/', $className);
+    $file = ROOT_PATH . '/' . $className . '.php';
+
+    if (file_exists($file)) {
+        require_once $file;
+        return true;
+    }
+
+    // Альтернативные пути для поиска классов
+    $alternativePaths = [
+        APP_PATH . '/',
+        APP_PATH . '/Core/',
+        APP_PATH . '/Controllers/',
+        APP_PATH . '/Models/',
+        APP_PATH . '/Middleware/',
+    ];
+
+    foreach ($alternativePaths as $path) {
+        $file = $path . $className . '.php';
+        if (file_exists($file)) {
+            require_once $file;
+            return true;
+        }
+    }
+
+    return false;
+});
+
+// Инициализация сессии
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Загрузка конфигурации
+$appConfig = require_once CONFIG_PATH . '/app.php';
+
+// Установка часового пояса
+if (isset($appConfig['timezone'])) {
+    date_default_timezone_set($appConfig['timezone']);
+}
+
+// Загрузка маршрутов
+$router = require_once CONFIG_PATH . '/routes.php';
+
+// Обработка запроса
+try {
+    $router->dispatch();
+} catch (Throwable $e) {
+    http_response_code(500);
+
+    if ($appConfig['debug'] ?? false) {
+        echo '<h1>500 - Internal Server Error</h1>';
+        echo '<pre>' . htmlspecialchars($e->getMessage()) . '</pre>';
+        echo '<pre>' . htmlspecialchars($e->getTraceAsString()) . '</pre>';
+    } else {
+        echo '<h1>500 - Internal Server Error</h1>';
+        echo '<p>An error occurred while processing your request.</p>';
+    }
+
+    error_log('Application error: ' . $e->getMessage());
+}
+
+ПОЯСНЕНИЕ:
+Этот файл является точкой входа в приложение. Он выполняет следующие функции:
+1. Настройка окружения PHP (лимиты времени и памяти, отображение ошибок)
+2. Регистрация автозагрузчика классов для автоматической загрузки необходимых файлов
+3. Инициализация сессии для работы с пользовательскими данными
+4. Загрузка конфигурации приложения
+5. Установка часового пояса
+6. Загрузка и выполнение маршрутизатора для обработки HTTP-запросов
+7. Обработка исключений с выводом детальной информации в режиме отладки
+
+================================================================================
+2. СИСТЕМА РОУТИНГА
+Файл: app/Core/Router.php
+Фрагмент: Метод dispatch() и compilePattern()
+================================================================================
+
+// Компиляция паттерна маршрута с параметрами
+private function compilePattern(string $path): string
+{
+    // Замена {id} на именованную группу регулярного выражения
+    $pattern = preg_replace('/\{([a-zA-Z_][a-zA-Z0-9_-]*)\}/', '(?P<$1>[^/]+)', $path);
+    
+    // Замена {id?} на опциональный параметр
+    $pattern = preg_replace('/\{([a-zA-Z_][a-zA-Z0-9_-]*)\?\}/', '(?P<$1>[^/]*)?', $pattern);
+    
+    return '#^' . $pattern . '$#';
+}
+
+// Основной метод обработки запросов
+public function dispatch(): void
+{
+    $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+    $uri = $this->getCurrentUri();
+    
+    // Поиск подходящего маршрута
+    if (isset($this->routes[$method])) {
+        foreach ($this->routes[$method] as $route) {
+            if (preg_match($route['pattern'], $uri, $matches)) {
+                $this->currentRoute = $route;
+                
+                // Извлечение параметров из URL
+                $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
+                
+                $this->executeHandler($route['handler'], $params);
+                return;
+            }
+        }
+    }
+    
+    // Обработка 404 ошибки
+    $this->handleError(404);
+}
+
+// Выполнение обработчика маршрута
+private function executeHandler($handler, array $params): void
+{
+    try {
+        if (is_string($handler) && strpos($handler, '@') !== false) {
+            // Обработчик в формате "Controller@method"
+            list($controller, $method) = explode('@', $handler, 2);
+            $controller = 'App\\Controllers\\' . $controller;
+            
+            if (class_exists($controller)) {
+                $controllerInstance = new $controller();
+                
+                if (method_exists($controllerInstance, $method)) {
+                    call_user_func_array([$controllerInstance, $method], $params);
+                    return;
+                }
+            }
+        } elseif (is_callable($handler)) {
+            // Callback функция
+            call_user_func_array($handler, $params);
+            return;
+        }
+        
+        throw new \RuntimeException('Invalid route handler');
+        
+    } catch (\Throwable $e) {
+        error_log('Router error: ' . $e->getMessage());
+        $this->handleError(500, $e);
+    }
+}
+
+ПОЯСНЕНИЕ:
+Роутер реализует паттерн Front Controller и обеспечивает:
+1. Парсинг URL и извлечение параметров (например, /items/{id} → id = 5)
+2. Сопоставление HTTP-метода и URL с зарегистрированными маршрутами
+3. Вызов соответствующего контроллера и метода с передачей параметров
+4. Обработку ошибок (404, 500)
+5. Поддержку именованных маршрутов для генерации URL
+
+Использование регулярных выражений позволяет гибко обрабатывать динамические параметры в URL.
+
+================================================================================
+3. ПОДКЛЮЧЕНИЕ К БАЗЕ ДАННЫХ (Singleton Pattern)
+Файл: app/Core/Database.php
+================================================================================
+
+class Database
+{
+    private static $instance = null;
+    private $connection;
+    
+    // Приватный конструктор для предотвращения создания экземпляров
+    private function __construct()
+    {
+        try {
+            // Загрузка конфигурации БД
+            $config = require CONFIG_PATH . '/database.php';
+            
+            // Формирование DSN для PostgreSQL
+            $dsn = sprintf(
+                'pgsql:host=%s;port=%s;dbname=%s;',
+                $config['host'],
+                $config['port'],
+                $config['database']
+            );
+            
+            // Создание PDO соединения
+            $this->connection = new PDO(
+                $dsn,
+                $config['username'],
+                $config['password'],
+                $config['options'] ?? []
+            );
+            
+            // Настройка PDO
+            $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->connection->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            $this->connection->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+            
+            // Установка кодировки UTF-8
+            $this->connection->exec("SET NAMES 'UTF8'");
+            
+        } catch (PDOException $e) {
+            throw new \RuntimeException('Database connection failed: ' . $e->getMessage());
+        }
+    }
+    
+    // Получение единственного экземпляра (Singleton)
+    public static function getInstance(): self
+    {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+        
+        return self::$instance;
+    }
+    
+    public function getConnection(): PDO
+    {
+        return $this->connection;
+    }
+    
+    // Подготовка SQL запроса
+    public function prepare(string $sql): \PDOStatement
+    {
+        return $this->connection->prepare($sql);
+    }
+    
+    // Выполнение запроса с параметрами
+    public function query(string $sql, array $params = [])
+    {
+        $stmt = $this->prepare($sql);
+        $stmt->execute($params);
+        return $stmt;
+    }
+}
+
+ПОЯСНЕНИЕ:
+Класс Database реализует паттерн Singleton, обеспечивая единственное соединение с БД:
+1. Приватный конструктор предотвращает создание множественных экземпляров
+2. Метод getInstance() гарантирует наличие только одного соединения
+3. Использование PDO обеспечивает безопасность (prepared statements)
+4. Настройка режима исключений упрощает обработку ошибок
+5. Отключение эмуляции prepared statements повышает производительность
+
+Это критически важно для предотвращения утечек соединений и обеспечения безопасности.
+
+================================================================================
+4. БАЗОВАЯ МОДЕЛЬ (Active Record Pattern)
+Файл: app/Models/BaseModel.php
+Фрагмент: CRUD операции
+================================================================================
+
+abstract class BaseModel
+{
+    protected $table;
+    protected $primaryKey = 'id';
+    protected $db;
+    protected $fillable = [];
+    
+    public function __construct()
+    {
+        $this->db = Database::getInstance();
+    }
+    
+    // Поиск записи по ID
+    public function find(int $id, array $columns = ['*']): ?array
+    {
+        $columns = implode(', ', $columns);
+        $sql = "SELECT {$columns} FROM {$this->table} WHERE {$this->primaryKey} = :id LIMIT 1";
+        
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['id' => $id]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result ?: null;
+        } catch (PDOException $e) {
+            throw new \RuntimeException("Database error: " . $e->getMessage());
+        }
+    }
+    
+    // Создание новой записи
+    public function create(array $data): int
+    {
+        // Фильтрация данных по разрешенным полям (fillable)
+        $filteredData = array_intersect_key($data, array_flip($this->fillable));
+        
+        if (empty($filteredData)) {
+            throw new \RuntimeException("No fillable fields provided for insert");
+        }
+        
+        // Формирование SQL запроса
+        $columns = implode(', ', array_keys($filteredData));
+        $placeholders = ':' . implode(', :', array_keys($filteredData));
+        
+        $sql = "INSERT INTO {$this->table} ({$columns}) VALUES ({$placeholders}) RETURNING {$this->primaryKey}";
+        
+        try {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($filteredData);
+            
+            // Получение ID созданной записи (PostgreSQL RETURNING)
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($result && isset($result[$this->primaryKey])) {
+                return (int) $result[$this->primaryKey];
+            }
+            
+            // Альтернативный способ получения ID
+            $sequenceName = $this->table . '_' . $this->primaryKey . '_seq';
+            $lastId = $this->db->lastInsertId($sequenceName);
+            return $lastId ? (int) $lastId : 0;
+        } catch (PDOException $e) {
+            throw new \RuntimeException("Database error: " . $e->getMessage());
+        }
+    }
+    
+    // Обновление записи
+    public function update(int $id, array $data): bool
+    {
+        // Фильтрация данных
+        $filteredData = array_intersect_key($data, array_flip($this->fillable));
+        
+        if (empty($filteredData)) {
+            throw new \RuntimeException("No fillable fields provided for update");
+        }
+        
+        // Формирование SET части запроса
+        $setClause = implode(', ', array_map(
+            fn($key) => "{$key} = :{$key}",
+            array_keys($filteredData)
+        ));
+        
+        $sql = "UPDATE {$this->table} SET {$setClause} WHERE {$this->primaryKey} = :id";
+        $filteredData['id'] = $id;
+        
+        try {
+            $stmt = $this->db->prepare($sql);
+            $result = $stmt->execute($filteredData);
+            
+            return $result && $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+            throw new \RuntimeException("Database error: " . $e->getMessage());
+        }
+    }
+    
+    // Удаление записи
+    public function delete(int $id): bool
+    {
+        $sql = "DELETE FROM {$this->table} WHERE {$this->primaryKey} = :id";
+        
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute(['id' => $id]);
+        } catch (PDOException $e) {
+            throw new \RuntimeException("Database error: " . $e->getMessage());
+        }
+    }
+}
+
+ПОЯСНЕНИЕ:
+BaseModel реализует паттерн Active Record и предоставляет базовую функциональность:
+1. Абстрактный класс, от которого наследуются все модели
+2. Автоматическая фильтрация данных через массив $fillable (защита от массового присвоения)
+3. Использование prepared statements для защиты от SQL-инъекций
+4. Единообразный интерфейс для всех моделей
+5. Обработка ошибок с информативными сообщениями
+
+Это обеспечивает безопасность, переиспользование кода и единообразие работы с БД.
+
+================================================================================
+5. РАБОТА С ИЗОБРАЖЕНИЯМИ
+Файл: app/Models/Item.php
+Фрагмент: Методы createWithImage() и compressImage()
+================================================================================
+
+// Создание вещи с изображением
+public function createWithImage(int $userId, array $data, string $imagePath = null): int
+{
+    Logger::debug('createWithImage: начало', [
+        'user_id' => $userId,
+        'image_path' => $imagePath,
+        'data_keys' => array_keys($data)
+    ]);
+    
+    // Обработка изображения
+    if ($imagePath && file_exists($imagePath)) {
+        Logger::debug('createWithImage: чтение файла', ['path' => $imagePath, 'size' => filesize($imagePath)]);
+        
+        // Чтение файла
+        $imageData = file_get_contents($imagePath);
+        
+        // Определение MIME-типа
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $imagePath);
+        finfo_close($finfo);
+        
+        if (!$mimeType) {
+            $mimeType = mime_content_type($imagePath);
+        }
+        
+        Logger::debug('createWithImage: MIME тип определен', ['mime_type' => $mimeType]);
+        
+        // Проверка типа файла
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (!in_array($mimeType, $allowedTypes)) {
+            Logger::error('createWithImage: неподдерживаемый тип', ['mime_type' => $mimeType]);
+            throw new \RuntimeException("Неподдерживаемый тип изображения: {$mimeType}");
+        }
+        
+        // Автоматическое сжатие больших изображений
+        $maxSize = 2 * 1024 * 1024; // 2MB
+        $originalSize = strlen($imageData);
+        if ($originalSize > $maxSize) {
+            Logger::info('createWithImage: сжатие изображения', [
+                'original_size' => $originalSize,
+                'max_size' => $maxSize
+            ]);
+            $imageData = $this->compressImage($imageData, $mimeType);
+            Logger::info('createWithImage: изображение сжато', ['new_size' => strlen($imageData)]);
+        }
+        
+        // Подготовка данных для сохранения
+        $data['image_data'] = $imageData;
+        $data['image_mime_type'] = $mimeType;
+    } else {
+        throw new \RuntimeException("Изображение обязательно для загрузки");
+    }
+    
+    $data['user_id'] = $userId;
+    $data['usage_count'] = 0;
+    
+    // Создание записи в БД
+    $itemId = $this->createWithBinaryData($data);
+    
+    // Синхронизация тегов
+    if (!empty($data['tag_ids']) && is_array($data['tag_ids'])) {
+        $this->syncTags($itemId, $data['tag_ids']);
+    }
+    
+    return $itemId;
+}
+
+// Сжатие изображения
+private function compressImage(string $imageData, string $mimeType): string
+{
+    // Создание изображения из строки
+    $image = imagecreatefromstring($imageData);
+    if (!$image) {
+        throw new \RuntimeException("Не удалось создать изображение из данных");
+    }
+    
+    $maxWidth = 1200;
+    $maxHeight = 1200;
+    
+    $width = imagesx($image);
+    $height = imagesy($image);
+    
+    // Изменение размера, если необходимо
+    if ($width > $maxWidth || $height > $maxHeight) {
+        $ratio = min($maxWidth / $width, $maxHeight / $height);
+        $newWidth = (int) ($width * $ratio);
+        $newHeight = (int) ($height * $ratio);
+        
+        $newImage = imagecreatetruecolor($newWidth, $newHeight);
+        imagecopyresampled($newImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+        imagedestroy($image);
+        $image = $newImage;
+    }
+    
+    // Сохранение в буфер с настройками качества
+    ob_start();
+    switch ($mimeType) {
+        case 'image/jpeg':
+            imagejpeg($image, null, 85); // Качество 85%
+            break;
+        case 'image/png':
+            imagepng($image, null, 8); // Уровень сжатия 8 из 9
+            break;
+        case 'image/gif':
+            imagegif($image);
+            break;
+        case 'image/webp':
+            imagewebp($image, null, 85);
+            break;
+        default:
+            imagejpeg($image, null, 85);
+    }
+    $compressed = ob_get_clean();
+    imagedestroy($image);
+    
+    return $compressed;
+}
+
+// Сохранение бинарных данных в PostgreSQL
+private function createWithBinaryData(array $data): int
+{
+    $imageData = $data['image_data'] ?? null;
+    $imageMimeType = $data['image_mime_type'] ?? null;
+    unset($data['image_data'], $data['image_mime_type']);
+    
+    $filteredData = array_intersect_key($data, array_flip($this->fillable));
+    
+    $columns = array_keys($filteredData);
+    $placeholders = array_map(fn($col) => ':' . $col, $columns);
+    
+    // Добавление полей изображения
+    if ($imageData !== null) {
+        $columns[] = 'image_data';
+        $columns[] = 'image_mime_type';
+        $placeholders[] = ':image_data';
+        $placeholders[] = ':image_mime_type';
+    }
+    
+    $sql = "INSERT INTO {$this->table} (" . implode(', ', $columns) . ") 
+            VALUES (" . implode(', ', $placeholders) . ") 
+            RETURNING {$this->primaryKey}";
+    
+    try {
+        $stmt = $this->db->prepare($sql);
+        
+        // Привязка обычных параметров
+        foreach ($filteredData as $key => $value) {
+            $stmt->bindValue(':' . $key, $value);
+        }
+        
+        // Привязка бинарных данных в формате HEX для PostgreSQL
+        if ($imageData !== null) {
+            $hexData = '\\x' . bin2hex($imageData);
+            $stmt->bindValue(':image_data', $hexData, PDO::PARAM_STR);
+            $stmt->bindValue(':image_mime_type', $imageMimeType ?? 'image/jpeg');
+        }
+        
+        $stmt->execute();
+        
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($result && isset($result[$this->primaryKey])) {
+            return (int) $result[$this->primaryKey];
+        }
+        
+        return 0;
+    } catch (PDOException $e) {
+        throw new \RuntimeException("Database error: " . $e->getMessage());
+    }
+}
+
+ПОЯСНЕНИЕ:
+Этот код реализует сложную логику работы с изображениями:
+1. Валидация типа файла через MIME-тип (защита от загрузки вредоносных файлов)
+2. Автоматическое сжатие изображений больше 2MB для экономии места в БД
+3. Изменение размера до максимум 1200x1200 пикселей
+4. Сохранение изображений в БД (BYTEA) вместо файловой системы (упрощает резервное копирование)
+5. Использование формата HEX для передачи бинарных данных в PostgreSQL
+6. Логирование всех операций для отладки
+
+Хранение в БД обеспечивает целостность данных и упрощает развертывание.
+
+================================================================================
+6. АУТЕНТИФИКАЦИЯ ПОЛЬЗОВАТЕЛЕЙ
+Файл: app/Models/User.php
+Фрагмент: Регистрация и проверка паролей
+================================================================================
+
+// Регистрация нового пользователя
+public function register(array $data): ?int
+{
+    try {
+        // Проверка уникальности email
+        if ($this->findByEmail($data['email'])) {
+            return null;
+        }
+        
+        // Хеширование пароля с использованием bcrypt
+        $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
+        
+        $sql = "INSERT INTO {$this->table} (email, username, password_hash, full_name, created_at) 
+                VALUES (:email, :username, :password_hash, :full_name, NOW())";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            ':email' => $data['email'],
+            ':username' => $data['username'] ?? $data['email'],
+            ':password_hash' => $hashedPassword,
+            ':full_name' => $data['full_name'] ?? ''
+        ]);
+        
+        return (int)$this->db->lastInsertId();
+    } catch (PDOException $e) {
+        error_log('User registration error: ' . $e->getMessage());
+        return null;
+    }
+}
+
+// Проверка учетных данных
+public function verifyCredentials(string $email, string $password): ?array
+{
+    $user = $this->findByEmail($email);
+    
+    // Проверка пароля с использованием password_verify
+    if (!$user || !password_verify($password, $user['password_hash'])) {
+        return null;
+    }
+    
+    // Удаление хеша пароля из результата (безопасность)
+    unset($user['password_hash']);
+    return $user;
+}
+
+// Обновление профиля
+public function updateProfile(int $userId, array $data): bool
+{
+    try {
+        $fields = [];
+        $params = [':id' => $userId];
+        
+        if (isset($data['username'])) {
+            $fields[] = 'username = :username';
+            $params[':username'] = $data['username'];
+        }
+        
+        if (isset($data['email'])) {
+            // Проверка уникальности email
+            $existing = $this->findByEmail($data['email']);
+            if ($existing && $existing['id'] != $userId) {
+                return false;
+            }
+            $fields[] = 'email = :email';
+            $params[':email'] = $data['email'];
+        }
+        
+        if (isset($data['password'])) {
+            // Хеширование нового пароля
+            $fields[] = 'password_hash = :password_hash';
+            $params[':password_hash'] = password_hash($data['password'], PASSWORD_DEFAULT);
+        }
+        
+        if (empty($fields)) {
+            return false;
+        }
+        
+        $fields[] = 'updated_at = NOW()';
+        
+        $sql = "UPDATE {$this->table} SET " . implode(', ', $fields) . " WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        
+        return $stmt->execute($params);
+    } catch (PDOException $e) {
+        error_log('Update profile error: ' . $e->getMessage());
+        return false;
+    }
+}
+
+ПОЯСНЕНИЕ:
+Код реализует безопасную систему аутентификации:
+1. Использование password_hash() с PASSWORD_DEFAULT (bcrypt) для хеширования паролей
+2. Использование password_verify() для безопасной проверки паролей
+3. Проверка уникальности email при регистрации и обновлении
+4. Удаление хеша пароля из результата запросов (никогда не возвращаем пароль)
+5. Динамическое формирование UPDATE запроса только для измененных полей
+6. Обработка ошибок с логированием
+
+Это обеспечивает защиту от атак перебора паролей и утечек данных.
+
+================================================================================
+7. MIDDLEWARE ДЛЯ АУТЕНТИФИКАЦИИ
+Файл: app/Middleware/AuthMiddleware.php
+================================================================================
+
+class AuthMiddleware
+{
+    protected $session;
+    
+    public function __construct()
+    {
+        $this->session = new Session();
+    }
+    
+    // Проверка аутентификации
+    public function handle(): bool
+    {
+        // Проверка наличия user_id в сессии
+        if (!$this->session->get('user_id')) {
+            return false;
+        }
+        
+        return true;
+    }
+    
+    // Требование аутентификации (с редиректом)
+    public function requireAuth(string $redirectTo = '/login'): void
+    {
+        if (!$this->handle()) {
+            if ($redirectTo === '/login') {
+                $currentUrl = $_SERVER['REQUEST_URI'] ?? '/';
+                header("Location: /login?redirect=" . urlencode($currentUrl));
+            } else {
+                header("Location: " . $redirectTo);
+            }
+            exit();
+        }
+    }
+    
+    // Проверка доступа к ресурсу
+    public function canAccessResource(int $resourceUserId): bool
+    {
+        $currentUserId = $this->getUserId();
+        
+        // Пользователь может работать только со своими ресурсами
+        return $currentUserId && $currentUserId === $resourceUserId;
+    }
+    
+    public function getUserId(): ?int
+    {
+        return $this->session->get('user_id');
+    }
+}
+
+ПОЯСНЕНИЕ:
+Middleware обеспечивает контроль доступа:
+1. Проверка аутентификации через сессию
+2. Редирект неавторизованных пользователей на страницу входа
+3. Сохранение URL для редиректа после входа
+4. Проверка прав доступа к ресурсам (пользователь может работать только со своими данными)
+5. Изоляция логики аутентификации от контроллеров
+
+Это критически важно для безопасности приложения.
+
+================================================================================
+8. ГЕНЕРАЦИЯ ОБРАЗОВ ИЗ КАПСУЛЫ
+Файл: app/Models/Outfit.php
+Фрагмент: Метод generateFromCapsule()
+================================================================================
+
+public function generateFromCapsule(int $capsuleId, int $userId, int $count = 10): array
+{
+    $capsuleModel = new Capsule();
+    $capsule = $capsuleModel->find($capsuleId);
+    
+    // Проверка прав доступа
+    if (!$capsule || $capsule['user_id'] != $userId) {
+        throw new \RuntimeException('Капсула не найдена или нет прав доступа');
+    }
+    
+    // Получение вещей из капсулы
+    $items = $capsuleModel->getItems($capsuleId);
+    if (empty($items)) {
+        throw new \RuntimeException('В капсуле нет вещей для генерации образов');
+    }
+    
+    // Группировка вещей по категориям
+    $itemsByCategory = [];
+    foreach ($items as $item) {
+        $categoryId = $item['category_id'];
+        if (!isset($itemsByCategory[$categoryId])) {
+            $itemsByCategory[$categoryId] = [];
+        }
+        $itemsByCategory[$categoryId][] = $item;
+    }
+    
+    // Извлечение вещей по категориям
+    $tops = $itemsByCategory[1] ?? [];        // Верх
+    $bottoms = $itemsByCategory[2] ?? [];     // Низ
+    $dresses = $itemsByCategory[3] ?? [];     // Платье/Костюм
+    $shoes = $itemsByCategory[4] ?? [];       // Обувь
+    $outerwear = $itemsByCategory[5] ?? [];   // Верхняя одежда
+    $accessories = $itemsByCategory[6] ?? []; // Аксессуар
+    
+    $generatedOutfits = [];
+    $generated = 0;
+    $attempts = 0;
+    $maxAttempts = $count * 100; // Защита от бесконечного цикла
+    
+    // Генерация образов
+    while ($generated < $count && $attempts < $maxAttempts) {
+        $attempts++;
+        $outfitItems = [];
+        $itemIds = [];
+        
+        // Выбор базового элемента образа
+        // 30% вероятность выбрать платье, если есть
+        if (!empty($dresses) && rand(0, 100) < 30) {
+            $dress = $dresses[array_rand($dresses)];
+            $outfitItems[] = $dress;
+            $itemIds[] = $dress['id'];
+        } else {
+            // Иначе комбинация верха и низа
+            if (!empty($tops) && !empty($bottoms)) {
+                $top = $tops[array_rand($tops)];
+                $bottom = $bottoms[array_rand($bottoms)];
+                $outfitItems[] = $top;
+                $outfitItems[] = $bottom;
+                $itemIds[] = $top['id'];
+                $itemIds[] = $bottom['id'];
+            } elseif (!empty($tops)) {
+                $top = $tops[array_rand($tops)];
+                $outfitItems[] = $top;
+                $itemIds[] = $top['id'];
+            } elseif (!empty($bottoms)) {
+                $bottom = $bottoms[array_rand($bottoms)];
+                $outfitItems[] = $bottom;
+                $itemIds[] = $bottom['id'];
+            } else {
+                continue; // Нет базовых элементов
+            }
+        }
+        
+        // Добавление верхней одежды (40% вероятность)
+        if (!empty($outerwear) && rand(0, 100) < 40) {
+            $outer = $outerwear[array_rand($outerwear)];
+            if (!in_array($outer['id'], $itemIds)) {
+                $outfitItems[] = $outer;
+                $itemIds[] = $outer['id'];
+            }
+        }
+        
+        // Добавление обуви (70% вероятность)
+        if (!empty($shoes) && rand(0, 100) < 70) {
+            $shoe = $shoes[array_rand($shoes)];
+            if (!in_array($shoe['id'], $itemIds)) {
+                $outfitItems[] = $shoe;
+                $itemIds[] = $shoe['id'];
+            }
+        }
+        
+        // Добавление аксессуаров (50% вероятность)
+        if (!empty($accessories) && rand(0, 100) < 50) {
+            $accessory = $accessories[array_rand($accessories)];
+            if (!in_array($accessory['id'], $itemIds)) {
+                $outfitItems[] = $accessory;
+                $itemIds[] = $accessory['id'];
+            }
+        }
+        
+        if (empty($itemIds)) {
+            continue;
+        }
+        
+        // Определение сезона
+        $seasonId = $capsule['season_id'];
+        if (!$seasonId && !empty($outfitItems)) {
+            $seasonId = $outfitItems[0]['season_id'] ?? null;
+        }
+        
+        // Формирование образа
+        $generatedOutfits[] = [
+            'name' => 'Образ из капсулы "' . $capsule['name'] . '" #' . ($generated + 1),
+            'description' => 'Автоматически сгенерированный образ из капсулы',
+            'season_id' => $seasonId,
+            'items' => $outfitItems,
+            'item_ids' => $itemIds,
+            'is_generated' => true
+        ];
+        
+        $generated++;
+    }
+    
+    return $generatedOutfits;
+}
+
+ПОЯСНЕНИЕ:
+Алгоритм генерации образов реализует интеллектуальную комбинацию вещей:
+1. Группировка вещей по категориям для логической структуры
+2. Вероятностный выбор элементов (платье 30%, верхняя одежда 40%, обувь 70%, аксессуары 50%)
+3. Проверка уникальности вещей в образе (одна вещь не может быть дважды)
+4. Защита от бесконечного цикла через ограничение попыток
+5. Автоматическое определение сезона образа
+6. Формирование осмысленных названий для образов
+
+Это демонстрирует применение алгоритмов комбинаторики и вероятностного выбора.
+
+================================================================================
+9. ФИЛЬТРАЦИЯ И ПОИСК ВЕЩЕЙ
+Файл: app/Models/Item.php
+Фрагмент: Метод getByUser() с фильтрами
+================================================================================
+
+public function getByUser(int $userId, array $filters = []): array
+{
+    // Базовый SQL запрос с JOIN для получения связанных данных
+    $sql = "SELECT i.*, 
+                   c.name as category_name,
+                   s.name as season_name,
+                   cl.name as color_name,
+                   cl.hex_code as color_hex
+            FROM {$this->table} i
+            LEFT JOIN categories c ON i.category_id = c.id
+            LEFT JOIN seasons s ON i.season_id = s.id
+            LEFT JOIN colors cl ON i.color_id = cl.id
+            WHERE i.user_id = :user_id";
+    
+    $params = ['user_id' => $userId];
+    
+    // Фильтр по категории
+    if (!empty($filters['category_id'])) {
+        $sql .= " AND i.category_id = :category_id";
+        $params['category_id'] = $filters['category_id'];
+    }
+    
+    // Фильтр по цвету
+    if (!empty($filters['color_id'])) {
+        $sql .= " AND i.color_id = :color_id";
+        $params['color_id'] = $filters['color_id'];
+    }
+    
+    // Фильтр по сезону
+    if (!empty($filters['season_id'])) {
+        $sql .= " AND i.season_id = :season_id";
+        $params['season_id'] = $filters['season_id'];
+    }
+    
+    // Поиск по названию (case-insensitive)
+    if (!empty($filters['search'])) {
+        $sql .= " AND LOWER(i.name) LIKE LOWER(:search)";
+        $params['search'] = '%' . $filters['search'] . '%';
+    }
+    
+    // Фильтр по тегам (логическое И - все выбранные теги должны быть)
+    if (!empty($filters['tag_ids']) && is_array($filters['tag_ids'])) {
+        $tagIds = array_filter(array_map('intval', $filters['tag_ids']));
+        if (!empty($tagIds)) {
+            $placeholders = implode(',', array_fill(0, count($tagIds), '?'));
+            $sql .= " AND i.id IN (
+                SELECT item_id FROM item_tags 
+                WHERE tag_id IN ({$placeholders})
+                GROUP BY item_id
+                HAVING COUNT(DISTINCT tag_id) = ?
+            )";
+            $params = array_merge($params, $tagIds, [count($tagIds)]);
+        }
+    }
+    
+    // Сортировка
+    $orderBy = $filters['order_by'] ?? 'created_at';
+    $orderDir = strtoupper($filters['order_dir'] ?? 'DESC');
+    
+    // Белый список разрешенных полей для сортировки (защита от SQL-инъекций)
+    $allowedOrderBy = ['created_at', 'updated_at', 'name', 'usage_count', 'category_id'];
+    if (in_array($orderBy, $allowedOrderBy)) {
+        $sql .= " ORDER BY i.{$orderBy} {$orderDir}";
+    } else {
+        $sql .= " ORDER BY i.created_at {$orderDir}";
+    }
+    
+    // Пагинация
+    if (!empty($filters['limit'])) {
+        $limit = (int) $filters['limit'];
+        $offset = (int) ($filters['offset'] ?? 0);
+        $sql .= " LIMIT {$limit} OFFSET {$offset}";
+    }
+    
+    try {
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Загрузка тегов для каждой вещи
+        foreach ($items as &$item) {
+            $item['tags'] = $this->getTags($item['id']);
+        }
+        
+        return $items;
+    } catch (PDOException $e) {
+        throw new \RuntimeException("Database error: " . $e->getMessage());
+    }
+}
+
+ПОЯСНЕНИЕ:
+Метод демонстрирует сложную логику фильтрации и поиска:
+1. Динамическое построение SQL запроса на основе фильтров
+2. Использование JOIN для получения связанных данных за один запрос
+3. Реализация поиска с использованием LIKE и LOWER для case-insensitive поиска
+4. Сложный фильтр по тегам с логическим И (HAVING COUNT)
+5. Белый список для полей сортировки (защита от SQL-инъекций)
+6. Поддержка пагинации через LIMIT и OFFSET
+7. Загрузка связанных данных (теги) после основного запроса
+
+Это обеспечивает гибкий и безопасный поиск с хорошей производительностью.
+
+================================================================================
+10. БАЗОВЫЙ КОНТРОЛЛЕР
+Файл: app/Controllers/Controller.php
+Фрагмент: Методы render(), json(), input()
+================================================================================
+
+abstract class Controller
+{
+    // Рендеринг представления с layout
+    protected function render(string $view, array $data = [], string $layout = 'main'): void
+    {
+        // Рендеринг основного контента
+        $content = $this->renderView($view, $data);
+        
+        // Объединение стилей (по умолчанию + дополнительные)
+        $defaultStyles = ['/assets/css/app.css', '/assets/css/responsive.css'];
+        $additionalStyles = $data['styles'] ?? [];
+        $allStyles = array_merge($defaultStyles, $additionalStyles);
+        $allStyles = array_unique($allStyles);
+        
+        $layoutData = array_merge($data, [
+            'content' => $content,
+            'title' => $data['title'] ?? 'Капсульный Гардероб',
+            'styles' => $allStyles
+        ]);
+        
+        // Рендеринг layout
+        $this->renderLayout($layout, $layoutData);
+    }
+    
+    // Рендеринг отдельного представления
+    protected function renderView(string $view, array $data = []): string
+    {
+        extract($data, EXTR_SKIP);
+        
+        $viewPath = VIEWS_PATH . '/' . $view . '.php';
+        
+        if (!file_exists($viewPath)) {
+            throw new \RuntimeException("View file not found: {$viewPath}");
+        }
+        
+        ob_start();
+        require $viewPath;
+        return ob_get_clean();
+    }
+    
+    // Отправка JSON ответа
+    protected function json(array $data, int $statusCode = 200): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        http_response_code($statusCode);
+        
+        // Удаление бинарных данных из ответа
+        $data = $this->removeBinaryData($data);
+        
+        $json = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        
+        if ($json === false) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Ошибка сериализации JSON: ' . json_last_error_msg()
+            ], JSON_UNESCAPED_UNICODE);
+            exit();
+        }
+        
+        echo $json;
+        exit();
+    }
+    
+    // Получение входных данных (GET, POST, PUT, PATCH, DELETE)
+    protected function input(string $key = null, $default = null)
+    {
+        // Объединение GET и POST данных
+        $data = array_merge($_GET, $_POST);
+        
+        // Поддержка метода через _method (для форм)
+        if (isset($data['_method'])) {
+            $_SERVER['REQUEST_METHOD'] = strtoupper($data['_method']);
+            unset($data['_method']);
+        }
+        
+        // Обработка PUT, PATCH, DELETE методов
+        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+        if (in_array($method, ['PUT', 'PATCH', 'DELETE'])) {
+            $rawInput = file_get_contents('php://input');
+            if (!empty($rawInput)) {
+                $jsonData = json_decode($rawInput, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($jsonData)) {
+                    $data = array_merge($data, $jsonData);
+                } else {
+                    parse_str($rawInput, $parsedData);
+                    if (is_array($parsedData)) {
+                        $data = array_merge($data, $parsedData);
+                    }
+                }
+            }
+        }
+        
+        if ($key === null) {
+            return $data;
+        }
+        
+        return $data[$key] ?? $default;
+    }
+    
+    // Проверка AJAX запроса
+    protected function isAjax(): bool
+    {
+        return isset($_SERVER['HTTP_X_REQUESTED_WITH'])
+            && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+    }
+    
+    // Успешный ответ
+    protected function success($data = null, string $message = 'Success', int $statusCode = 200): void
+    {
+        $this->json([
+            'success' => true,
+            'message' => $message,
+            'data' => $data
+        ], $statusCode);
+    }
+    
+    // Ответ с ошибкой
+    protected function error(string $message = 'Error', int $statusCode = 400, $errors = null): void
+    {
+        $this->json([
+            'success' => false,
+            'message' => $message,
+            'errors' => $errors
+        ], $statusCode);
+    }
+}
+
+ПОЯСНЕНИЕ:
+Базовый контроллер предоставляет общую функциональность:
+1. Рендеринг представлений с поддержкой layout (шаблонов)
+2. Управление CSS стилями (объединение дефолтных и дополнительных)
+3. Отправка JSON ответов с обработкой ошибок сериализации
+4. Удаление бинарных данных из JSON (изображения не отправляются в JSON)
+5. Унифицированная обработка входных данных для всех HTTP методов
+6. Поддержка RESTful методов через _method параметр
+7. Определение AJAX запросов для разной логики ответов
+8. Стандартизированные методы success() и error() для API
+
+Это обеспечивает единообразие и переиспользование кода во всех контроллерах.
+
+================================================================================
+11. СИСТЕМА ЛОГИРОВАНИЯ
+Файл: app/Utils/Logger.php
+================================================================================
+
+class Logger
+{
+    private static $logPath = null;
+    
+    // Инициализация пути к логам
+    public static function init(): void
+    {
+        if (self::$logPath === null) {
+            self::$logPath = defined('LOG_PATH') ? LOG_PATH : dirname(__DIR__, 2) . '/logs';
+            
+            // Создание директории, если не существует
+            if (!is_dir(self::$logPath)) {
+                mkdir(self::$logPath, 0755, true);
+            }
+        }
+    }
+    
+    // Основной метод логирования
+    public static function log(string $message, string $level = 'INFO', array $context = []): void
+    {
+        self::init();
+        
+        $timestamp = date('Y-m-d H:i:s');
+        // Сериализация контекста в JSON
+        $contextStr = !empty($context) ? ' ' . json_encode($context, JSON_UNESCAPED_UNICODE) : '';
+        $logMessage = "[{$timestamp}] [{$level}] {$message}{$contextStr}" . PHP_EOL;
+        
+        $logFile = self::$logPath . '/app.log';
+        // Атомарная запись с блокировкой файла
+        file_put_contents($logFile, $logMessage, FILE_APPEND | LOCK_EX);
+    }
+    
+    // Методы для разных уровней логирования
+    public static function error(string $message, array $context = []): void
+    {
+        self::log($message, 'ERROR', $context);
+    }
+    
+    public static function warning(string $message, array $context = []): void
+    {
+        self::log($message, 'WARNING', $context);
+    }
+    
+    public static function info(string $message, array $context = []): void
+    {
+        self::log($message, 'INFO', $context);
+    }
+    
+    public static function debug(string $message, array $context = []): void
+    {
+        self::log($message, 'DEBUG', $context);
+    }
+}
+
+ПОЯСНЕНИЕ:
+Система логирования обеспечивает:
+1. Централизованное логирование всех операций
+2. Разные уровни логирования (ERROR, WARNING, INFO, DEBUG)
+3. Контекстная информация в формате JSON для детального анализа
+4. Атомарная запись с блокировкой файла (LOCK_EX) для предотвращения конфликтов
+5. Автоматическое создание директории логов
+6. Форматирование с временными метками для удобства анализа
+
+Это критически важно для отладки и мониторинга работы приложения.
+
+================================================================================
+12. ОПРЕДЕЛЕНИЕ МАРШРУТОВ
+Файл: config/routes.php
+================================================================================
+
+use App\Core\Router;
+use App\Middleware\AuthMiddleware;
+
+$router = new Router();
+
+// Главная страница
+$router->get('/', 'HomeController@index', 'home');
+
+// Аутентификация
+$router->get('/login', 'AuthController@showLogin', 'login');
+$router->post('/login', 'AuthController@login');
+$router->get('/register', 'AuthController@showRegister', 'register');
+$router->post('/register', 'AuthController@register');
+$router->get('/logout', 'AuthController@logout', 'logout');
+$router->get('/profile', 'AuthController@showProfile', 'profile');
+$router->post('/profile', 'AuthController@updateProfile');
+
+// API справочников
+$router->get('/api/taxonomies', 'TaxonomyController@index', 'taxonomies.index');
+$router->get('/api/taxonomies/categories', 'TaxonomyController@categories', 'taxonomies.categories');
+$router->get('/api/taxonomies/colors', 'TaxonomyController@colors', 'taxonomies.colors');
+$router->get('/api/taxonomies/seasons', 'TaxonomyController@seasons', 'taxonomies.seasons');
+
+// API вещей
+$router->get('/items', 'ItemController@index', 'items.index');
+$router->get('/items/create', 'ItemController@create', 'items.create');
+$router->post('/items', 'ItemController@store', 'items.store');
+$router->get('/items/{id}', 'ItemController@show', 'items.show');
+$router->get('/items/{id}/edit', 'ItemController@edit', 'items.edit');
+$router->post('/items/{id}', 'ItemController@update', 'items.update');
+$router->put('/items/{id}', 'ItemController@update');
+$router->patch('/items/{id}', 'ItemController@update');
+$router->delete('/items/{id}', 'ItemController@destroy');
+$router->get('/api/items', 'ItemController@index');
+$router->get('/api/items/{id}', 'ItemController@show');
+$router->get('/api/items/{id}/image', 'ItemController@getImage', 'items.image');
+
+// API образов
+$router->get('/outfits', 'OutfitController@index', 'outfits.index');
+$router->post('/outfits', 'OutfitController@store', 'outfits.store');
+$router->get('/outfits/{id}', 'OutfitController@show', 'outfits.show');
+$router->post('/outfits/{id}/favorite', 'OutfitController@toggleFavorite', 'outfits.toggleFavorite');
+$router->post('/api/capsules/{id}/generate-outfits', 'OutfitController@generateFromCapsule', 'outfits.generateFromCapsule');
+
+// API капсул
+$router->get('/capsules', 'CapsuleController@index', 'capsules.index');
+$router->post('/capsules', 'CapsuleController@store', 'capsules.store');
+$router->get('/capsules/{id}', 'CapsuleController@show', 'capsules.show');
+$router->post('/capsules/{id}/generate-outfits', 'CapsuleController@generateOutfits', 'capsules.generateOutfits');
+
+// API аналитики
+$router->get('/api/analytics', 'AnalyticsController@index');
+$router->get('/api/analytics/categories', 'AnalyticsController@categories');
+$router->get('/api/analytics/colors', 'AnalyticsController@colors');
+$router->get('/api/analytics/usage', 'AnalyticsController@usage');
+$router->get('/api/analytics/compatibility', 'AnalyticsController@compatibility');
+
+// Обработка ошибок
+$router->notFound(function() {
+    http_response_code(404);
+    $data = [
+        'title' => '404 - Страница не найдена',
+        'content' => '<div class="text-center py-5">
+            <h1 class="display-1">404</h1>
+            <p class="lead">Страница не найдена</p>
+            <a href="/" class="btn btn-primary">На главную</a>
+        </div>'
+    ];
+    extract($data);
+    require dirname(__DIR__) . '/public/views/layouts/main.php';
+});
+
+$router->error(function($exception) {
+    http_response_code(500);
+    $data = [
+        'title' => '500 - Внутренняя ошибка сервера',
+        'content' => '<div class="text-center py-5">
+            <h1 class="display-1">500</h1>
+            <p class="lead">Внутренняя ошибка сервера</p>'
+    ];
+    
+    $configPath = dirname(__DIR__) . '/config/app.php';
+    $appConfig = file_exists($configPath) ? require $configPath : ['debug' => true];
+    
+    if ($appConfig['debug'] ?? false) {
+        $data['content'] .= '<div class="mt-4"><pre>' . htmlspecialchars($exception->getMessage()) . '</pre></div>';
+        $data['content'] .= '<div class="mt-2"><pre>' . htmlspecialchars($exception->getTraceAsString()) . '</pre></div>';
+    }
+    
+    $data['content'] .= '<a href="/" class="btn btn-primary mt-3">На главную</a></div>';
+    extract($data);
+    require dirname(__DIR__) . '/public/views/layouts/main.php';
+});
+
+return $router;
+
+ПОЯСНЕНИЕ:
+Файл маршрутов демонстрирует:
+1. RESTful архитектуру с поддержкой различных HTTP методов
+2. Именованные маршруты для генерации URL в представлениях
+3. Параметризованные маршруты ({id}) для динамических URL
+4. Разделение веб-маршрутов и API маршрутов
+5. Обработчики ошибок 404 и 500
+6. Поддержку callback функций для обработчиков ошибок
+7. Условный вывод детальной информации об ошибках в режиме отладки
+
+Это обеспечивает четкую структуру API и удобную навигацию.
+
+================================================================================
+ЗАКЛЮЧЕНИЕ
+================================================================================
+
+Представленные фрагменты кода демонстрируют:
+
+1. Архитектурные паттерны:
+   - MVC (Model-View-Controller)
+   - Singleton (Database)
+   - Active Record (BaseModel)
+   - Front Controller (Router)
+   - Middleware (AuthMiddleware)
+
+2. Безопасность:
+   - Prepared statements для защиты от SQL-инъекций
+   - Хеширование паролей (bcrypt)
+   - Валидация входных данных
+   - Фильтрация данных через fillable
+   - Проверка прав доступа
+
+3. Производительность:
+   - Использование JOIN для оптимизации запросов
+   - Кеширование соединений с БД
+   - Сжатие изображений
+   - Пагинация результатов
+
+4. Функциональность:
+   - Генерация образов из капсул
+   - Сложная фильтрация и поиск
+   - Работа с бинарными данными
+   - RESTful API
+
+5. Качество кода:
+   - Обработка ошибок
+   - Логирование операций
+   - Документирование кода
+   - Единообразие стиля
+
+Все фрагменты кода являются частью рабочего веб-приложения для управления
+капсульным гардеробом, реализованного на PHP 8.2 с использованием PostgreSQL.
+
+================================================================================
+

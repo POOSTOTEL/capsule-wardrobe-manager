@@ -1,19 +1,14 @@
-/* outfits.css - Стили для управления образами */
-
-/* Общие стили для страниц образов - стили применяются напрямую к элементам */
 .outfit-builder {
     max-width: 1400px;
     margin: 0 auto;
 }
 
-/* Фильтры - стили в app.css */
 .filter-group {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-xs);
 }
 
-/* Сетка образов */
 .outfits-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -159,9 +154,6 @@
     justify-content: flex-end;
 }
 
-/* Форма образа - стили в app.css */
-
-/* Селектор вещей */
 .item-selector-card.selected {
     border-color: var(--primary-color);
     background: rgba(74, 111, 165, 0.1);
@@ -233,7 +225,6 @@
     text-align: center;
 }
 
-/* Карточки вещей в конструкторе - плитки одинакового размера */
 .builder-item-card {
     background: var(--bg-primary);
     border: 2px solid var(--border-color);
@@ -305,8 +296,6 @@
     text-overflow: ellipsis;
 }
 
-/* Детальная страница образа - стили в app.css */
-
 .header-content {
     flex: 1;
 }
@@ -356,7 +345,6 @@
     gap: var(--spacing-lg);
 }
 
-/* Конструктор образов */
 .outfit-builder .builder-container {
     display: grid !important;
     grid-template-columns: 320px 1fr !important;
@@ -571,7 +559,6 @@
     gap: var(--spacing-sm);
 }
 
-/* Адаптивность */
 @media (max-width: 768px) {
     .outfit-builder .builder-container {
         grid-template-columns: 1fr !important;
@@ -610,8 +597,6 @@
         flex-direction: column;
     }
 }
-
-/* Утилиты - стили в app.css */
 
 .d-grid {
     display: grid;

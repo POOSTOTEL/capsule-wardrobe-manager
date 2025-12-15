@@ -1953,3 +1953,31 @@
 [2025-12-14 23:21:17] [INFO] Вещь успешно создана {"user_id":1,"item_id":6}
 [2025-12-14 23:21:21] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
 [2025-12-14 23:21:58] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-15 02:16:07] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-15 02:25:01] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-15 02:29:24] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-15 02:29:27] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-15 02:29:28] [DEBUG] Просмотр образа {"user_id":1,"outfit_id":2}
+[2025-12-15 02:29:28] [INFO] Образ просмотрен {"user_id":1,"outfit_id":2,"outfit_name":"Летний стиляга"}
+[2025-12-15 02:34:09] [INFO] Начало создания вещи {"user_id":1,"data":{"name":"Куртка","category_id":5,"color_id":1,"season_id":3,"notes":"Куртка похожая на поле для игры в Морской бой","tag_ids":[],"tag_ids_count":0},"image_size":75631,"image_type":"image\/jpeg"}
+[2025-12-15 02:34:09] [DEBUG] createWithImage: начало {"user_id":1,"image_path":"\/tmp\/phpKfPHJH","data_keys":["name","category_id","color_id","season_id","notes","tag_ids"]}
+[2025-12-15 02:34:09] [DEBUG] createWithImage: чтение файла {"path":"\/tmp\/phpKfPHJH","size":75631}
+[2025-12-15 02:34:09] [DEBUG] createWithImage: MIME тип определен {"mime_type":"image\/jpeg"}
+[2025-12-15 02:34:09] [DEBUG] createWithImage: данные изображения подготовлены {"image_size":75631,"mime_type":"image\/jpeg"}
+[2025-12-15 02:34:09] [DEBUG] createWithImage: вызов createWithBinaryData {"data_keys":["name","category_id","color_id","season_id","notes","tag_ids","image_data","image_mime_type","user_id","usage_count"],"has_image_data":true}
+[2025-12-15 02:34:09] [DEBUG] Выполнение INSERT для items {"columns":["name","category_id","color_id","season_id","notes","user_id","usage_count","image_data","image_mime_type"],"filtered_data_keys":["name","category_id","color_id","season_id","notes","user_id","usage_count"],"has_image":true,"image_size":75631}
+[2025-12-15 02:34:09] [DEBUG] Привязка параметра: name {"value":"Куртка"}
+[2025-12-15 02:34:09] [DEBUG] Привязка параметра: category_id {"value":5}
+[2025-12-15 02:34:09] [DEBUG] Привязка параметра: color_id {"value":1}
+[2025-12-15 02:34:09] [DEBUG] Привязка параметра: season_id {"value":3}
+[2025-12-15 02:34:09] [DEBUG] Привязка параметра: notes 
+[2025-12-15 02:34:09] [DEBUG] Привязка параметра: user_id {"value":1}
+[2025-12-15 02:34:09] [DEBUG] Привязка параметра: usage_count {"value":0}
+[2025-12-15 02:34:09] [DEBUG] Привязка бинарных данных {"hex_length":151264,"mime_type":"image\/jpeg"}
+[2025-12-15 02:34:09] [INFO] Вещь создана успешно {"item_id":7}
+[2025-12-15 02:34:09] [INFO] createWithImage: вещь создана в БД {"item_id":7}
+[2025-12-15 02:34:09] [INFO] Вещь успешно создана {"user_id":1,"item_id":7}
+[2025-12-15 02:35:00] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-15 02:35:00] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-15 02:35:32] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}
+[2025-12-15 02:35:38] [DEBUG] Получение списка образов {"user_id":1,"filters":{"order_by":"created_at","order_dir":"DESC","limit":50,"offset":0},"is_ajax":false}

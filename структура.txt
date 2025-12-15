@@ -1,0 +1,159 @@
+﻿Структура папок тома Новый том
+Серийный номер тома: 1EDA-3B2C
+E:.
+|   .dockerignore
+|   .gitignore
+|   composer.json
+|   composer.lock
+|   deploy.bat
+|   docker-compose.yml
+|   package.json
+|   README.md
+|   start.bat
+|   stop.bat
+|   webpack.config.js
+|   структура.txt
+|   
++---app
+|   +---Controllers
+|   |       AnalyticsController.php
+|   |       AuthController.php
+|   |       CapsuleController.php
+|   |       Controller.php
+|   |       HomeController.php
+|   |       ItemController.php
+|   |       OutfitController.php
+|   |       TagController.php
+|   |       TaxonomyController.php
+|   |       
+|   +---Core
+|   |       Config.php
+|   |       Database.php
+|   |       Router.php
+|   |       Session.php
+|   |       
+|   +---Middleware
+|   |       AuthMiddleware.php
+|   |       
+|   +---Models
+|   |       Analytics.php
+|   |       BaseModel.php
+|   |       Capsule.php
+|   |       Category.php
+|   |       Color.php
+|   |       Item.php
+|   |       Outfit.php
+|   |       Season.php
+|   |       Tag.php
+|   |       User.php
+|   |       
+|   +---Services
+|   |       TaxonomyService.php
+|   |       
+|   \---Utils
+|           Logger.php
+|           
++---config
+|       app.php
+|       database.php
+|       paths.php
+|       routes.php
+|       uploads.php
+|       
++---docker
+|   +---nginx
+|   |       default.conf
+|   |       
+|   +---php
+|   |       Dockerfile
+|   |       php.ini
+|   |       
+|   \---postgres
+|           init.sql
+|           
++---docs
+|       API.md
+|       ARCHITECTURE.md
+|       DATABASE.md
+|       DEBUGGING.md
+|       ITEMS_GUIDE.md
+|       USER_GUIDE.md
+|       
++---logs
+|   |   access.log
+|   |   app.log
+|   |   error.log
+|   |   
+|   \---nginx
+|           access.log
+|           error.log
+|           
+\---public
+    |   index.php
+    |   
+    +---assets
+    |   +---css
+    |   |       analytics.css
+    |   |       app.css
+    |   |       capsules.css
+    |   |       dashboard.css
+    |   |       items.css
+    |   |       outfits.css
+    |   |       profile.css
+    |   |       responsive.css
+    |   |       tags.css
+    |   |       
+    |   \---js
+    |           charts.js
+    |           
+    +---js
+    |       items.js
+    |       tags.js
+    |       
+    \---views
+        +---analytics
+        |       categories.php
+        |       colors.php
+        |       compatibility.php
+        |       dashboard.php
+        |       usage.php
+        |       
+        +---auth
+        |       login.php
+        |       profile.php
+        |       register.php
+        |       
+        +---capsules
+        |       combinations.php
+        |       create.php
+        |       edit.php
+        |       index.php
+        |       show.php
+        |       
+        +---home
+        |       index.php
+        |       
+        +---items
+        |       create.php
+        |       edit.php
+        |       index.php
+        |       show.php
+        |       _filters.php
+        |       _grid.php
+        |       _tag_selector.php
+        |       
+        +---layouts
+        |       main.php
+        |       
+        +---outfits
+        |       create.php
+        |       edit.php
+        |       index.php
+        |       show.php
+        |       
+        +---tags
+        |       manage.php
+        |       
+        \---taxonomies
+                index.php
+                
